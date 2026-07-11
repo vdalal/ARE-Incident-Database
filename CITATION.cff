@@ -1,9 +1,11 @@
 cff-version: 1.2.0
 title: "Agent Reliability Engineering Database (AREDB)"
 abstract: >-
-  A public taxonomy of catastrophic autonomous-agent failures, each with a
-  stable ARE-YYYY-NNN identifier and an honest coverage flag. Cite the
-  identifiers (e.g. ARE-2026-001) as the shared reference for the field.
+  A public registry of catastrophic autonomous-agent failures, indexed onto the
+  OWASP Agentic Security Initiative Top 10. Each incident carries a stable
+  ARE-YYYY-NNN identifier, a cited source, and an honest coverage flag stating
+  whether the failure is deterministically preventable at the action layer.
+  Cite the identifiers (e.g. ARE-2026-001) as the shared reference for the field.
 message: >-
   If you use this database, please cite it and keep the ARE-YYYY-NNN
   identifiers intact. Attribution satisfies the CC-BY-4.0 license.
@@ -11,8 +13,18 @@ type: dataset
 authors:
   - name: "AgentX-Core"
     website: "https://agentx-core.com"
-url: "https://github.com/vdalal/ARE-Incident-Database"
-repository: "https://github.com/vdalal/ARE-Incident-Database"
+# `url` is the canonical landing page and is the field citation renderers
+# actually emit (GitHub's cite widget, Zenodo, BibTeX/APA). It must point at the
+# AREDB landing page, not the source repo, or every generated citation sends the
+# reader to GitHub and the domain never appears. `repository-code` (NOT bare
+# `repository`, which means an archival repository in CFF 1.2.0) carries the source.
+url: "https://agentx-core.com/aredb"
+repository-code: "https://github.com/vdalal/ARE-Incident-Database"
+# KEEP IN SYNC, all three move together at release: this `version` + `date-released`,
+# the CHANGELOG.md release heading, and the `v*` git tag. `date-released` is what
+# supplies the year in a rendered citation; without it citations render year-less.
+version: "1.0.0"
+date-released: "2026-07-11"
 license: CC-BY-4.0
 keywords:
   - agent-reliability-engineering
@@ -20,3 +32,4 @@ keywords:
   - AI-agent-failures
   - agent-security
   - incident-taxonomy
+  - OWASP-ASI
