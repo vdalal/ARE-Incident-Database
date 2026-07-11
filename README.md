@@ -72,7 +72,7 @@ Each incident lives at [`incidents/ARE-2026-NNN.md`](incidents/) and states: wha
 
 Every entry also carries a **status**, `confirmed` by default. Per [`GOVERNANCE.md`](GOVERNANCE.md), a `disputed` or `withdrawn` entry keeps its `ARE-YYYY-NNN` id forever and is marked in place, never deleted, so any citation always resolves.
 
-**A note on repros.** Covered entries whose block lives in the free, keyless SDK ship a one-line `pip` repro that blocks standalone. Entries whose block needs the AgentX gateway are marked "wired to the gateway" honestly, since the gateway is access-gated. We never imply a gateway-only block runs from a bare `pip install`.
+**A note on repros.** Covered entries whose block lives in the free, keyless SDK ship a one-line `pip` repro that blocks standalone. Entries whose block runs in the AgentX gateway are marked **wired to the gateway**, and we never imply they fire from a bare `pip install`. The gateway is free and self-serve: you pull it at [agentx-core.com/gateway](https://agentx-core.com/gateway) and run it locally, alongside the SDK.
 
 ## Prevent the coverable
 

@@ -112,9 +112,10 @@ def repro_block(inc):
         )
     if r == "gateway_wired":
         return (
-            "**Repro:** this block is enforced by the AgentX gateway, which is "
-            "access-gated, so it does not fire from a bare `pip install`. Wire the "
-            "gateway to reproduce it.\n\n"
+            "**Repro (gateway):** this block runs in the AgentX gateway, so it does "
+            "not fire from a bare `pip install`. The gateway is free and self-serve: "
+            "pull it at [agentx-core.com/gateway](https://agentx-core.com/gateway) and "
+            "run it locally to reproduce this entry.\n\n"
         )
     return ""
 

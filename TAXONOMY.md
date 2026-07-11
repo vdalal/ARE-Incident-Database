@@ -50,7 +50,7 @@ Severity is the blast radius of the action we can intercept, not real-world harm
 ## Repro flags
 
 - **keyless_pip**: the block runs in the free, keyless SDK shield and reproduces from a bare `pip install`.
-- **gateway_wired**: the block is enforced by the access-gated AgentX gateway and does not fire from a bare `pip install`.
+- **gateway_wired**: the block runs in the AgentX gateway and does not fire from a bare `pip install`. The gateway is free and self-serve ([agentx-core.com/gateway](https://agentx-core.com/gateway)).
 - **none**: not a coverable entry.
 
 ## Ids
