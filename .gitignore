@@ -1,0 +1,11 @@
+# Internal build artifacts -- NOT part of the public AREDB repo.
+# BUILD_STATUS.md is the overnight build tracker and references internal detector
+# names; it must never ship. The design spec lives in the monorepo, not here.
+BUILD_STATUS.md
+# REVIEW_DIGEST.md is the founder's content-review aid (link status + judgment
+# columns); internal, regenerated on demand, never shipped.
+REVIEW_DIGEST.md
+__pycache__/
+*.pyc
+# yaml transform backups (data/incidents.yaml.bak*) — local safety nets, never shipped.
+*.bak*

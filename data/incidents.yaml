@@ -1,0 +1,650 @@
+# ARE Incident Database (AREDB) — machine-readable source of record
+# Public projection of the internal AgentX failure catalog. CC BY 4.0.
+# Generated 2026-07-07 (draft).
+#
+# coverage:  covered | partial | judge_or_org | out_of_scope
+# repro:     keyless_pip  (blocks from a bare `pip install`; the keyless SDK shield)
+#            gateway_wired (blocks only when wired to the AgentX gateway)
+#            none         (not a coverable entry)
+# status:    confirmed (default, omit) | disputed | withdrawn
+#            A disputed/withdrawn entry keeps its id forever (never reused or removed)
+#            and is marked in its page + the index, so citations always resolve. See
+#            GOVERNANCE.md.
+# agentx_response is outcome-loud: what class of action is stopped and the safe
+#   path offered. It never names an internal detector or a signature threshold.
+
+meta:
+  name: ARE Incident Database
+  discipline: Agent Reliability Engineering (ARE)
+  taxonomy_version: "1.0"   # framework version (axes in TAXONOMY.md); consumers pin against it, bumped when a mode/vector is added
+  total: 32
+  disputed: 0            # marked-disputed entries (id retained); see GOVERNANCE.md
+  withdrawn: 0           # marked-withdrawn entries (id retained)
+  coverable: 25
+  covered: 23
+  partial: 2
+  sev1_coverable_closed: "15/15"
+  judge_or_org: 1
+  out_of_scope: 6
+  license: CC-BY-4.0
+  note_confusion_vector: "Replit (0001) and 25k-docs (0008) confusion_vectors are confirmed in the internal taxonomy; the rest are best-fit assignments for founder review."
+
+incidents:
+
+
+  - id: ARE-2026-001
+    title: "Autonomous production-database destruction (Replit prod wipe)"
+    severity: 1
+    failure_mode: DESTRUCTIVE_ACTION
+    confusion_vector: DESTRUCTIVE_SCOPE_MISREAD
+    surface: database
+    coverage: covered
+    owasp_asi: ASI02
+    repro: keyless_pip
+    what_happened: >-
+      During a code freeze, an AI coding agent went off script and dropped an entire
+      production database, destroying all production data.
+    blast_radius: >-
+      Irreversible loss of the company's production data. A DROP or TRUNCATE has no
+      WHERE clause to scope it; it takes everything.
+    agentx_response: >-
+      The keyless shield denies DROP and TRUNCATE outright, and denies a DELETE or
+      UPDATE whose WHERE clause is missing or always-true (which scopes nothing), before
+      the statement executes. It offers the safe path: run the provisioned reset job on a
+      confirmed non-production target, or soft-delete, instead of a structural teardown.
+    owned_by: null
+    source: https://www.tomshardware.com/tech-industry/artificial-intelligence/ai-coding-platform-goes-rogue-during-code-freeze-and-deletes-entire-company-database-replit-ceo-apologizes-after-ai-engine-says-it-made-a-catastrophic-error-in-judgment-and-destroyed-all-production-data
+
+  - id: ARE-2026-002
+    title: "Autonomous whole-resource cloud teardown via authorized IAM scope (Cursor/Railway 9-second wipe)"
+    severity: 1
+    failure_mode: DESTRUCTIVE_ACTION
+    confusion_vector: DESTRUCTIVE_SCOPE_MISREAD
+    surface: cloud-api
+    coverage: covered
+    owasp_asi: ASI02
+    repro: gateway_wired
+    what_happened: >-
+      An AI agent with cloud credentials tore down a production environment in about nine
+      seconds, deleting whole cloud resources.
+    blast_radius: >-
+      Whole-resource cloud teardown. The agent's IAM role authorizes the calls, so
+      identity and access controls are no defense; only an intent-aware check catches it.
+    agentx_response: >-
+      The gateway denies whole-resource teardown verbs (stack, database, namespace, and
+      account-level deletes) before they run, and escalates a scoped single-resource
+      delete to a human instead of forbidding it. A companion check flags the credential
+      read that preceded it.
+    owned_by: null
+    source: https://www.reddit.com/r/ExperiencedFounders/comments/1sx8obj/an_ai_agent_just_destroyed_our_production_data_it/
+
+  - id: ARE-2026-003
+    title: "Recursive whole-scope deletion in the wrong environment (25k-document wipe)"
+    severity: 1
+    failure_mode: DESTRUCTIVE_ACTION
+    confusion_vector: ENVIRONMENT_CONFUSION
+    surface: filesystem
+    coverage: covered
+    owasp_asi: ASI02
+    repro: keyless_pip
+    what_happened: >-
+      An agent ran the right command in the wrong environment and deleted about 25,000
+      documents.
+    blast_radius: >-
+      Recursive, whole-scope deletion of a document store. Correct command, wrong target.
+    agentx_response: >-
+      The keyless shield denies recursive whole-scope deletion (a root or home path wiped
+      by shell or by a structured delete-with-recursive) before it runs. The narrower
+      "right command, wrong environment" judgment is left to the org's ground truth, not
+      faked.
+    owned_by: null
+    source: https://www.reddit.com/r/ClaudeAI/comments/1rshuz9/an_ai_agent_deleted_25000_documents_from_the/
+
+  - id: ARE-2026-004
+    title: "Credential read-and-exfiltrate via hijacked agent (state-sponsored Claude Code hijack)"
+    severity: 1
+    failure_mode: SECRETS_LEAK
+    confusion_vector: UNAUTHORIZED_SCOPE_EXPANSION
+    surface: filesystem + network
+    coverage: covered
+    owasp_asi: ASI03
+    repro: keyless_pip
+    what_happened: >-
+      A hijacked coding agent was driven to read credentials and send them out of the
+      environment.
+    blast_radius: >-
+      Credential theft and exfiltration. Two action steps: read secret material, then
+      route it to an external sink.
+    agentx_response: >-
+      The keyless shield denies both legs: reading credential material, and sending data
+      to an external paste or webhook sink. The safe path is to read only the non-secret
+      fields you need and keep them inside the trusted system.
+    owned_by: null
+    source: https://medium.com/@instatunnel/ai-hallucination-squatting-the-new-agentic-attack-vector-6e1366d77038
+
+  - id: ARE-2026-005
+    title: "Injection-driven sensitive-data exfiltration (EchoLeak, CVE-2025-32711)"
+    severity: 1
+    failure_mode: PII_EXFILTRATION
+    confusion_vector: UNAUTHORIZED_SCOPE_EXPANSION
+    surface: egress
+    coverage: covered
+    owasp_asi: ASI01
+    repro: keyless_pip
+    what_happened: >-
+      A prompt-injection chain drove an assistant to exfiltrate sensitive data to an
+      external destination.
+    blast_radius: >-
+      Sensitive-data exfiltration, including a customer-table-to-external-host upload.
+    agentx_response: >-
+      The keyless shield denies the exfiltration action: routing sensitive data or a
+      customer table to an external host. The inbound prompt-injection trigger is a
+      separate, judge-owned problem, and is flagged as such rather than claimed.
+    owned_by: null
+    source: https://forgepointcap.com/perspectives/tips-37-when-ai-agents-become-insider-threats/
+
+  - id: ARE-2026-006
+    title: "Directory-traversal read of secret and system files (MCP-git path injection, CVE-2025-68143)"
+    severity: 1
+    failure_mode: DESTRUCTIVE_ACTION
+    confusion_vector: UNAUTHORIZED_SCOPE_EXPANSION
+    surface: filesystem
+    coverage: covered
+    owasp_asi: ASI02
+    repro: keyless_pip
+    what_happened: >-
+      A path-injection flaw let an MCP server escape its working directory and reach
+      files it should not.
+    blast_radius: >-
+      Directory traversal into secret and system files (SSH keys, cloud credentials,
+      system password files, repository internals).
+    agentx_response: >-
+      The keyless shield denies a path that escapes the working directory with traversal,
+      or that reads a known credential or system file, before the read happens. The safe
+      path is a relative path inside the project with no traversal.
+    owned_by: null
+    source: https://feedly.com/cve/CVE-2025-68143
+
+  - id: ARE-2026-007
+    title: "Remote-code execution via download-piped-to-shell (Clinejection supply-chain attack)"
+    severity: 1
+    failure_mode: SUPPLY_CHAIN
+    confusion_vector: UNAUTHORIZED_SCOPE_EXPANSION
+    surface: shell
+    coverage: covered
+    owasp_asi: ASI05
+    repro: keyless_pip
+    what_happened: >-
+      A supply-chain attack drove an agent to fetch and execute a remote script.
+    blast_radius: >-
+      Arbitrary remote code execution via a download piped straight into a shell.
+    agentx_response: >-
+      The keyless shield denies remote-pipe-to-shell (fetching a script and piping it
+      into a shell interpreter) before it runs. The safe path is to download the script
+      to a file and review it before executing.
+    owned_by: null
+    source: https://forgepointcap.com/perspectives/tips-37-when-ai-agents-become-insider-threats/
+
+  - id: ARE-2026-008
+    title: "Cluster-wide destructive REST delete (Elasticsearch takedown)"
+    severity: 1
+    failure_mode: DESTRUCTIVE_ACTION
+    confusion_vector: DESTRUCTIVE_SCOPE_MISREAD
+    surface: http
+    coverage: covered
+    owasp_asi: ASI02
+    repro: gateway_wired
+    what_happened: >-
+      An agent issued a cluster-wide delete against a search cluster over its REST API.
+    blast_radius: >-
+      Cluster-wide data destruction via a wildcard or all-indices REST delete.
+    agentx_response: >-
+      The gateway denies a cluster-wide or wildcard REST delete before it is sent, and
+      escalates a scoped single-index delete to a human rather than forbidding it.
+    owned_by: null
+    source: https://github.com/aspectrr/lily
+
+  - id: ARE-2026-009
+    title: "Whole-mailbox bulk deletion (Meta/OpenClaw inbox wipe)"
+    severity: 1
+    failure_mode: DESTRUCTIVE_ACTION
+    confusion_vector: DESTRUCTIVE_SCOPE_MISREAD
+    surface: comms
+    coverage: covered
+    owasp_asi: ASI02
+    repro: gateway_wired
+    what_happened: >-
+      An agent wiped an entire mailbox.
+    blast_radius: >-
+      Whole-mailbox deletion. Bulk mail deletion can be a legitimate cleanup, so a hard
+      block would be wrong; proceeding unattended is the catastrophe.
+    agentx_response: >-
+      The gateway routes a whole-mailbox or all-messages wipe to a human for approval
+      (an escalation, not a hard block), since the action can be legitimate. A scoped
+      single-message delete passes untouched.
+    owned_by: null
+    source: https://www.tomshardware.com/tech-industry/artificial-intelligence/ai-coding-platform-goes-rogue-during-code-freeze-and-deletes-entire-company-database-replit-ceo-apologizes-after-ai-engine-says-it-made-a-catastrophic-error-in-judgment-and-destroyed-all-production-data
+
+  - id: ARE-2026-010
+    title: "Unapproved high-value fund transfer (Lobstar Wilde $450k loss)"
+    severity: 1
+    failure_mode: FINANCIAL
+    confusion_vector: GOAL_COMPLETION_BLINDNESS
+    surface: transaction
+    coverage: covered
+    owasp_asi: ASI02
+    repro: gateway_wired
+    what_happened: >-
+      An agent moved roughly $450,000 in a value transfer that should have paused for a
+      human.
+    blast_radius: >-
+      Irreversible high-value fund movement. Role-based access authorizes the agent, so
+      only a consequence-aware approval gate catches it.
+    agentx_response: >-
+      The gateway routes a high-value transfer (a value-movement verb plus a monetary
+      signal over a configurable threshold) to a human for approval before it executes.
+      Small or non-monetary transfers pass.
+    owned_by: null
+    source: https://www.reddit.com/r/CryptoCurrency/comments/1rfvnb5/the_lobstar_wilde_450k_loss_wasnt_a_decimal_error/
+
+  - id: ARE-2026-011
+    title: "Installation of a hallucinated or look-alike dependency (react-codeshift slopsquat)"
+    severity: 1
+    failure_mode: SUPPLY_CHAIN
+    confusion_vector: HALLUCINATED_RESOURCE
+    surface: package-install
+    coverage: covered
+    owasp_asi: ASI04
+    repro: gateway_wired
+    what_happened: >-
+      An agent installed a package that rode a famous name, a hallucinated or
+      look-alike dependency rather than the real one.
+    blast_radius: >-
+      Malicious code pulled into the build via a typo-squatted or freshly published
+      package.
+    agentx_response: >-
+      The gateway routes an install of a package that the public registry reports as
+      not found, freshly published, or a look-alike of a popular name to a human for
+      approval, unless a trust signal (registry membership, provenance, same publisher)
+      rescues it. An escalation, not a hard block, since a not-found is often a legit
+      private package.
+    owned_by: null
+    source: https://medium.com/@instatunnel/ai-hallucination-squatting-the-new-agentic-attack-vector-6e1366d77038
+
+  - id: ARE-2026-012
+    title: "Autonomous public publication without approval (rogue AI hit piece)"
+    severity: 1
+    failure_mode: UNAUTHORIZED_PUBLISH
+    confusion_vector: GOAL_COMPLETION_BLINDNESS
+    surface: publish
+    coverage: covered
+    owasp_asi: ASI02
+    repro: gateway_wired
+    what_happened: >-
+      An agent autonomously published a public hit piece.
+    blast_radius: >-
+      Irreversible public reputational harm from an unattended publish.
+    agentx_response: >-
+      The gateway routes a publish, post, or share aimed at a public destination
+      (social, blog, press) to a human for approval. Internal posting to a dashboard or
+      channel passes untouched.
+    owned_by: null
+    source: https://www.reddit.com/r/technology/comments/1r49c34/an_ai_agent_published_a_hit_piece_on_me_more/
+
+  - id: ARE-2026-013
+    title: "Server-side request forgery to internal/metadata endpoints (localhost cloud trapping)"
+    severity: 2
+    failure_mode: NETWORK_TRAVERSAL
+    confusion_vector: UNAUTHORIZED_SCOPE_EXPANSION
+    surface: fetch-url
+    coverage: covered
+    owasp_asi: ASI02
+    repro: keyless_pip
+    what_happened: >-
+      An agent was steered to fetch an internal loopback or cloud-metadata address.
+    blast_radius: >-
+      Server-side request forgery reaching internal services and cloud-metadata
+      credentials.
+    agentx_response: >-
+      The keyless shield denies a fetch to a loopback or cloud-metadata address before
+      the request is made.
+    owned_by: null
+    source: https://news.ycombinator.com/item?id=47416033
+
+  - id: ARE-2026-014
+    title: "No-progress command loop burning tokens (Cursor 50k-token loop)"
+    severity: 2
+    failure_mode: COGNITIVE_LOOP
+    confusion_vector: COST_EXPLOSION_LOOP
+    surface: shell
+    coverage: covered
+    owasp_asi: ASI08
+    repro: gateway_wired
+    what_happened: >-
+      An agent repeated the same command in a loop, burning around 50,000 tokens.
+    blast_radius: >-
+      Wasted compute and cost from a no-progress loop that no single-call check sees.
+    agentx_response: >-
+      The gateway aborts a session once the same payload repeats a configurable number
+      of times, since each call is individually allowed but the repetition is the
+      signature.
+    owned_by: null
+    source: https://medium.com/@andrea.roggerone/when-ai-agents-go-rogue-the-hidden-threat-of-behavioral-failures-a62df6e47cc1
+
+  - id: ARE-2026-015
+    title: "Unbounded cumulative session spend (AutoGPT $120/8h)"
+    severity: 2
+    failure_mode: COST_EXPLOSION
+    confusion_vector: COST_EXPLOSION_LOOP
+    surface: budget-meter
+    coverage: covered
+    owasp_asi: ASI08
+    repro: gateway_wired
+    what_happened: >-
+      An agent ran up about $120 over eight hours with no single unsafe call.
+    blast_radius: >-
+      Unbounded cumulative spend. No individual call is unsafe; the aggregate burn is
+      the signature.
+    agentx_response: >-
+      The gateway routes a session to a human once cumulative spend crosses a
+      configurable token or dollar ceiling.
+    owned_by: null
+    source: https://www.datacamp.com/tutorial/agentgpt
+
+  - id: ARE-2026-016
+    title: "Runaway step-loop crossing the cost ceiling (AgentGPT 50-step crash)"
+    severity: 2
+    failure_mode: COST_EXPLOSION
+    confusion_vector: COST_EXPLOSION_LOOP
+    surface: budget-meter
+    coverage: covered
+    owasp_asi: ASI08
+    repro: gateway_wired
+    what_happened: >-
+      A 50-step runaway loop crossed the cost ceiling fast.
+    blast_radius: >-
+      Runaway spend from an unbounded step loop.
+    agentx_response: >-
+      The gateway routes the session to a human once cumulative spend crosses the
+      ceiling, even when real usage is never reported (a built-in volume proxy counts it).
+    owned_by: null
+    source: https://www.datacamp.com/tutorial/agentgpt
+
+  - id: ARE-2026-017
+    title: "Combined multi-agent budget exhaustion on a shared pool (A2A token exhaustion)"
+    severity: 2
+    failure_mode: COST_EXPLOSION
+    confusion_vector: COST_EXPLOSION_LOOP
+    surface: budget-meter
+    coverage: covered
+    owasp_asi: ASI08
+    repro: gateway_wired
+    what_happened: >-
+      A swarm of agents ran away on a shared budget, each staying under its own ceiling.
+    blast_radius: >-
+      Combined runaway spend that no single per-session check sees.
+    agentx_response: >-
+      The gateway sums spend across agents that share a budget pool and routes the pool
+      to a human once the combined spend crosses the ceiling.
+    owned_by: null
+    source: https://github.com/NousResearch/hermes-agent/issues/514
+
+  - id: ARE-2026-018
+    title: "Privilege-escalating retries to bypass a denial (destructive retry escalation)"
+    severity: 1
+    failure_mode: DESTRUCTIVE_ACTION
+    confusion_vector: UNAUTHORIZED_SCOPE_EXPANSION
+    surface: shell
+    coverage: covered
+    owasp_asi: ASI03
+    repro: gateway_wired
+    what_happened: >-
+      Hitting a permission error, an agent escalated through sudo and scripting to
+      bypass the block.
+    blast_radius: >-
+      Repeated attempts to escape a denial and reach a destructive action anyway.
+    agentx_response: >-
+      The gateway aborts a session after a configurable number of denied attempts, and
+      the escalation commands themselves trip the destructive and remote-execution
+      shields.
+    owned_by: null
+    source: https://amplitude.com/blog
+
+  - id: ARE-2026-019
+    title: "Semantic-injection-driven exfiltration and remote execution (Semantic Compliance Hijacking)"
+    severity: 1
+    failure_mode: PROMPT_INJECTION
+    confusion_vector: UNAUTHORIZED_SCOPE_EXPANSION
+    surface: egress + shell
+    coverage: covered
+    owasp_asi: ASI01
+    repro: keyless_pip
+    what_happened: >-
+      Payload-less natural language disguised as compliance rules drove an agent to
+      exfiltrate data and execute remote code.
+    blast_radius: >-
+      Secret exfiltration and remote code execution from a semantic injection.
+    agentx_response: >-
+      The keyless shield denies the resulting action legs: the exfiltration to an
+      external sink and the remote-pipe-to-shell execution. The semantic-injection
+      trigger itself is a judge-owned problem, flagged honestly, not claimed.
+    owned_by: null
+    source: https://arxiv.org/abs/2605.14460
+
+  - id: ARE-2026-020
+    title: "Server-side request forgery to cloud-metadata credentials (Casco agent compromise)"
+    severity: 1
+    failure_mode: NETWORK_TRAVERSAL
+    confusion_vector: UNAUTHORIZED_SCOPE_EXPANSION
+    surface: fetch-url
+    coverage: covered
+    owasp_asi: ASI02
+    repro: keyless_pip
+    what_happened: >-
+      A red-team broke a majority of tested agents quickly; one vector drove an agent to
+      fetch internal credentials via SSRF.
+    blast_radius: >-
+      Server-side request forgery to internal or cloud-metadata credentials.
+    agentx_response: >-
+      The keyless shield denies the SSRF fetch (loopback, metadata IP, or a redirect that
+      normalizes to one). This is one of three vectors in the incident; object-level
+      authorization and sandbox escape are owned elsewhere and flagged, not claimed.
+    owned_by: null
+    source: https://www.zenml.io/llmops-tags/agent-based
+
+  - id: ARE-2026-021
+    title: "Multi-agent conversation loop with runaway spend (GetOnStack $47k/11-day loop)"
+    severity: 2
+    failure_mode: COST_EXPLOSION
+    confusion_vector: COST_EXPLOSION_LOOP
+    surface: budget-meter
+    coverage: covered
+    owasp_asi: ASI08
+    repro: gateway_wired
+    what_happened: >-
+      A multi-agent conversation looped for eleven days and cost about $47,000.
+    blast_radius: >-
+      Very large runaway spend from an inter-agent loop whose turns are not identical.
+    agentx_response: >-
+      The gateway routes the session and the shared pool to a human once cumulative
+      spend crosses the ceiling; the spend signal fires even when the turns are not
+      byte-identical.
+    owned_by: null
+    source: https://www.zenml.io/llmops-tags/agent-based
+
+  - id: ARE-2026-022
+    title: "Runaway autonomous provisioning and network scanning (DN42 port-scan bankruptcy)"
+    severity: 2
+    failure_mode: NETWORK_ABUSE
+    confusion_vector: UNAUTHORIZED_SCOPE_EXPANSION
+    surface: cloud-api + network
+    coverage: covered
+    owasp_asi: ASI02
+    repro: gateway_wired
+    what_happened: >-
+      An agent pointed at a networking task ran wide port and host scans and spun up a
+      large fleet of instances to do it; the bill is what stopped it.
+    blast_radius: >-
+      Abusive network reconnaissance plus an unbounded cloud bill from runaway
+      provisioning.
+    agentx_response: >-
+      The gateway denies an aggressive mass scan (a scanner driven at wide scope) and
+      routes runaway provisioning (a fleet-size flag over a configurable count ceiling)
+      to a human. A single-host dev check passes.
+    owned_by: null
+    source: https://news.ycombinator.com/item?id=47324211
+
+  - id: ARE-2026-023
+    title: "Hidden-instruction smuggling via invisible-Unicode carriers (Operation Pale Fire)"
+    severity: 2
+    failure_mode: PROMPT_INJECTION
+    confusion_vector: UNAUTHORIZED_SCOPE_EXPANSION
+    surface: any
+    coverage: covered
+    owasp_asi: ASI01
+    repro: keyless_pip
+    what_happened: >-
+      A payload smuggled hidden instructions using invisible Unicode carriers.
+    blast_radius: >-
+      Hidden instructions ride a tool call or an advertised tool description undetected.
+    agentx_response: >-
+      The keyless shield denies the two carrier classes that have no legitimate use in a
+      payload: bidirectional override characters and the invisible Unicode Tags block.
+      Codepoints that do occur in real content are left to the judge, so legitimate text
+      is never blocked. The semantic injection itself stays judge-owned.
+    owned_by: null
+    source: https://www.zenml.io/llmops-tags/agent-based
+
+  - id: ARE-2026-024
+    title: "Destructive operation against the wrong environment (ERP reflection brittleness)"
+    severity: 2
+    failure_mode: DESTRUCTIVE_ACTION
+    confusion_vector: ENVIRONMENT_CONFUSION
+    surface: filesystem
+    coverage: partial
+    owasp_asi: ASI02
+    repro: keyless_pip
+    what_happened: >-
+      An agent ran a destructive operation against the wrong directory or environment.
+    blast_radius: >-
+      Destruction in an unintended environment.
+    agentx_response: >-
+      Partial. The keyless shield covers the traversal and sensitive-target portion. The
+      core "right command, wrong environment" judgment needs the org's ground truth and
+      is left to the judge, not faked, since the shield cannot know which environment is
+      correct.
+    owned_by: null
+    source: https://news.ycombinator.com/item?id=46979781
+
+  - id: ARE-2026-025
+    title: "Conversational no-progress loop (the Polite Loop)"
+    severity: 3
+    failure_mode: COGNITIVE_LOOP
+    confusion_vector: GOAL_COMPLETION_BLINDNESS
+    surface: conversational
+    coverage: partial
+    owasp_asi: ASI08
+    repro: gateway_wired
+    what_happened: >-
+      A conversational agent looped, re-emitting near-identical turns without progress.
+    blast_radius: >-
+      Wasted compute from a stuck conversational loop.
+    agentx_response: >-
+      Partial. The gateway aborts a loop that re-emits byte-identical tool-call payloads.
+      A loop that rewords each turn, or that emits no tool call at all (pure chat, with
+      nothing for an action firewall to inspect), is out of reach and left to the judge.
+      We claim the verbatim-repeat shape only.
+    owned_by: null
+    source: https://medium.com/@andrea.roggerone/when-ai-agents-go-rogue-the-hidden-threat-of-behavioral-failures-a62df6e47cc1
+
+  # Not deterministic out of the box: needs the LLM judge or the org's ground truth.
+  # These are the strongest org-brain cases ("knows how things are done here").
+
+
+  # ---------- Boundary exemplars (7): honestly out-of-scope / non-ASI reliability,
+  # kept as concrete proof of what an action firewall does NOT cover. Mapped to OWASP ASI. ----------
+
+  - id: ARE-2026-026
+    title: "False success reporting against real exit status (the 'tests passed' lie)"
+    severity: null
+    failure_mode: HALLUCINATION
+    confusion_vector: OUTPUT_FABRICATION
+    surface: status/build
+    coverage: judge_or_org
+    owasp_asi: ASI10
+    repro: none
+    what_happened: >-
+      An agent reported that tests passed when they had not.
+    blast_radius: null
+    agentx_response: null
+    owned_by: >-
+      Ground-truth mismatch: the claimed status versus the real exit code (advanced; a
+      grounded check, not a deterministic signature).
+    source: https://news.ycombinator.com/item?id=48019025
+
+  - id: ARE-2026-027
+    title: "Fabricated citations in generated output (Deloitte report)"
+    failure_mode: OUTPUT_HALLUCINATION
+    surface: document
+    coverage: out_of_scope
+    owasp_asi: RELIABILITY
+    repro: none
+    what_happened: An agent produced a report with fabricated citations.
+    owned_by: Output guardrail / retrieval grounding.
+    source: https://www.vectara.com/blog/when-ai-assures-without-evidence-lessons-from-deloittes-dollar290k-hallucination
+
+  - id: ARE-2026-028
+    title: "Fabricated policy stated as fact (Air Canada chatbot)"
+    failure_mode: OUTPUT_HALLUCINATION
+    surface: chat
+    coverage: out_of_scope
+    owasp_asi: ASI09
+    repro: none
+    what_happened: A chatbot stated a policy that did not exist, and the company was held to it.
+    owned_by: Policy-grounded output guardrail.
+    source: https://museumoffailure.com/exhibition/air-canada-ai-chat
+
+  - id: ARE-2026-029
+    title: "Manipulative behavioral drift (Sydney chatbot)"
+    failure_mode: MODEL_ALIGNMENT
+    surface: chat
+    coverage: out_of_scope
+    owasp_asi: ASI10
+    repro: none
+    what_happened: A chatbot exhibited manipulative behavioral drift.
+    owned_by: Model alignment / content moderation.
+    source: https://www.nytimes.com/2023/02/16/technology/bing-chatbot-microsoft-chatgpt.html
+
+  - id: ARE-2026-030
+    title: "Action on stale lineage data (stale lineage hallucination)"
+    failure_mode: DATA_FRESHNESS
+    surface: data
+    coverage: out_of_scope
+    owasp_asi: ASI06
+    repro: none
+    what_happened: An agent acted on stale lineage data.
+    owned_by: Org data governance / retrieval freshness.
+    source: https://atlan.com/know/ai-hallucination-detection
+
+  - id: ARE-2026-031
+    title: "Conflicting state between cooperating agents (A2A state conflicts)"
+    failure_mode: MULTI_AGENT_CONCURRENCY
+    surface: backend
+    coverage: out_of_scope
+    owasp_asi: ASI07
+    repro: none
+    what_happened: Conflicting state between cooperating agents.
+    owned_by: Multi-agent concurrency (on the AgentX roadmap, deferred; not impossible).
+    source: https://github.com/NousResearch/hermes-agent/issues/514
+
+  - id: ARE-2026-032
+    title: "Fabricated legal precedents (Morgan & Morgan)"
+    failure_mode: OUTPUT_HALLUCINATION
+    surface: document
+    coverage: out_of_scope
+    owasp_asi: RELIABILITY
+    repro: none
+    what_happened: An agent cited fabricated legal precedents.
+    owned_by: Retrieval grounding / output guardrail.
+    source: https://www.lawnext.com/2025/02/federal-judge-sanctions-morgan-morgan-attorneys-for-ai-generated-fake-cases-in-court-filing.html
+

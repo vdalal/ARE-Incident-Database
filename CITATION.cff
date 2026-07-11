@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+title: "Agent Reliability Engineering Database (AREDB)"
+abstract: >-
+  A public taxonomy of catastrophic autonomous-agent failures, each with a
+  stable ARE-YYYY-NNN identifier and an honest coverage flag. Cite the
+  identifiers (e.g. ARE-2026-001) as the shared reference for the field.
+message: >-
+  If you use this database, please cite it and keep the ARE-YYYY-NNN
+  identifiers intact. Attribution satisfies the CC-BY-4.0 license.
+type: dataset
+authors:
+  - name: "AgentX-Core"
+    website: "https://agentx-core.com"
+url: "https://github.com/vdalal/ARE-Incident-Database"
+repository: "https://github.com/vdalal/ARE-Incident-Database"
+license: CC-BY-4.0
+keywords:
+  - agent-reliability-engineering
+  - ARE
+  - AI-agent-failures
+  - agent-security
+  - incident-taxonomy

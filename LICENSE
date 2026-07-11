@@ -1,0 +1,23 @@
+ARE Incident Database (AREDB)
+Copyright (c) 2026 AgentX-Core
+
+This work — the incident taxonomy, entries, and accompanying prose in this
+repository — is licensed under the Creative Commons Attribution 4.0
+International License (CC BY 4.0).
+
+You are free to share and adapt the material for any purpose, including
+commercially, provided you give appropriate credit, link to the license, and
+indicate if changes were made.
+
+License summary:  https://creativecommons.org/licenses/by/4.0/
+Full legal code:  https://creativecommons.org/licenses/by/4.0/legalcode
+
+Attribution: "ARE Incident Database (AREDB), agentx-core.com".
+
+Any code/tooling in this repository (e.g. generate.py) is separately licensed
+under the MIT License.
+
+--
+NOTE (pre-publication): paste the full CC BY 4.0 legal code text into this file
+at publish time rather than shipping only the link, so the license travels with
+the repo. Left as a link here to avoid transcription errors in the draft.
