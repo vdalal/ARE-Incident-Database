@@ -221,11 +221,23 @@ def main():
         doc = yaml.safe_load(f)
     incidents = doc["incidents"]
     os.makedirs(OUT, exist_ok=True)
-    # Remove stale incident pages whose entry was cut from the yaml, so the folder
-    # never ships an orphan that the index no longer references.
+    # Remove incident pages whose entry is no longer in the yaml, so the folder never
+    # ships an orphan the index does not reference.
+    #
+    # LOUDLY, though. GOVERNANCE.md promises an id is retained forever and never reused,
+    # and that a bad entry is MARKED (status: disputed|withdrawn) rather than deleted. A
+    # withdrawn entry therefore stays in the yaml and keeps its page. So if this loop ever
+    # actually deletes something, either that promise is being broken or an id is being
+    # recycled, and both are exactly the kind of thing that must not happen silently in
+    # the middle of a routine regen.
     ids = {inc["id"] for inc in incidents}
-    for fn in os.listdir(OUT):
+    for fn in sorted(os.listdir(OUT)):
         if fn.startswith("ARE-") and fn.endswith(".md") and fn[:-3] not in ids:
+            print(
+                f"WARNING: removing {fn}: its id is gone from data/incidents.yaml.\n"
+                f"         GOVERNANCE.md says an id is never deleted. To retire an entry,\n"
+                f"         keep it and set `status: withdrawn` so citations still resolve."
+            )
             os.remove(os.path.join(OUT, fn))
     for inc in incidents:
         path = os.path.join(OUT, f"{inc['id']}.md")

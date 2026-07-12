@@ -1,10 +1,6 @@
-<!--
-  TAGLINE PLACEHOLDER (founder picks in the AM): the hero line below should match
-  the chosen landing tagline. See ../designs/tagline-and-hero-candidates.md.
-  Current placeholder uses the coverage-led frame, which is tagline-agnostic.
--->
-
 # ARE Incident Database (AREDB)
+
+[![repros](https://github.com/vdalal/ARE-Incident-Database/actions/workflows/repros.yml/badge.svg)](https://github.com/vdalal/ARE-Incident-Database/actions/workflows/repros.yml)
 
 **The incident registry for the OWASP Agentic Security Top 10. Real, cited agent failures, each mapped to its OWASP ASI category and flagged with whether a deterministic action firewall stops it.**
 

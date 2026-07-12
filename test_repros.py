@@ -5,7 +5,7 @@ only worth something if the snippets on the pages actually run. So this does not
 re-implement them: it scrapes the exact fenced ```python block out of each published
 incident page and executes it, in its own process, against a real install.
 
-    pip install agentx-security-sdk pyyaml
+    pip install -r requirements.txt
     python test_repros.py
 
 Every keyless entry must satisfy three things:
@@ -19,6 +19,7 @@ data/incidents.yaml, not to soften the wording on the page. See GOVERNANCE.md: t
 coverage flag is a claim, and a claim that fails is withdrawn, not edited.
 """
 import glob
+import importlib.util
 import os
 import re
 import subprocess
@@ -68,7 +69,30 @@ def safe(text):
     return (text or "").encode(enc, "replace").decode(enc, "replace")
 
 
+def preflight():
+    """Fail on a MISSING INSTALL differently from a failing claim.
+
+    Without this, running the suite before `pip install agentx-security-sdk` makes every
+    snippet die on ImportError, which scores as blocked=False, which prints under
+    "FAILING: reclassify these entries". So the most likely first-run mistake a curious
+    reader can make would have this registry telling them OUR DATA IS WRONG. On the one
+    artifact whose entire value is that its claims hold up, that is the worst possible
+    lie to tell. Check for the SDK up front and say the real thing instead.
+    """
+    if importlib.util.find_spec("agentx_sdk") is None:
+        print("agentx-security-sdk is not installed, so there is nothing to run the repros against.")
+        print()
+        print("    pip install -r requirements.txt")
+        print()
+        print("This is a setup problem, not a failing claim. No entry is in question.")
+        return False
+    return True
+
+
 def main():
+    if not preflight():
+        return 2
+
     pages = sorted(glob.glob(os.path.join(HERE, "incidents", "ARE-*.md")))
     if not pages:
         print("no incident pages found; run `python generate.py` first")

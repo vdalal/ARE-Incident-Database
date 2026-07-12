@@ -1,0 +1,12 @@
+# AREDB tooling dependencies.
+#
+# generate.py     renders the incident pages from data/incidents.yaml   -> PyYAML
+# test_repros.py  runs the repro published on every page, for real      -> agentx-security-sdk
+#
+# The SDK is here because the repros are not illustrations. test_repros.py executes the
+# exact snippet printed on each page against a real install and asserts the block fires.
+# That is the whole point of the registry: the coverage flags are tested assertions, not
+# editorial ones.
+
+PyYAML>=6.0
+agentx-security-sdk>=0.4.18

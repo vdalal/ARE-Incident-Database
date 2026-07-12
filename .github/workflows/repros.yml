@@ -1,0 +1,44 @@
+name: repros
+
+# The registry's claim is "do not trust it, run it". A test that only runs when someone
+# remembers to run it is not a claim, it is a hope. This gate makes every published
+# coverage flag an assertion that CI re-proves on every push.
+#
+# Two things are checked, and they are different:
+#   1. The pages are REGENERABLE from the data. If someone hand-edits an incident page,
+#      the page and data/incidents.yaml (the machine-readable source of record other
+#      people will consume) silently disagree. This catches that.
+#   2. Every published repro actually BLOCKS, against a real PyPI install of the SDK.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  # A repro can rot without anyone touching this repo: a new SDK release could change
+  # the behaviour out from under a published claim. Re-prove it weekly so the registry
+  # finds out before a reader does.
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+jobs:
+  repros:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install tooling
+        run: pip install -r requirements.txt
+
+      - name: Pages are regenerable from data/incidents.yaml
+        run: |
+          python generate.py
+          git diff --exit-code -- incidents/ \
+            || (echo "::error::incidents/ is out of sync with data/incidents.yaml. Run 'python generate.py' and commit the result. Never hand-edit a page." && exit 1)
+
+      - name: Every published repro blocks, from a bare pip install
+        run: python test_repros.py
