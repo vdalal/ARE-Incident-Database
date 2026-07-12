@@ -18,7 +18,7 @@ authors:
 # AREDB landing page, not the source repo, or every generated citation sends the
 # reader to GitHub and the domain never appears. `repository-code` (NOT bare
 # `repository`, which means an archival repository in CFF 1.2.0) carries the source.
-url: "https://agentx-core.com/aredb"
+url: "https://aredb.org"
 repository-code: "https://github.com/vdalal/ARE-Incident-Database"
 # KEEP IN SYNC, all three move together at release: this `version` + `date-released`,
 # the CHANGELOG.md release heading, and the `v*` git tag. `date-released` is what

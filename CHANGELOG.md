@@ -68,7 +68,7 @@ either backed by a repro you can run or honestly marked as not ours.
 - Data under **CC BY 4.0** ([`LICENSE`](LICENSE), the verbatim legal code, so the license
   travels with the repository and is machine-detectable). Tooling under **MIT**
   ([`LICENSE-MIT`](LICENSE-MIT)). Attribution is the whole obligation:
-  `ARE Incident Database (AREDB), agentx-core.com`, with the `ARE-YYYY-NNN` identifiers
+  `ARE Incident Database (AREDB), aredb.org`, with the `ARE-YYYY-NNN` identifiers
   kept intact.
 
 [1.0.0]: https://github.com/vdalal/ARE-Incident-Database/releases/tag/v1.0.0
