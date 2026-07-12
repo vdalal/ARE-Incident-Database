@@ -72,7 +72,9 @@ Each incident lives at [`incidents/ARE-2026-NNN.md`](incidents/) and states: wha
 
 Every entry also carries a **status**, `confirmed` by default. Per [`GOVERNANCE.md`](GOVERNANCE.md), a `disputed` or `withdrawn` entry keeps its `ARE-YYYY-NNN` id forever and is marked in place, never deleted, so any citation always resolves.
 
-**A note on repros.** Covered entries whose block lives in the free, keyless SDK ship a one-line `pip` repro that blocks standalone. Entries whose block runs in the AgentX gateway are marked **wired to the gateway**, and we never imply they fire from a bare `pip install`. The gateway is free and self-serve: you pull it at [agentx-core.com/gateway](https://agentx-core.com/gateway) and run it locally, alongside the SDK.
+**A note on repros.** Covered entries whose block lives in the free, keyless SDK ship a **runnable** repro: a `pip install` and a short Python snippet you can copy off the page and execute. It blocks with no key, no gateway, and nothing leaving your machine. Do not take our word for any of it, run it. [`test_repros.py`](test_repros.py) scrapes the snippet out of every published page and executes it, asserting the block fires *and* that the tool body never ran, so a claim on a page cannot drift from what the code actually does.
+
+Entries whose block runs in the AgentX gateway are marked **wired to the gateway**, and we never imply they fire from a bare `pip install`. The gateway is free and self-serve: you pull it at [agentx-core.com/gateway](https://agentx-core.com/gateway) and run it locally, alongside the SDK.
 
 ## Prevent the coverable
 

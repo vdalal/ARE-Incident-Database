@@ -104,11 +104,27 @@ def ticket_header(inc):
 def repro_block(inc):
     r = inc.get("repro")
     if r == "keyless_pip":
+        call = inc.get("repro_call")
+        if not call:
+            # A keyless entry with no runnable call is a claim with no proof. Fail loud
+            # rather than quietly emitting the old prose-only "repro" (mirrors the
+            # COVERAGE_LABEL KeyError posture).
+            raise KeyError(f"{inc['id']}: repro is keyless_pip but no repro_call to render")
+        tool, param, action = call["tool"], call["param"], call["action"]
+        payload = call["payload"]
         return (
-            "**Repro (keyless -- blocks from a bare `pip install`):**\n\n"
+            "**Repro.** This blocks from a bare `pip install`, with no key, no gateway, "
+            "and nothing leaving your machine. Copy it and run it.\n\n"
             "```bash\npip install agentx-security-sdk\n```\n\n"
-            "The keyless shield denies this action class locally, with no key and "
-            "nothing leaving your machine.\n\n"
+            "```python\n"
+            "from agentx_sdk import agentx_protect, is_block\n\n"
+            f'@agentx_protect(agent_id="aredb-repro", action="{action}")\n'
+            f"def {tool}({param}: str):\n"
+            f'    return "EXECUTED"          # the agent never gets here\n\n'
+            f"result = {tool}({payload})\n"
+            "print(is_block(result))        # True\n"
+            "print(result)                  # the block, and the safe path to take instead\n"
+            "```\n\n"
         )
     if r == "gateway_wired":
         return (

@@ -7,5 +7,10 @@ BUILD_STATUS.md
 REVIEW_DIGEST.md
 __pycache__/
 *.pyc
-# yaml transform backups (data/incidents.yaml.bak*) — local safety nets, never shipped.
+# yaml transform backups (data/incidents.yaml.bak*): local safety nets, never shipped.
 *.bak*
+# The SDK writes a local event ledger wherever a protected tool runs. test_repros.py
+# executes real blocks, so a stray .agentx.db can appear here. It is a local artifact
+# and must never ship in a public repo.
+.agentx.db
+.agentx/
