@@ -10,7 +10,7 @@ We block what an agent *does*, and we say plainly which OWASP ASI categories we 
 
 > **Using AREDB in your product, model, or research? You're encouraged to.** To satisfy the CC-BY-4.0 license, paste this one line into your docs or footer, and keep the `ARE-YYYY-NNN` identifiers intact (they are the shared reference the whole field cites):
 >
-> `Data from the Agent Reliability Engineering Database (AREDB), https://github.com/vdalal/ARE-Incident-Database, under CC BY 4.0.`
+> `Data from the Agent Reliability Engineering Database (AREDB), https://aredb.org, under CC BY 4.0.`
 >
 > That is the whole obligation. (GitHub's "Cite this repository" button gives you the same, from `CITATION.cff`.)
 
