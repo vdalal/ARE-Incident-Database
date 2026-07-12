@@ -106,4 +106,9 @@ The OWASP ASI categories AgentX does not cover are not dead weight; they name la
 
 ## License
 
-The taxonomy and entries are CC BY 4.0. Attribution: "ARE Incident Database (AREDB), agentx-core.com". Tooling is MIT. See [`LICENSE`](LICENSE).
+Copyright (c) 2026 AgentX-Core.
+
+- **The data** (the incident entries, the taxonomy, and the prose) is **CC BY 4.0**: [`LICENSE`](LICENSE). Share it, adapt it, use it commercially. The one obligation is attribution: `ARE Incident Database (AREDB), agentx-core.com`, with the `ARE-YYYY-NNN` identifiers kept intact.
+- **The tooling** (`generate.py`, `test_repros.py`, the CI workflow) is **MIT**: [`LICENSE-MIT`](LICENSE-MIT).
+
+The two are split into separate files on purpose. `LICENSE` carries the verbatim CC BY 4.0 legal code so the license travels with the repository and is machine-detectable, rather than being a summary that points at a URL.
