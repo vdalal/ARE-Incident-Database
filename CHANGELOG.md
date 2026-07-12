@@ -10,15 +10,34 @@ an entry's content or its status (`confirmed` / `disputed` / `withdrawn`), never
 
 Dates are ISO-8601 (UTC). The format loosely follows Keep a Changelog.
 
-## [Unreleased]
+## [1.0.0] - 2026-07-11
 
-The founding batch. Nothing is published yet; at the first public release this section
-becomes the initial dated release.
+**The founding batch, published.** AREDB is public: `ARE-2026-001` through `ARE-2026-032`,
+every entry cited, every entry mapped to its OWASP ASI category, and every coverage flag
+either backed by a repro you can run or honestly marked as not ours.
 
 ### Assigned
 - Published founding set: **32 entries** = 25 coverable incidents (23 covered, 2 partial,
   Severity-1 coverable closed at 15 / 15) + 7 boundary exemplars, each mapped to its OWASP
   ASI category.
+
+### Verification
+- Every `keyless_pip` entry now ships a **runnable repro**: the decorator, the tool, the
+  exact payload, and the block. Copy it off the page and run it against a bare
+  `pip install agentx-security-sdk`. Previously an entry asserted its coverage in prose and
+  gave the reader nothing to execute, which is the one place this registry cannot afford to
+  ask for trust.
+- [`test_repros.py`](test_repros.py) scrapes the published snippet back **out of each page**
+  and executes it, so the code a reader copies is the code we prove blocks. It asserts three
+  things, because "it blocked" is a weaker claim than it sounds: the block fires, the tool
+  body never runs (a warning printed beside an action that still happens is not a block),
+  and the process exits clean. All 11 pass.
+- **CI runs it on every push and pull request**, plus weekly, so a future SDK release cannot
+  silently break a published claim without the registry finding out before a reader does.
+  CI also asserts the incident pages stay regenerable from `data/incidents.yaml`, so a
+  hand-edited page can never drift from the machine-readable source of record.
+- A coverage flag is therefore a **tested assertion**, not an editorial one. If a claim ever
+  stops holding, the entry is reclassified. The page is not reworded.
 
 ### Repositioned onto OWASP ASI (2026-07-07)
 - Every incident now leads with its **OWASP ASI** category (ASI01 through ASI10) plus a
@@ -46,4 +65,10 @@ becomes the initial dated release.
   or withdrawn entry is marked in place and its id always resolves.
 
 ### Licensing
-- Data under CC BY 4.0; tooling under MIT.
+- Data under **CC BY 4.0** ([`LICENSE`](LICENSE), the verbatim legal code, so the license
+  travels with the repository and is machine-detectable). Tooling under **MIT**
+  ([`LICENSE-MIT`](LICENSE-MIT)). Attribution is the whole obligation:
+  `ARE Incident Database (AREDB), agentx-core.com`, with the `ARE-YYYY-NNN` identifiers
+  kept intact.
+
+[1.0.0]: https://github.com/vdalal/ARE-Incident-Database/releases/tag/v1.0.0
