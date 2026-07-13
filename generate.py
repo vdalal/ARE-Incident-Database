@@ -82,7 +82,7 @@ def asi_label(inc):
 
 
 def layer0(inc, short=False):
-    r = inc.get("repro")
+    r = inc.get("agentx_check")
     if r == "keyless_pip":
         return "Yes"
     if r == "gateway_wired":
@@ -102,14 +102,14 @@ def ticket_header(inc):
 
 
 def repro_block(inc):
-    r = inc.get("repro")
+    r = inc.get("agentx_check")
     if r == "keyless_pip":
         call = inc.get("repro_call")
         if not call:
             # A keyless entry with no runnable call is a claim with no proof. Fail loud
             # rather than quietly emitting the old prose-only "repro" (mirrors the
             # COVERAGE_LABEL KeyError posture).
-            raise KeyError(f"{inc['id']}: repro is keyless_pip but no repro_call to render")
+            raise KeyError(f"{inc['id']}: agentx_check is keyless_pip but no repro_call to render")
         tool, param, action = call["tool"], call["param"], call["action"]
         payload = call["payload"]
         return (
@@ -158,7 +158,7 @@ def render(inc):
     lines.append("")
     lines.append(field_line(inc))
     lines.append("")
-    lines.append(f"**Coverage:** {COVERAGE_LABEL[inc['coverage']]}")
+    lines.append(f"**Coverage claim (AgentX Core, the maintainer):** {COVERAGE_LABEL[inc['agentx_coverage']]}")
     lines.append("")
     lines.append("## What happened")
     lines.append("")
@@ -169,8 +169,10 @@ def render(inc):
         lines.append("")
         lines.append(inc["blast_radius"].strip())
         lines.append("")
-    if inc["coverage"] in ("covered", "partial"):
-        lines.append("## How AgentX responds")
+    if inc["agentx_coverage"] in ("covered", "partial"):
+        lines.append("## How AgentX Core responds")
+        lines.append("")
+        lines.append("_A vendor claim by the registry's maintainer, not a registry finding. It ships a check you can run; see below._")
         lines.append("")
         lines.append(inc["agentx_response"].strip())
         lines.append("")
@@ -198,7 +200,7 @@ def render_index(incidents):
         "judge_or_org": "judge/org",
         "out_of_scope": "out-of-scope",
     }
-    rows = sorted(incidents, key=lambda i: (order[i["coverage"]], i["id"]))
+    rows = sorted(incidents, key=lambda i: (order[i["agentx_coverage"]], i["id"]))
     out = ["# AREDB incidents (index)", "",
            "| ID | Incident | OWASP ASI | Layer-0 | Coverage |", "|---|---|---|---|---|"]
     for i in rows:
@@ -210,7 +212,7 @@ def render_index(incidents):
         asi = "Reliability" if asi == "RELIABILITY" else asi
         out.append(
             f"| [{i['id']}]({i['id']}.md) | {title} | "
-            f"`{asi}` | {layer0(i, short=True)} | {badge[i['coverage']]} |"
+            f"`{asi}` | {layer0(i, short=True)} | {badge[i['agentx_coverage']]} |"
         )
     out.append("")
     return "\n".join(out)

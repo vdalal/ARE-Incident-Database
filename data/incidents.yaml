@@ -1,22 +1,43 @@
-# ARE Incident Database (AREDB): machine-readable source of record
-# Public projection of the internal AgentX failure catalog. CC BY 4.0.
-# Generated 2026-07-07 (draft).
+# ARE Incident Database (AREDB): machine-readable source of record. CC BY 4.0.
 #
-# coverage:  covered | partial | judge_or_org | out_of_scope
-# repro:     keyless_pip  (blocks from a bare `pip install`; the keyless SDK shield)
-#            gateway_wired (blocks only when wired to the AgentX gateway)
-#            none         (not a coverable entry)
-# status:    confirmed (default, omit) | disputed | withdrawn
-#            A disputed/withdrawn entry keeps its id forever (never reused or removed)
-#            and is marked in its page + the index, so citations always resolve. See
-#            GOVERNANCE.md.
-# agentx_response is outcome-loud: what class of action is stopped and the safe
-#   path offered. It never names an internal detector or a signature threshold.
+# A public registry of real, cited autonomous-agent failures, indexed onto the OWASP Agentic
+# Security Top 10. Entries are facts about incidents. They are not claims about any product.
+#
+# MAINTAINER AND CONFLICT OF INTEREST, STATED UP FRONT.
+#   This registry is maintained by AgentX Core, which sells a product in this space. That is a
+#   real conflict and hiding it would be the thing that discredits the registry, so it is
+#   disclosed here, in the data, and on every page.
+#   It is contained structurally: a coverage claim is NOT a registry verdict. It is one vendor
+#   saying what its product does, and it is namespaced to that vendor so a reader can always
+#   tell the difference between what the registry FOUND and what a vendor CLAIMS.
+#
+# REGISTRY fields (facts about the incident; true regardless of who reads them):
+#   id, title, severity, failure_mode, confusion_vector, surface, owasp_asi, source,
+#   what_happened, blast_radius
+#   status:  confirmed (default, omit) | disputed | withdrawn
+#            A disputed/withdrawn entry keeps its id FOREVER (never reused, never removed) and
+#            is marked on its page and in the index, so a citation always resolves. GOVERNANCE.md.
+#
+# VENDOR-CLAIM fields (one vendor's claim about its own product; NOT a registry finding).
+#   Namespaced by vendor. AgentX Core's claim uses the `agentx_` prefix:
+#     agentx_coverage:  covered | partial | judge_or_org | out_of_scope
+#     agentx_check:     keyless_pip   (blocks from a bare `pip install`; the keyless SDK shield)
+#                       gateway_wired (blocks only when wired to the AgentX gateway)
+#                       none          (not a coverable entry)
+#     agentx_response:  outcome-loud prose: what class of action is stopped and the safe path
+#                       offered. Never names an internal detector or a signature threshold.
+#
+#   ANY VENDOR MAY ADD A CLAIM, under its own prefix (`<vendor>_coverage`, `<vendor>_check`,
+#   `<vendor>_response`), on the same terms AgentX Core is held to here: the claim ships a check
+#   a stranger can run, the check runs on every push (test_repros.py), and a claim that stops
+#   holding is WITHDRAWN, not reworded. See CONTRIBUTING.md and GOVERNANCE.md.
+#   These fields used to be the unqualified `coverage:` and `repro:`, which read as the
+#   REGISTRY's verdict when they were only ever AgentX's. Renamed in taxonomy 1.1.
 
 meta:
   name: ARE Incident Database
   discipline: Agent Reliability Engineering (ARE)
-  taxonomy_version: "1.0"   # framework version (axes in TAXONOMY.md); consumers pin against it, bumped when a mode/vector is added
+  taxonomy_version: "1.1"   # framework version (axes in TAXONOMY.md); consumers pin against it, bumped when a mode/vector is added
   total: 32
   disputed: 0            # marked-disputed entries (id retained); see GOVERNANCE.md
   withdrawn: 0           # marked-withdrawn entries (id retained)
@@ -38,9 +59,9 @@ incidents:
     failure_mode: DESTRUCTIVE_ACTION
     confusion_vector: DESTRUCTIVE_SCOPE_MISREAD
     surface: database
-    coverage: covered
+    agentx_coverage: covered
     owasp_asi: ASI02
-    repro: keyless_pip
+    agentx_check: keyless_pip
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
     repro_call:
@@ -68,9 +89,9 @@ incidents:
     failure_mode: DESTRUCTIVE_ACTION
     confusion_vector: DESTRUCTIVE_SCOPE_MISREAD
     surface: cloud-api
-    coverage: covered
+    agentx_coverage: covered
     owasp_asi: ASI02
-    repro: gateway_wired
+    agentx_check: gateway_wired
     what_happened: >-
       An AI agent with cloud credentials tore down a production environment in about nine
       seconds, deleting whole cloud resources.
@@ -91,9 +112,9 @@ incidents:
     failure_mode: DESTRUCTIVE_ACTION
     confusion_vector: ENVIRONMENT_CONFUSION
     surface: filesystem
-    coverage: covered
+    agentx_coverage: covered
     owasp_asi: ASI02
-    repro: keyless_pip
+    agentx_check: keyless_pip
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
     repro_call:
@@ -120,9 +141,9 @@ incidents:
     failure_mode: SECRETS_LEAK
     confusion_vector: UNAUTHORIZED_SCOPE_EXPANSION
     surface: filesystem + network
-    coverage: covered
+    agentx_coverage: covered
     owasp_asi: ASI03
-    repro: keyless_pip
+    agentx_check: keyless_pip
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
     repro_call:
@@ -149,9 +170,9 @@ incidents:
     failure_mode: PII_EXFILTRATION
     confusion_vector: UNAUTHORIZED_SCOPE_EXPANSION
     surface: egress
-    coverage: covered
+    agentx_coverage: covered
     owasp_asi: ASI01
-    repro: keyless_pip
+    agentx_check: keyless_pip
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
     repro_call:
@@ -177,9 +198,9 @@ incidents:
     failure_mode: DESTRUCTIVE_ACTION
     confusion_vector: UNAUTHORIZED_SCOPE_EXPANSION
     surface: filesystem
-    coverage: covered
+    agentx_coverage: covered
     owasp_asi: ASI02
-    repro: keyless_pip
+    agentx_check: keyless_pip
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
     repro_call:
@@ -206,9 +227,9 @@ incidents:
     failure_mode: SUPPLY_CHAIN
     confusion_vector: UNAUTHORIZED_SCOPE_EXPANSION
     surface: shell
-    coverage: covered
+    agentx_coverage: covered
     owasp_asi: ASI05
-    repro: keyless_pip
+    agentx_check: keyless_pip
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
     repro_call:
@@ -233,9 +254,9 @@ incidents:
     failure_mode: DESTRUCTIVE_ACTION
     confusion_vector: DESTRUCTIVE_SCOPE_MISREAD
     surface: http
-    coverage: covered
+    agentx_coverage: covered
     owasp_asi: ASI02
-    repro: gateway_wired
+    agentx_check: gateway_wired
     what_happened: >-
       An agent issued a cluster-wide delete against a search cluster over its REST API.
     blast_radius: >-
@@ -252,9 +273,9 @@ incidents:
     failure_mode: DESTRUCTIVE_ACTION
     confusion_vector: DESTRUCTIVE_SCOPE_MISREAD
     surface: comms
-    coverage: covered
+    agentx_coverage: covered
     owasp_asi: ASI02
-    repro: gateway_wired
+    agentx_check: gateway_wired
     what_happened: >-
       An agent wiped an entire mailbox.
     blast_radius: >-
@@ -273,9 +294,9 @@ incidents:
     failure_mode: FINANCIAL
     confusion_vector: GOAL_COMPLETION_BLINDNESS
     surface: transaction
-    coverage: covered
+    agentx_coverage: covered
     owasp_asi: ASI02
-    repro: gateway_wired
+    agentx_check: gateway_wired
     what_happened: >-
       An agent moved roughly $450,000 in a value transfer that should have paused for a
       human.
@@ -295,9 +316,9 @@ incidents:
     failure_mode: SUPPLY_CHAIN
     confusion_vector: HALLUCINATED_RESOURCE
     surface: package-install
-    coverage: covered
+    agentx_coverage: covered
     owasp_asi: ASI04
-    repro: gateway_wired
+    agentx_check: gateway_wired
     what_happened: >-
       An agent installed a package that rode a famous name, a hallucinated or
       look-alike dependency rather than the real one.
@@ -319,9 +340,9 @@ incidents:
     failure_mode: UNAUTHORIZED_PUBLISH
     confusion_vector: GOAL_COMPLETION_BLINDNESS
     surface: publish
-    coverage: covered
+    agentx_coverage: covered
     owasp_asi: ASI02
-    repro: gateway_wired
+    agentx_check: gateway_wired
     what_happened: >-
       An agent autonomously published a public hit piece.
     blast_radius: >-
@@ -339,9 +360,9 @@ incidents:
     failure_mode: NETWORK_TRAVERSAL
     confusion_vector: UNAUTHORIZED_SCOPE_EXPANSION
     surface: fetch-url
-    coverage: covered
+    agentx_coverage: covered
     owasp_asi: ASI02
-    repro: keyless_pip
+    agentx_check: keyless_pip
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
     repro_call:
@@ -366,9 +387,9 @@ incidents:
     failure_mode: COGNITIVE_LOOP
     confusion_vector: COST_EXPLOSION_LOOP
     surface: shell
-    coverage: covered
+    agentx_coverage: covered
     owasp_asi: ASI08
-    repro: gateway_wired
+    agentx_check: gateway_wired
     what_happened: >-
       An agent repeated the same command in a loop, burning around 50,000 tokens.
     blast_radius: >-
@@ -386,9 +407,9 @@ incidents:
     failure_mode: COST_EXPLOSION
     confusion_vector: COST_EXPLOSION_LOOP
     surface: budget-meter
-    coverage: covered
+    agentx_coverage: covered
     owasp_asi: ASI08
-    repro: gateway_wired
+    agentx_check: gateway_wired
     what_happened: >-
       An agent ran up about $120 over eight hours with no single unsafe call.
     blast_radius: >-
@@ -406,9 +427,9 @@ incidents:
     failure_mode: COST_EXPLOSION
     confusion_vector: COST_EXPLOSION_LOOP
     surface: budget-meter
-    coverage: covered
+    agentx_coverage: covered
     owasp_asi: ASI08
-    repro: gateway_wired
+    agentx_check: gateway_wired
     what_happened: >-
       A 50-step runaway loop crossed the cost ceiling fast.
     blast_radius: >-
@@ -425,9 +446,9 @@ incidents:
     failure_mode: COST_EXPLOSION
     confusion_vector: COST_EXPLOSION_LOOP
     surface: budget-meter
-    coverage: covered
+    agentx_coverage: covered
     owasp_asi: ASI08
-    repro: gateway_wired
+    agentx_check: gateway_wired
     what_happened: >-
       A swarm of agents ran away on a shared budget, each staying under its own ceiling.
     blast_radius: >-
@@ -444,9 +465,9 @@ incidents:
     failure_mode: DESTRUCTIVE_ACTION
     confusion_vector: UNAUTHORIZED_SCOPE_EXPANSION
     surface: shell
-    coverage: covered
+    agentx_coverage: covered
     owasp_asi: ASI03
-    repro: gateway_wired
+    agentx_check: gateway_wired
     what_happened: >-
       Hitting a permission error, an agent escalated through sudo and scripting to
       bypass the block.
@@ -465,9 +486,9 @@ incidents:
     failure_mode: PROMPT_INJECTION
     confusion_vector: UNAUTHORIZED_SCOPE_EXPANSION
     surface: egress + shell
-    coverage: covered
+    agentx_coverage: covered
     owasp_asi: ASI01
-    repro: keyless_pip
+    agentx_check: keyless_pip
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
     repro_call:
@@ -493,9 +514,9 @@ incidents:
     failure_mode: NETWORK_TRAVERSAL
     confusion_vector: UNAUTHORIZED_SCOPE_EXPANSION
     surface: fetch-url
-    coverage: covered
+    agentx_coverage: covered
     owasp_asi: ASI02
-    repro: keyless_pip
+    agentx_check: keyless_pip
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
     repro_call:
@@ -521,9 +542,9 @@ incidents:
     failure_mode: COST_EXPLOSION
     confusion_vector: COST_EXPLOSION_LOOP
     surface: budget-meter
-    coverage: covered
+    agentx_coverage: covered
     owasp_asi: ASI08
-    repro: gateway_wired
+    agentx_check: gateway_wired
     what_happened: >-
       A multi-agent conversation looped for eleven days and cost about $47,000.
     blast_radius: >-
@@ -541,9 +562,9 @@ incidents:
     failure_mode: NETWORK_ABUSE
     confusion_vector: UNAUTHORIZED_SCOPE_EXPANSION
     surface: cloud-api + network
-    coverage: covered
+    agentx_coverage: covered
     owasp_asi: ASI02
-    repro: gateway_wired
+    agentx_check: gateway_wired
     what_happened: >-
       An agent pointed at a networking task ran wide port and host scans and spun up a
       large fleet of instances to do it; the bill is what stopped it.
@@ -563,9 +584,9 @@ incidents:
     failure_mode: PROMPT_INJECTION
     confusion_vector: UNAUTHORIZED_SCOPE_EXPANSION
     surface: any
-    coverage: covered
+    agentx_coverage: covered
     owasp_asi: ASI01
-    repro: keyless_pip
+    agentx_check: keyless_pip
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
     repro_call:
@@ -591,9 +612,9 @@ incidents:
     failure_mode: DESTRUCTIVE_ACTION
     confusion_vector: ENVIRONMENT_CONFUSION
     surface: filesystem
-    coverage: partial
+    agentx_coverage: partial
     owasp_asi: ASI02
-    repro: keyless_pip
+    agentx_check: keyless_pip
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
     repro_call:
@@ -619,9 +640,9 @@ incidents:
     failure_mode: COGNITIVE_LOOP
     confusion_vector: GOAL_COMPLETION_BLINDNESS
     surface: conversational
-    coverage: partial
+    agentx_coverage: partial
     owasp_asi: ASI08
-    repro: gateway_wired
+    agentx_check: gateway_wired
     what_happened: >-
       A conversational agent looped, re-emitting near-identical turns without progress.
     blast_radius: >-
@@ -647,9 +668,9 @@ incidents:
     failure_mode: HALLUCINATION
     confusion_vector: OUTPUT_FABRICATION
     surface: status/build
-    coverage: judge_or_org
+    agentx_coverage: judge_or_org
     owasp_asi: ASI10
-    repro: none
+    agentx_check: none
     what_happened: >-
       An agent reported that tests passed when they had not.
     blast_radius: null
@@ -663,9 +684,9 @@ incidents:
     title: "Fabricated citations in generated output (Deloitte report)"
     failure_mode: OUTPUT_HALLUCINATION
     surface: document
-    coverage: out_of_scope
+    agentx_coverage: out_of_scope
     owasp_asi: RELIABILITY
-    repro: none
+    agentx_check: none
     what_happened: An agent produced a report with fabricated citations.
     owned_by: Output guardrail / retrieval grounding.
     source: https://www.vectara.com/blog/when-ai-assures-without-evidence-lessons-from-deloittes-dollar290k-hallucination
@@ -674,9 +695,9 @@ incidents:
     title: "Fabricated policy stated as fact (Air Canada chatbot)"
     failure_mode: OUTPUT_HALLUCINATION
     surface: chat
-    coverage: out_of_scope
+    agentx_coverage: out_of_scope
     owasp_asi: ASI09
-    repro: none
+    agentx_check: none
     what_happened: A chatbot stated a policy that did not exist, and the company was held to it.
     owned_by: Policy-grounded output guardrail.
     source: https://museumoffailure.com/exhibition/air-canada-ai-chat
@@ -685,9 +706,9 @@ incidents:
     title: "Manipulative behavioral drift (Sydney chatbot)"
     failure_mode: MODEL_ALIGNMENT
     surface: chat
-    coverage: out_of_scope
+    agentx_coverage: out_of_scope
     owasp_asi: ASI10
-    repro: none
+    agentx_check: none
     what_happened: A chatbot exhibited manipulative behavioral drift.
     owned_by: Model alignment / content moderation.
     source: https://www.nytimes.com/2023/02/16/technology/bing-chatbot-microsoft-chatgpt.html
@@ -696,9 +717,9 @@ incidents:
     title: "Action on stale lineage data (stale lineage hallucination)"
     failure_mode: DATA_FRESHNESS
     surface: data
-    coverage: out_of_scope
+    agentx_coverage: out_of_scope
     owasp_asi: ASI06
-    repro: none
+    agentx_check: none
     what_happened: An agent acted on stale lineage data.
     owned_by: Org data governance / retrieval freshness.
     source: https://atlan.com/know/ai-hallucination-detection
@@ -707,9 +728,9 @@ incidents:
     title: "Conflicting state between cooperating agents (A2A state conflicts)"
     failure_mode: MULTI_AGENT_CONCURRENCY
     surface: backend
-    coverage: out_of_scope
+    agentx_coverage: out_of_scope
     owasp_asi: ASI07
-    repro: none
+    agentx_check: none
     what_happened: Conflicting state between cooperating agents.
     owned_by: Multi-agent concurrency (on the AgentX roadmap, deferred; not impossible).
     source: https://github.com/NousResearch/hermes-agent/issues/514
@@ -718,9 +739,9 @@ incidents:
     title: "Fabricated legal precedents (Morgan & Morgan)"
     failure_mode: OUTPUT_HALLUCINATION
     surface: document
-    coverage: out_of_scope
+    agentx_coverage: out_of_scope
     owasp_asi: RELIABILITY
-    repro: none
+    agentx_check: none
     what_happened: An agent cited fabricated legal precedents.
     owned_by: Retrieval grounding / output guardrail.
     source: https://www.lawnext.com/2025/02/federal-judge-sanctions-morgan-morgan-attorneys-for-ai-generated-fake-cases-in-court-filing.html

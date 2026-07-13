@@ -16,6 +16,50 @@ Open a pull request adding an entry to [`data/incidents.yaml`](data/incidents.ya
 
 If your product owns one of the disciplines that covers our `judge_or_org` or `out_of_scope` incidents, see [`PARTNERS.md`](PARTNERS.md).
 
+
+## 3. A coverage claim (any vendor, including a competitor)
+
+The coverage column is not reserved for the maintainer. If your product stops one of these
+failures, claim it. You will be held to exactly the bar AgentX Core is held to here, and no
+higher.
+
+**A claim is listed only if it ships a check a stranger can run.** Add your fields to the entry
+in `data/incidents.yaml`, namespaced with your own prefix so a reader can always tell whose
+claim is whose:
+
+```yaml
+  - id: ARE-2026-001
+    # ... registry fields (facts about the incident) are not yours to change ...
+
+    # AgentX Core's claim (the maintainer's)
+    agentx_coverage: covered
+    agentx_check: keyless_pip
+    agentx_response: |
+      ...
+
+    # Yours
+    acme_coverage: covered
+    acme_check: keyless_pip
+    acme_response: |
+      What class of action your product stops, and the safe path it offers instead.
+      Outcome-loud. Do not name an internal detector or a signature threshold.
+```
+
+**The terms, which are the same for everyone:**
+
+- **The check runs on every push.** `test_repros.py` scrapes the snippet out of the published
+  page and executes it against a real install. It asserts the block fired *and* that the tool
+  body never ran, because a block that prints a warning while the action still happens is not a
+  block.
+- **A claim that stops holding is withdrawn, not reworded.** If the check goes red, the entry is
+  reclassified. Softening the page instead is the one thing this registry will not do, and that
+  applies to the maintainer's own rows first. See `GOVERNANCE.md`.
+- **The registry does not rank or endorse vendors.** It records what was claimed, by whom, and
+  whether the check still passes. Two vendors may both claim the same entry.
+
+If your product owns a lane the action layer cannot reach at all (content safety, retrieval
+grounding, model alignment, and the rest), that is `PARTNERS.md`, not a coverage claim.
+
 ## Regenerating the pages
 
 `data/incidents.yaml` is the source of record. The per-incident pages under `incidents/` are generated. Do not hand-edit the generated pages; edit the yaml and regenerate:
