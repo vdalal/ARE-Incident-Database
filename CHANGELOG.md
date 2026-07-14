@@ -10,6 +10,48 @@ an entry's content or its status (`confirmed` / `disputed` / `withdrawn`), never
 
 Dates are ISO-8601 (UTC). The format loosely follows Keep a Changelog.
 
+## [1.1.0] - 2026-07-13
+
+### Changed (schema, BREAKING for machine consumers pinned to taxonomy 1.0)
+
+**A coverage claim is now namespaced to the vendor making it.** Previously the schema carried an
+unqualified `coverage:` field, which reads as *the registry's verdict* when it was only ever one
+vendor's claim. The registry does not cover anything. A vendor does.
+
+| taxonomy 1.0 | taxonomy 1.1 |
+|---|---|
+| `coverage:` | `agentx_coverage:` |
+| `repro:` | `agentx_check:` |
+| `agentx_response:` | unchanged (already vendor-scoped) |
+| `meta.covered` / `meta.partial` / `meta.coverable` / `meta.judge_or_org` / `meta.out_of_scope` / `meta.sev1_coverable_closed` | `meta.agentx_*` |
+
+**Any vendor may now add a claim** under its own prefix (`<vendor>_coverage`, `<vendor>_check`,
+`<vendor>_response`), on exactly the terms the maintainer is held to: the claim ships a check a
+stranger can run, the check runs on every push, and a claim that stops holding is withdrawn rather
+than reworded. `CONTRIBUTING.md` documents the path.
+
+**No incident data changed.** No id was reused, renamed, or removed. Every citation minted against
+v1.0.0 still resolves to the same incident. This release changes the SHAPE of the coverage fields
+and the FRAMING of the documents, nothing about what happened in the world.
+
+### Changed (framing)
+
+- `data/incidents.yaml` no longer describes itself as a *"public projection of the internal AgentX
+  failure catalog"*. It is a registry. The maintainer's conflict of interest is disclosed in the
+  header and structurally contained by the namespacing above.
+- Entry pages attribute the claim (`**Coverage claim (AgentX Core, the maintainer):**`) instead of
+  stating it as a registry fact (`**Coverage:**`), and the generated index says *AgentX coverage
+  claim* rather than a bare *Coverage*.
+- `TAXONOMY.md` describes coverage tiers as vendor claims, and no longer carries a product CTA.
+- `README.md` no longer calls the maintainer "the reference implementation" of the registry, and
+  the line *"a registry you can trust beats a self-serving list"* is gone: a swipe at competitors
+  does not belong in the README of a registry that asks competitors to cite it.
+
+### Fixed
+
+- `PARTNERS.md` claimed *"The 38 incidents in this database"*. There are **32**.
+
+
 ## [1.0.0] - 2026-07-11
 
 **The founding batch, published.** AREDB is public: `ARE-2026-001` through `ARE-2026-032`,

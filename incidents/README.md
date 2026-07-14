@@ -1,6 +1,6 @@
 # AREDB incidents (index)
 
-| ID | Incident | OWASP ASI | Layer-0 | Coverage |
+| ID | Incident | OWASP ASI | AgentX check | AgentX coverage claim |
 |---|---|---|---|---|
 | [ARE-2026-001](ARE-2026-001.md) | Autonomous production-database destruction (Replit prod wipe) | `ASI02` | Yes | covered |
 | [ARE-2026-002](ARE-2026-002.md) | Autonomous whole-resource cloud teardown via authorized IAM scope (Cursor/Railway 9-second wipe) | `ASI02` | gateway | covered |

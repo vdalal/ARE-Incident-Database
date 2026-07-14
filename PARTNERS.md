@@ -1,6 +1,6 @@
 # Partners: complete the category
 
-An action firewall covers what an agent **does**. The 38 incidents in this database flagged `judge_or_org` or `out_of_scope` are owned by other reliability and security disciplines. This is an open map. If your product owns one of these lanes, we invite you to map your coverage into it.
+An action firewall covers what an agent **does**. The incidents in this database flagged `judge_or_org` or `out_of_scope` are owned by other reliability and security disciplines. This is an open map. If your product owns one of these lanes, we invite you to map your coverage into it.
 
 ## Open lanes
 

@@ -26,9 +26,13 @@ We block what an agent *does*, and we say plainly which OWASP ASI categories we 
 | Boundary exemplars (honestly out of scope, mapped to ASI) | **7** |
 | Total entries | **32** |
 
-**AgentX-Core** is the reference implementation: it deterministically blocks 23 of the 25 cited incidents today, with 2 more partial, covering 6 of the 10 OWASP ASI categories at the action layer. The four it does not cover are named below, honestly, with what to use instead. The honesty is the point: a registry you can trust beats a self-serving list.
+**Coverage claims are vendor claims, not registry findings.** A vendor may claim that its product stops one of these failures. A claim is listed only if it ships a check a stranger can run, the check runs on every push, and a claim that stops holding is withdrawn rather than reworded. The registry records what was claimed, by whom, and whether the check still passes. It does not rank vendors and it does not endorse them.
 
-## What AgentX does not cover (mapped to OWASP ASI)
+**AgentX Core maintains this registry and also sells a product in this space.** That is a real conflict of interest, and it is disclosed rather than hidden: its claims are namespaced (`agentx_coverage`, `agentx_check`, `agentx_response`) exactly so a reader can always tell what the registry FOUND from what a vendor CLAIMS. Its claim, in full and including what it does not stop, is at [agentx-core.com/aredb](https://agentx-core.com/aredb).
+
+**Any vendor may add a claim** under its own prefix, on the same terms. See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## What the maintainer's product does not cover (a vendor claim)
 
 A deterministic action firewall stops what an agent *does*, not what it *thinks* or *says*. We map every OWASP ASI category to what we can prove, and we do not claim the rest:
 
@@ -47,7 +51,7 @@ The coverage flags are not a scoreboard where 25 of 63 is a passing grade. They 
 
 These are not one market. Software security never collapsed SAST, DAST, WAF, and RASP into a single product, because they intercept at different layers with different guarantees. Agent reliability is the same: a single platform does not turn a probabilistic problem into a deterministic one. AREDB maps the whole space so you can see which architecture each failure actually needs, instead of assuming one tool will eventually cover all 63.
 
-AgentX-Core is the reference implementation for this registry's deterministic coverage: it blocks the action-coverable incidents and names who owns the rest.
+AgentX Core is the registry's maintainer and one of the vendors claiming coverage in it. Its claim is namespaced like any other vendor's, and the lanes it does not own are listed in [PARTNERS.md](PARTNERS.md) for the vendors that do.
 
 ## How coverage is flagged
 
@@ -55,7 +59,7 @@ An action firewall intercepts what an agent **does**, a tool call with an inspec
 
 So every incident carries its OWASP ASI category (the shared taxonomy) plus one of four coverage flags (our internal `failure_mode x confusion_vector` classification is in [`TAXONOMY.md`](TAXONOMY.md)):
 
-- **covered**: AgentX-Core deterministically blocks it today (backed by a passing repro on attribution).
+- **covered**: a vendor claims a deterministic block today, backed by a passing check. (`agentx_coverage: covered` is AgentX Core's claim; another vendor's would be `<vendor>_coverage`.)
 - **partial**: a mechanism exists; the entry states the honest scope.
 - **judge / org-policy**: needs an LLM judge or the org's ground truth; no deterministic block.
 - **out-of-scope**: a different discipline's job; the entry names whose.
@@ -64,13 +68,13 @@ For how AREDB relates to OWASP ASI, CVE, and CWE (and why it indexes onto them r
 
 ## How to read an entry
 
-Each incident lives at [`incidents/ARE-2026-NNN.md`](incidents/) and states: what happened, the blast radius, the coverage flag, and either **what AgentX blocks** (for covered entries, with a one-line repro) or **who owns it** (for the rest). Machine-readable source of record: [`data/incidents.yaml`](data/incidents.yaml).
+Each incident lives at [`incidents/ARE-2026-NNN.md`](incidents/) and states: what happened, the blast radius, and any vendor coverage claims against it, each attributed to the vendor making it. Machine-readable source of record: [`data/incidents.yaml`](data/incidents.yaml).
 
 Every entry also carries a **status**, `confirmed` by default. Per [`GOVERNANCE.md`](GOVERNANCE.md), a `disputed` or `withdrawn` entry keeps its `ARE-YYYY-NNN` id forever and is marked in place, never deleted, so any citation always resolves.
 
 **A note on repros.** Covered entries whose block lives in the free, keyless SDK ship a **runnable** repro: a `pip install` and a short Python snippet you can copy off the page and execute. It blocks with no key, no gateway, and nothing leaving your machine. Do not take our word for any of it, run it. [`test_repros.py`](test_repros.py) scrapes the snippet out of every published page and executes it, asserting the block fires *and* that the tool body never ran, so a claim on a page cannot drift from what the code actually does.
 
-Entries whose block runs in the AgentX gateway are marked **wired to the gateway**, and we never imply they fire from a bare `pip install`. The gateway is free and self-serve: you pull it at [agentx-core.com/gateway](https://agentx-core.com/gateway) and run it locally, alongside the SDK.
+Entries whose block runs in the AgentX gateway rather than the bare SDK are marked **wired to the gateway**, so a claim never implies it fires from a plain `pip install` when it does not. That distinction is part of the claim, not a footnote to it.
 
 ## Prevent the coverable
 
