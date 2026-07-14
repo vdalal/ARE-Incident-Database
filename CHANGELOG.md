@@ -14,34 +14,55 @@ Dates are ISO-8601 (UTC). The format loosely follows Keep a Changelog.
 
 ### Added (taxonomy 1.2, ADDITIVE — non-breaking for machine consumers pinned to 1.1)
 
-**New failure mode: †`FALSE_COMPLETION`** — *the agent reports a task as done when its own trace does
-not substantiate it.* Over-optimism; declared success on a run that failed, or that was never
-performed at all.
+**New failure mode on axis 1: `FALSE_COMPLETION`** — *the agent reports a task as done when its own
+trace does not substantiate it.* Over-optimism; declared success on a run that failed, or that was
+never performed at all.
 
 **Why it earns a slot on axis 1 rather than reusing a vector.** Every other failure mode in this
 taxonomy names a harmful **action**. This one names a harmful **claim**: the agent may do nothing
 dangerous whatsoever, it simply reports a job it did not do. It needs **no new confusion vector** —
-`GOAL_COMPLETION_BLINDNESS` (it cannot tell whether it finished) and `OUTPUT_FABRICATION` (it
-manufactures the evidence that it did) already exist on axis 2 and are its typical causes.
+`OUTPUT_FABRICATION` (it manufactures the evidence that it finished) and `GOAL_COMPLETION_BLINDNESS`
+(it cannot tell whether it finished) already exist on axis 2 and are its typical causes.
 
-It is catalogued because it is the failure that makes **every other measurement untrustworthy**. A
-task-completion metric cannot be believed while this mode goes unmeasured, so it corrupts the
+It matters because it is the failure that makes **every other measurement untrustworthy**. A
+task-completion metric cannot be believed while this mode goes undetected, so it corrupts the
 evidence base a reliability registry exists to provide.
 
-Independently arrived at from two directions, which is the reason it is being pre-registered now:
-Lilian Weng's *Harness Engineering* (2026-07-04) lists *"over-optimism: declaring success despite
-noisy or failed experiments"* among six recurring failure modes observed in autonomous agents; the
-same failure appears in agent-evaluation practice as a **false success** — a final answer whose claim
-is not substantiated by the trace that produced it.
+Arrived at independently from two directions, which is why it is being named now: Lilian Weng's
+*Harness Engineering* (2026-07-04) lists *"over-optimism: declaring success despite noisy or failed
+experiments"* among six recurring failure modes observed in autonomous agents; the same failure
+appears in agent-evaluation practice as a **false success** — a final answer whose claim the trace
+that produced it does not back.
 
-**No coverage claim attaches to it**, per the standing rule in `TAXONOMY.md`: an emerging class is a
-slot, not a claim, until a real incident is catalogued under it and its coverage is honestly flagged.
-Note plainly that **no vendor in this registry, including the maintainer, claims to detect this
-today.** A registry that only ever grows classes its maintainer covers is a marketing surface.
+### Changed (reclassification)
 
-**No incident data changed.** `total` is still 32, no id was reused, renamed or removed, and every
-citation minted against v1.0.0 or v1.1.0 still resolves to the same incident. This release adds a
-classification slot and nothing else.
+**`ARE-2026-026` moves from `HALLUCINATION` to `FALSE_COMPLETION`** (*"false success reporting against
+real exit status — the 'tests passed' lie"*). Its confusion vector (`OUTPUT_FABRICATION`), its
+coverage flag, its severity and its id are **unchanged**.
+
+The old classification was not wrong so much as imprecise: a hallucination is a false statement about
+*the world*; a false completion is a false statement about **the agent's own work**, which is the
+thing a reliability registry is uniquely positioned to record.
+
+**`HALLUCINATION` consequently returns to the †emerging set.** `ARE-2026-026` was its only catalogued
+incident, and a mode with no incident is by this taxonomy's own rule an emerging slot, not a live
+class. Leaving it unmarked would have implied an instance that no longer exists. (`OUTPUT_HALLUCINATION`
+is a distinct mode and still carries `ARE-2026-027`, `-028` and `-032`.)
+
+### Coverage: unchanged, and honestly nil
+
+**No vendor in this registry — including the maintainer — claims a deterministic block for
+`FALSE_COMPLETION`.** `ARE-2026-026` remains flagged `judge_or_org`: detecting it needs an LLM judge
+or the organisation's own ground truth, because the only way to know a completion claim is false is to
+check it against the trace that supposedly produced it. That flag is not improved by this release and
+is not intended to be. A registry that only ever grows classes its maintainer covers is a marketing
+surface, not infrastructure.
+
+### Data
+
+`total` is still **32**. No id was reused, renamed or removed, and every citation minted against
+v1.0.0 or v1.1.0 still resolves to the same incident. One entry's `failure_mode` changed (above);
+`generate.py` re-renders `ARE-2026-026.md` accordingly and every other page byte-identical.
 
 ## [1.1.0] - 2026-07-13
 

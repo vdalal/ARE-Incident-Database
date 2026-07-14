@@ -12,7 +12,7 @@ The failure-mode space, grouped. Modes marked **†emerging** are anticipated cl
 - **Authority & identity:** `BROKEN_AUTHZ`, `SCOPE_OVERREACH`, `UNAUTHORIZED_PUBLISH`, †`IDENTITY_SPOOFING` (agent-to-agent impersonation)
 - **Injection & manipulation:** `PROMPT_INJECTION` (inbound: the agent is manipulated), †`SOCIAL_ENGINEERING` (outbound: the agent manipulates humans)
 - **Multi-agent:** `MULTI_AGENT_CONCURRENCY`, †`MULTI_AGENT_COLLUSION` (emergent coordination into a harmful joint equilibrium)
-- **Cognition & decision:** `HALLUCINATION`, `JUDGMENT`, †`TOOL_MISSELECTION` (the wrong tool or capability is chosen), †`FALSE_COMPLETION` (the agent reports a task as done when its own trace does not substantiate it: over-optimism, declared success on a run that failed or was never performed)
+- **Cognition & decision:** `FALSE_COMPLETION` (the agent reports a task as done when its own trace does not substantiate it: over-optimism, declared success on a run that failed or was never performed), `JUDGMENT`, †`HALLUCINATION` (fabrication that is not a completion claim; `ARE-2026-026` moved to `FALSE_COMPLETION` in 1.2 and this mode now has no catalogued incident, so it returns to the emerging set — see the rule above), †`TOOL_MISSELECTION` (the wrong tool or capability is chosen)
 - **Memory & time:** `CONTEXT_MANAGEMENT`, †`MEMORY_CORRUPTION` (poisoned or persisted bad state), †`MODEL_DRIFT` (behavioural change over a long horizon)
 - **Embodied:** †`PHYSICAL_ACTUATION` (robotics and real-world effectors)
 - **Alignment & content** (model-owned): `MODEL_ALIGNMENT`, †`DECEPTIVE_ALIGNMENT` (aligned when observed, not otherwise), `CONTENT_SAFETY`, `OUTPUT_HALLUCINATION`, `CLASSIFICATION_QUALITY`, `MULTIMODAL_QUALITY`, `MODEL_INTERNALS`
@@ -26,15 +26,25 @@ Whether a mode is deterministically coverable, judge/org, or out-of-scope is a p
 
 Example: Replit (`ARE-2026-001`) is `DESTRUCTIVE_ACTION` x `DESTRUCTIVE_SCOPE_MISREAD`; the 25,000-document wipe (`ARE-2026-003`) is the same failure mode x `ENVIRONMENT_CONFUSION`. Same action, different confusion.
 
-Note that †`FALSE_COMPLETION` (added in taxonomy 1.2) needs **no new vector**: it is typically
-`GOAL_COMPLETION_BLINDNESS` (the agent cannot tell whether it finished) or `OUTPUT_FABRICATION` (it
-manufactures the evidence that it did), both of which already exist on axis 2. The mode is new
-because the two axes answer different questions, and *what broke* here is genuinely novel for this
-registry: **every other failure mode names a harmful ACTION. This one names a harmful CLAIM.** The
-agent may do nothing dangerous at all; it simply reports a job it did not do. It is catalogued
-because it is the failure that makes every other measurement untrustworthy — a completion metric
-cannot be believed while this mode is unmeasured, so it corrupts the evidence base a reliability
-registry exists to provide.
+`FALSE_COMPLETION` (added in taxonomy 1.2) is a good illustration of why the axes are separate. It
+needs **no new vector**: it is typically `OUTPUT_FABRICATION` (the agent manufactures the evidence
+that it finished) or `GOAL_COMPLETION_BLINDNESS` (it cannot tell whether it finished), both of which
+already existed on axis 2. What was missing was on axis 1, and it is a real gap: **every other
+failure mode in this registry names a harmful ACTION. This one names a harmful CLAIM.** The agent may
+do nothing dangerous whatsoever; it simply reports a job it did not do.
+
+`ARE-2026-026` (*"false success reporting against real exit status — the 'tests passed' lie"*) is its
+instance, and was previously filed under `HALLUCINATION` x `OUTPUT_FABRICATION`. That was not wrong so
+much as imprecise: a hallucination is a false *statement about the world*; a false completion is a
+false statement about **the agent's own work**, which is the thing a reliability registry is uniquely
+positioned to record. Reclassified in 1.2 (`HALLUCINATION` remains, for fabrication that is not a
+completion claim).
+
+It matters because it is the failure that makes **every other measurement untrustworthy**: a
+task-completion metric cannot be believed while this mode goes undetected, so it corrupts the evidence
+base a reliability registry exists to provide. **No vendor here claims a deterministic block for it**
+— `ARE-2026-026` is honestly flagged `judge_or_org` (it needs an LLM judge or the org's ground truth
+to know a claim is unsubstantiated), and that flag is unchanged by this reclassification.
 
 ## The frontier (a living, extensible classification)
 

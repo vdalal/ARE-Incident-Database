@@ -675,7 +675,7 @@ incidents:
   - id: ARE-2026-026
     title: "False success reporting against real exit status (the 'tests passed' lie)"
     severity: null
-    failure_mode: HALLUCINATION
+    failure_mode: FALSE_COMPLETION
     confusion_vector: OUTPUT_FABRICATION
     surface: status/build
     agentx_coverage: judge_or_org
