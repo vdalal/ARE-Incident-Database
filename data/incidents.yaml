@@ -37,17 +37,27 @@
 meta:
   name: ARE Incident Database
   discipline: Agent Reliability Engineering (ARE)
-  taxonomy_version: "1.1"   # framework version (axes in TAXONOMY.md); consumers pin against it, bumped when a mode/vector is added
+  taxonomy_version: "1.1"   # schema version; consumers pin against it. See CHANGELOG.md.
+  license: CC-BY-4.0
+
+  # REGISTRY facts. True regardless of who is reading, and not a claim about any product.
   total: 32
   disputed: 0            # marked-disputed entries (id retained); see GOVERNANCE.md
   withdrawn: 0           # marked-withdrawn entries (id retained)
-  coverable: 25
-  covered: 23
-  partial: 2
-  sev1_coverable_closed: "15/15"
-  judge_or_org: 1
-  out_of_scope: 6
-  license: CC-BY-4.0
+  sourced: 32            # entries carrying a public, checkable source. That is the entry bar.
+
+  # VENDOR-CLAIM rollups: AgentX Core's coverage OF this registry. NOT registry findings.
+  # Namespaced for the same reason the per-entry fields are (see the header): unqualified
+  # `covered: 23` in a registry's meta block tells a machine consumer that THE REGISTRY says 23
+  # are covered. By whom? A registry does not cover anything. A vendor does. Another vendor's
+  # rollup would appear as `<vendor>_covered`, and both would be equally true.
+  agentx_coverable: 25
+  agentx_covered: 23
+  agentx_partial: 2
+  agentx_judge_or_org: 1
+  agentx_out_of_scope: 6
+  agentx_sev1_coverable_closed: "15/15"
+
   note_confusion_vector: "Replit (0001) and 25k-docs (0008) confusion_vectors are confirmed in the internal taxonomy; the rest are best-fit assignments for founder review."
 
 incidents:

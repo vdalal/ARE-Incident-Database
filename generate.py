@@ -95,7 +95,7 @@ def ticket_header(inc):
     + whether the keyless Layer-0 shield reproduces it) so an entry reads like a
     registry ticket, not a blog paragraph."""
     bits = [f"`{inc['id']}`", f"**OWASP ASI:** {asi_label(inc)}",
-            f"**Layer-0 repro:** {layer0(inc)}"]
+            f"**AgentX check:** {layer0(inc)}"]
     if inc.get("severity"):
         bits.append(f"**Severity:** {inc['severity']}")
     return "> " + " &nbsp;·&nbsp; ".join(bits)
@@ -202,7 +202,8 @@ def render_index(incidents):
     }
     rows = sorted(incidents, key=lambda i: (order[i["agentx_coverage"]], i["id"]))
     out = ["# AREDB incidents (index)", "",
-           "| ID | Incident | OWASP ASI | Layer-0 | Coverage |", "|---|---|---|---|---|"]
+           "| ID | Incident | OWASP ASI | AgentX check | AgentX coverage claim |",
+           "|---|---|---|---|---|"]
     for i in rows:
         # A disputed/withdrawn entry stays in the index (id never disappears) but is
         # marked so a reader is not misled by a normal-looking row.

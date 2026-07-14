@@ -23,8 +23,8 @@ repository-code: "https://github.com/vdalal/ARE-Incident-Database"
 # KEEP IN SYNC, all three move together at release: this `version` + `date-released`,
 # the CHANGELOG.md release heading, and the `v*` git tag. `date-released` is what
 # supplies the year in a rendered citation; without it citations render year-less.
-version: "1.0.0"
-date-released: "2026-07-11"
+version: "1.1.0"
+date-released: "2026-07-13"
 license: CC-BY-4.0
 keywords:
   - agent-reliability-engineering

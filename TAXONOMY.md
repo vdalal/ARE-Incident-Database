@@ -36,22 +36,41 @@ Two governance rules keep it a classification rather than a grab-bag:
 
 The internal classification carries a version (`taxonomy_version` in [`data/incidents.yaml`](data/incidents.yaml), currently **1.0**) so downstream consumers can pin against a known set of axes. Adding a `failure_mode` or `confusion_vector` increments it and is recorded in [the changelog](CHANGELOG.md).
 
-## Coverage legend
+## Coverage-claim legend
 
-- **covered**: blocked deterministically today, with a passing repro on attribution.
-- **partial**: a mechanism exists; the entry states the honest scope.
-- **judge_or_org**: needs an LLM judge or the org's ground truth; no deterministic block.
-- **out_of_scope**: a different discipline's job; the entry names whose.
+⚠️ **A coverage tier is a VENDOR'S CLAIM about its own product, not a finding of the registry.**
+The registry records what was claimed, by whom, and whether the claim's check still passes. It does
+not rank vendors and it does not endorse them. Claims are namespaced to the vendor making them
+(`agentx_coverage`, and `<vendor>_coverage` for anyone else). See `CONTRIBUTING.md`.
+
+Applied to a claim, the tiers mean:
+
+- **covered**: the vendor claims a deterministic block today, backed by a check that passes on
+  every push.
+- **partial**: a mechanism exists; the claim states its honest scope.
+- **judge_or_org**: needs an LLM judge or the org's ground truth; no deterministic block claimed.
+- **out_of_scope**: a different discipline's job entirely. The entry names whose, and `PARTNERS.md`
+  lists the open lanes.
 
 ## Severity
 
-Severity is the blast radius of the action we can intercept, not real-world harm. A high-harm incident (for example, harmful health advice) can be out-of-scope here because it is not an action-interception problem. Keep the two ideas separate: coverable incidents carry a severity; non-coverable ones do not.
+Severity is the blast radius of the **interceptable action**, not of the real-world harm. A high-harm incident (for example, harmful health advice) can be out of scope here because it is not an action-interception problem at all. Keep the two ideas separate: action-coverable incidents carry a severity; non-coverable ones do not.
 
-## Repro flags
+## Check flags (`<vendor>_check`)
 
-- **keyless_pip**: the block runs in the free, keyless SDK shield and reproduces from a bare `pip install`. The entry page carries the runnable snippet, and `test_repros.py` executes it, so the flag is a tested assertion rather than an editorial one.
-- **gateway_wired**: the block runs in the AgentX gateway and does not fire from a bare `pip install`. The gateway is free and self-serve ([agentx-core.com/gateway](https://agentx-core.com/gateway)).
-- **none**: not a coverable entry.
+How a vendor's claim can be verified. These describe the CLAIM, not the incident, so they live in
+the vendor's namespace alongside it.
+
+- **keyless_pip**: the claimed block runs in a free, keyless package and reproduces from a bare
+  install. The entry page carries the runnable snippet and `test_repros.py` executes it on every
+  push, so the flag is a tested assertion rather than an editorial one.
+- **gateway_wired**: the claimed block requires the vendor's server-side component and does **not**
+  fire from a bare install. Stated explicitly so that a claim never implies it reproduces standalone
+  when it does not. This distinction is part of the claim, not a footnote to it.
+- **none**: no verifiable check offered for this entry.
+
+A claim whose check stops passing is **withdrawn, not reworded** (`GOVERNANCE.md`). That rule
+applies to the maintainer's own rows first.
 
 ## Ids
 
