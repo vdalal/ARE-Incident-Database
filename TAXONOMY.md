@@ -12,7 +12,7 @@ The failure-mode space, grouped. Modes marked **†emerging** are anticipated cl
 - **Authority & identity:** `BROKEN_AUTHZ`, `SCOPE_OVERREACH`, `UNAUTHORIZED_PUBLISH`, †`IDENTITY_SPOOFING` (agent-to-agent impersonation)
 - **Injection & manipulation:** `PROMPT_INJECTION` (inbound: the agent is manipulated), †`SOCIAL_ENGINEERING` (outbound: the agent manipulates humans)
 - **Multi-agent:** `MULTI_AGENT_CONCURRENCY`, †`MULTI_AGENT_COLLUSION` (emergent coordination into a harmful joint equilibrium)
-- **Cognition & decision:** `HALLUCINATION`, `JUDGMENT`, †`TOOL_MISSELECTION` (the wrong tool or capability is chosen)
+- **Cognition & decision:** `FALSE_COMPLETION` (the agent reports a task as done when its own trace does not substantiate it: over-optimism, declared success on a run that failed or was never performed), `JUDGMENT`, †`TOOL_MISSELECTION` (the wrong tool or capability is chosen)
 - **Memory & time:** `CONTEXT_MANAGEMENT`, †`MEMORY_CORRUPTION` (poisoned or persisted bad state), †`MODEL_DRIFT` (behavioural change over a long horizon)
 - **Embodied:** †`PHYSICAL_ACTUATION` (robotics and real-world effectors)
 - **Alignment & content** (model-owned): `MODEL_ALIGNMENT`, †`DECEPTIVE_ALIGNMENT` (aligned when observed, not otherwise), `CONTENT_SAFETY`, `OUTPUT_HALLUCINATION`, `CLASSIFICATION_QUALITY`, `MULTIMODAL_QUALITY`, `MODEL_INTERNALS`
@@ -25,6 +25,49 @@ Whether a mode is deterministically coverable, judge/org, or out-of-scope is a p
 `DESTRUCTIVE_SCOPE_MISREAD`, `HALLUCINATED_RESOURCE`, `ENVIRONMENT_CONFUSION`, `GOAL_COMPLETION_BLINDNESS`, `COST_EXPLOSION_LOOP`, `UNAUTHORIZED_SCOPE_EXPANSION`, `CONTEXT_STALENESS`, `OUTPUT_FABRICATION`, plus the emerging vectors †`EMERGENT_OPTIMIZATION` (agents optimize into a harmful joint equilibrium no one instructed), †`TEMPORAL_DRIFT` (behaviour degrades or shifts over a long horizon), †`SITUATIONAL_DECEPTION` (behaves differently when it detects it is observed), †`INSTRUMENTAL_MANIPULATION` (manipulates a human or system as a means to a goal), †`TOOL_CONFUSION` (misjudges which tool or capability the task needs).
 
 Example: Replit (`ARE-2026-001`) is `DESTRUCTIVE_ACTION` x `DESTRUCTIVE_SCOPE_MISREAD`; the 25,000-document wipe (`ARE-2026-003`) is the same failure mode x `ENVIRONMENT_CONFUSION`. Same action, different confusion.
+
+## Why there is no `HALLUCINATION` mode
+
+There was one until taxonomy 1.2. It was **renamed to `FALSE_COMPLETION`**, and the reason is worth
+stating, because it is the kind of decision a taxonomy has to get right early.
+
+"Hallucination" is too broad to be a category. **Every form of it already has a precise home here**,
+and they are genuinely different failures with different detection surfaces:
+
+| The agent fabricates… | Mode | How it fails | Caught by |
+|---|---|---|---|
+| a fact about **the world** (a citation, a policy, a precedent) | `OUTPUT_HALLUCINATION` | *detectably* — go check, it isn't there | external ground truth |
+| a **resource** that does not exist (a package, a table) | vector `HALLUCINATED_RESOURCE`, filed under the mode the action belongs to (e.g. `SUPPLY_CHAIN`) | at the action | the registry / the call |
+| a claim about **its own work** ("I ran it, it passed") | **`FALSE_COMPLETION`** | **silently — it looks exactly like success** | **the agent's own trace** |
+
+An umbrella term sitting alongside its own children is a **misfiling magnet**: the vague parent is the
+path of least resistance, so incidents get dumped into it instead of classified, and the taxonomy rots
+quietly. `HALLUCINATION` had exactly one incident (`ARE-2026-026`) and that incident is a false
+completion, so the rename is lossless for every incident that exists.
+
+### What makes `FALSE_COMPLETION` distinct, and worth its own axis-1 slot
+
+It needs **no new confusion vector** — `OUTPUT_FABRICATION` (the agent manufactures the evidence that
+it finished) and `GOAL_COMPLETION_BLINDNESS` (it cannot tell whether it finished) already exist on
+axis 2. What was missing was on axis 1: **every other failure mode in this registry names a harmful
+ACTION. This one names a harmful CLAIM.** The agent may do nothing dangerous whatsoever; it simply
+reports a job it did not do.
+
+Three properties separate it from its neighbours:
+
+1. **It is the only one that fails silently.** A runaway loop (`COGNITIVE_LOOP`, `COST_EXPLOSION`)
+   fails *loudly* — it burns money in the open. A fabricated citation fails *detectably* — check the
+   case, it does not exist. A false completion is **indistinguishable from a job well done**, and
+   nobody investigates a success.
+2. **It is the only one falsifiable without external ground truth.** To catch a hallucinated legal
+   precedent you need the world. To catch a false completion you need only **the trace you already
+   have**: did the tool call that would substantiate this claim actually happen?
+3. **It corrupts measurement.** A task-completion metric cannot be believed while this mode goes
+   undetected — so it degrades the evidence base a reliability registry exists to provide.
+
+**No vendor here claims a deterministic block for it.** `ARE-2026-026` is honestly flagged
+`judge_or_org`: knowing a completion claim is false requires an LLM judge or the organisation's own
+ground truth to check the claim against the trace. That flag is unchanged by the rename.
 
 ## The frontier (a living, extensible classification)
 

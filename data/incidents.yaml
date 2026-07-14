@@ -37,7 +37,7 @@
 meta:
   name: ARE Incident Database
   discipline: Agent Reliability Engineering (ARE)
-  taxonomy_version: "1.1"   # schema version; consumers pin against it. See CHANGELOG.md.
+  taxonomy_version: "1.2"   # schema version; consumers pin against it. See CHANGELOG.md.
   license: CC-BY-4.0
 
   # REGISTRY facts. True regardless of who is reading, and not a claim about any product.
@@ -675,7 +675,7 @@ incidents:
   - id: ARE-2026-026
     title: "False success reporting against real exit status (the 'tests passed' lie)"
     severity: null
-    failure_mode: HALLUCINATION
+    failure_mode: FALSE_COMPLETION
     confusion_vector: OUTPUT_FABRICATION
     surface: status/build
     agentx_coverage: judge_or_org

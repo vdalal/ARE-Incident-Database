@@ -10,6 +10,64 @@ an entry's content or its status (`confirmed` / `disputed` / `withdrawn`), never
 
 Dates are ISO-8601 (UTC). The format loosely follows Keep a Changelog.
 
+## [1.2.0] - 2026-07-14
+
+### Changed (schema, BREAKING for machine consumers pinned to taxonomy 1.1)
+
+**`HALLUCINATION` is renamed to `FALSE_COMPLETION`.** *The agent reports a task as done when its own
+trace does not substantiate it* — over-optimism; declared success on a run that failed, or that was
+never performed at all.
+
+| taxonomy 1.1 | taxonomy 1.2 |
+|---|---|
+| `failure_mode: HALLUCINATION` | `failure_mode: FALSE_COMPLETION` |
+| `OUTPUT_HALLUCINATION` | unchanged (a distinct mode — see below) |
+
+**Why: "hallucination" is too broad to be a category, and every form of it already has a precise home
+here.** They are genuinely different failures with different detection surfaces:
+
+| The agent fabricates… | Mode | How it fails | Caught by |
+|---|---|---|---|
+| a fact about **the world** (a citation, a policy, a precedent) | `OUTPUT_HALLUCINATION` (`ARE-2026-027`, `-028`, `-032`) | *detectably* — go check, it isn't there | external ground truth |
+| a **resource** that does not exist (a package, a table) | vector `HALLUCINATED_RESOURCE`, under the mode the action belongs to (e.g. `SUPPLY_CHAIN`, `ARE-2026-011`) | at the action | the registry / the call |
+| a claim about **its own work** ("I ran it, it passed") | **`FALSE_COMPLETION`** (`ARE-2026-026`) | **silently — it looks exactly like success** | **the agent's own trace** |
+
+An umbrella term sitting alongside its own children is a **misfiling magnet**: the vague parent is the
+path of least resistance, so incidents get dumped into it rather than classified, and the taxonomy
+rots quietly. Better to fix that now, while one incident is affected, than after citations accumulate.
+
+**The rename is lossless.** `HALLUCINATION` had exactly one incident — `ARE-2026-026`, *"false success
+reporting against real exit status (the 'tests passed' lie)"* — and that incident **is** a false
+completion. For every incident that exists, the old and new sets are identical. A consumer pinned to
+1.1 can migrate by string substitution.
+
+**What makes it distinct enough to name.** It needs **no new confusion vector** — `OUTPUT_FABRICATION`
+and `GOAL_COMPLETION_BLINDNESS` already exist on axis 2. What was missing was on axis 1: **every other
+failure mode in this registry names a harmful ACTION; this one names a harmful CLAIM.** It is the only
+mode here that (1) fails *silently*, being indistinguishable from success, (2) is falsifiable **without
+external ground truth**, needing only the trace the agent already produced, and (3) **corrupts
+measurement** — a task-completion metric cannot be believed while it goes undetected.
+
+Arrived at independently from two directions, which is why it is being named now: Lilian Weng's
+*Harness Engineering* (2026-07-04) lists *"over-optimism: declaring success despite noisy or failed
+experiments"* among six recurring failure modes observed in autonomous agents; the same failure appears
+in agent-evaluation practice as a **false success** — a final answer whose claim the trace that
+produced it does not back.
+
+### Coverage: unchanged, and honestly nil
+
+**No vendor in this registry — including the maintainer — claims a deterministic block for
+`FALSE_COMPLETION`.** `ARE-2026-026` remains flagged `judge_or_org`: knowing a completion claim is
+false requires an LLM judge or the organisation's own ground truth to check the claim against the
+trace. That flag is **not** improved by this release and is not intended to be. A registry that only
+ever grows classes its maintainer covers is a marketing surface, not infrastructure.
+
+### Data
+
+`total` is still **32**. **No id was reused, renamed or removed**, and every citation minted against
+v1.0.0 or v1.1.0 still resolves to the same incident. One entry's `failure_mode` string changed;
+`generate.py` re-renders `ARE-2026-026.md` accordingly, and every other page is byte-identical.
+
 ## [1.1.0] - 2026-07-13
 
 ### Changed (schema, BREAKING for machine consumers pinned to taxonomy 1.0)
