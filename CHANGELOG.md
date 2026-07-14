@@ -10,6 +10,39 @@ an entry's content or its status (`confirmed` / `disputed` / `withdrawn`), never
 
 Dates are ISO-8601 (UTC). The format loosely follows Keep a Changelog.
 
+## [1.2.0] - 2026-07-14
+
+### Added (taxonomy 1.2, ADDITIVE — non-breaking for machine consumers pinned to 1.1)
+
+**New failure mode: †`FALSE_COMPLETION`** — *the agent reports a task as done when its own trace does
+not substantiate it.* Over-optimism; declared success on a run that failed, or that was never
+performed at all.
+
+**Why it earns a slot on axis 1 rather than reusing a vector.** Every other failure mode in this
+taxonomy names a harmful **action**. This one names a harmful **claim**: the agent may do nothing
+dangerous whatsoever, it simply reports a job it did not do. It needs **no new confusion vector** —
+`GOAL_COMPLETION_BLINDNESS` (it cannot tell whether it finished) and `OUTPUT_FABRICATION` (it
+manufactures the evidence that it did) already exist on axis 2 and are its typical causes.
+
+It is catalogued because it is the failure that makes **every other measurement untrustworthy**. A
+task-completion metric cannot be believed while this mode goes unmeasured, so it corrupts the
+evidence base a reliability registry exists to provide.
+
+Independently arrived at from two directions, which is the reason it is being pre-registered now:
+Lilian Weng's *Harness Engineering* (2026-07-04) lists *"over-optimism: declaring success despite
+noisy or failed experiments"* among six recurring failure modes observed in autonomous agents; the
+same failure appears in agent-evaluation practice as a **false success** — a final answer whose claim
+is not substantiated by the trace that produced it.
+
+**No coverage claim attaches to it**, per the standing rule in `TAXONOMY.md`: an emerging class is a
+slot, not a claim, until a real incident is catalogued under it and its coverage is honestly flagged.
+Note plainly that **no vendor in this registry, including the maintainer, claims to detect this
+today.** A registry that only ever grows classes its maintainer covers is a marketing surface.
+
+**No incident data changed.** `total` is still 32, no id was reused, renamed or removed, and every
+citation minted against v1.0.0 or v1.1.0 still resolves to the same incident. This release adds a
+classification slot and nothing else.
+
 ## [1.1.0] - 2026-07-13
 
 ### Changed (schema, BREAKING for machine consumers pinned to taxonomy 1.0)

@@ -12,7 +12,7 @@ The failure-mode space, grouped. Modes marked **†emerging** are anticipated cl
 - **Authority & identity:** `BROKEN_AUTHZ`, `SCOPE_OVERREACH`, `UNAUTHORIZED_PUBLISH`, †`IDENTITY_SPOOFING` (agent-to-agent impersonation)
 - **Injection & manipulation:** `PROMPT_INJECTION` (inbound: the agent is manipulated), †`SOCIAL_ENGINEERING` (outbound: the agent manipulates humans)
 - **Multi-agent:** `MULTI_AGENT_CONCURRENCY`, †`MULTI_AGENT_COLLUSION` (emergent coordination into a harmful joint equilibrium)
-- **Cognition & decision:** `HALLUCINATION`, `JUDGMENT`, †`TOOL_MISSELECTION` (the wrong tool or capability is chosen)
+- **Cognition & decision:** `HALLUCINATION`, `JUDGMENT`, †`TOOL_MISSELECTION` (the wrong tool or capability is chosen), †`FALSE_COMPLETION` (the agent reports a task as done when its own trace does not substantiate it: over-optimism, declared success on a run that failed or was never performed)
 - **Memory & time:** `CONTEXT_MANAGEMENT`, †`MEMORY_CORRUPTION` (poisoned or persisted bad state), †`MODEL_DRIFT` (behavioural change over a long horizon)
 - **Embodied:** †`PHYSICAL_ACTUATION` (robotics and real-world effectors)
 - **Alignment & content** (model-owned): `MODEL_ALIGNMENT`, †`DECEPTIVE_ALIGNMENT` (aligned when observed, not otherwise), `CONTENT_SAFETY`, `OUTPUT_HALLUCINATION`, `CLASSIFICATION_QUALITY`, `MULTIMODAL_QUALITY`, `MODEL_INTERNALS`
@@ -25,6 +25,16 @@ Whether a mode is deterministically coverable, judge/org, or out-of-scope is a p
 `DESTRUCTIVE_SCOPE_MISREAD`, `HALLUCINATED_RESOURCE`, `ENVIRONMENT_CONFUSION`, `GOAL_COMPLETION_BLINDNESS`, `COST_EXPLOSION_LOOP`, `UNAUTHORIZED_SCOPE_EXPANSION`, `CONTEXT_STALENESS`, `OUTPUT_FABRICATION`, plus the emerging vectors †`EMERGENT_OPTIMIZATION` (agents optimize into a harmful joint equilibrium no one instructed), †`TEMPORAL_DRIFT` (behaviour degrades or shifts over a long horizon), †`SITUATIONAL_DECEPTION` (behaves differently when it detects it is observed), †`INSTRUMENTAL_MANIPULATION` (manipulates a human or system as a means to a goal), †`TOOL_CONFUSION` (misjudges which tool or capability the task needs).
 
 Example: Replit (`ARE-2026-001`) is `DESTRUCTIVE_ACTION` x `DESTRUCTIVE_SCOPE_MISREAD`; the 25,000-document wipe (`ARE-2026-003`) is the same failure mode x `ENVIRONMENT_CONFUSION`. Same action, different confusion.
+
+Note that †`FALSE_COMPLETION` (added in taxonomy 1.2) needs **no new vector**: it is typically
+`GOAL_COMPLETION_BLINDNESS` (the agent cannot tell whether it finished) or `OUTPUT_FABRICATION` (it
+manufactures the evidence that it did), both of which already exist on axis 2. The mode is new
+because the two axes answer different questions, and *what broke* here is genuinely novel for this
+registry: **every other failure mode names a harmful ACTION. This one names a harmful CLAIM.** The
+agent may do nothing dangerous at all; it simply reports a job it did not do. It is catalogued
+because it is the failure that makes every other measurement untrustworthy — a completion metric
+cannot be believed while this mode is unmeasured, so it corrupts the evidence base a reliability
+registry exists to provide.
 
 ## The frontier (a living, extensible classification)
 

@@ -37,7 +37,7 @@
 meta:
   name: ARE Incident Database
   discipline: Agent Reliability Engineering (ARE)
-  taxonomy_version: "1.1"   # schema version; consumers pin against it. See CHANGELOG.md.
+  taxonomy_version: "1.2"   # schema version; consumers pin against it. See CHANGELOG.md.
   license: CC-BY-4.0
 
   # REGISTRY facts. True regardless of who is reading, and not a claim about any product.
