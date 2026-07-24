@@ -10,6 +10,62 @@ an entry's content or its status (`confirmed` / `disputed` / `withdrawn`), never
 
 Dates are ISO-8601 (UTC). The format loosely follows Keep a Changelog.
 
+## [1.3.0] - 2026-07-24
+
+### Changed (schema + framing): a vendor-neutral registry, facts separated from claims
+
+The namespacing added in 1.1 disclosed the maintainer's conflict of interest, but left AgentX's
+vendor material dominating every page and, deeper, left the registry's own axis, vocabulary, and
+ordering looking out from the maintainer's product category. This release separates facts from
+claims structurally and de-centers the action layer to one control discipline among peers.
+
+**New registry field: `coverage_class`.** Every incident carries a neutral, vendor-independent
+classification of which control discipline it requires. No discipline is the default:
+
+| coverage_class | meaning |
+|---|---|
+| `action_coverable` | an inspectable tool call, addressable by deterministic action interception |
+| `needs_judge_or_org` | needs an LLM judge or the organization's ground truth; no deterministic rule |
+| `other_discipline` | owned by a different control domain (environmental isolation, model alignment, content safety, data governance, inter-agent authorization); the entry names which |
+
+This is a registry FACT, independent of whether any product stops it. The per-vendor
+`agentx_coverage` claim is retained unchanged (its values, including `out_of_scope`, are AgentX
+speaking about AgentX), so `coverage_class` is additive: a machine consumer pinned to taxonomy 1.2
+still parses. `taxonomy_version` moves `1.2` -> `1.3`. The meta block gains neutral
+`action_coverable` / `needs_judge_or_org` / `other_discipline` rollups.
+
+**Vendor claims are fenced, and rendered only where a claim exists.** On each entry the registry
+facts come first; a vendor's claim is rendered below a rule in an attributed, namespaced "Vendor
+coverage claims" section. The boundary and judge entries carry no vendor mention. The ticket header
+drops the `AgentX check` field and leads with the neutral coverage class.
+
+**The registry no longer centers the action layer.** The index sorts by identifier (not by coverage
+class, which stacked every AgentX-claimed row on top and read as a scoreboard), and its vendor-claim
+column is clearly labelled a claim. Severity is redefined as the incident's real-world blast radius
+and applied to ALL incidents, so the most dangerous entry (`ARE-2026-033`, an autonomous sandbox
+escape and third-party breach) ranks Sev-1 rather than going unranked because no deterministic rule
+reaches it. The class formerly "out of scope for the action layer" is renamed `other_discipline` (a
+peer, not a residual), and `README.md` / `RELATION-TO-STANDARDS.md` / `TAXONOMY.md` / `PARTNERS.md` /
+`CONTRIBUTING.md` are reframed to present control disciplines as peers rather than "the action layer
+and the rest." The README's "Prevent the coverable" install snippet (a product CTA) is removed and
+the conflict-of-interest disclosure consolidated into one bounded section. `GOVERNANCE.md`, which
+discloses that AgentX-Core runs the ARE Numbering Authority, is unchanged: disclosing who governs is
+neutrality, not a leak.
+
+**Build integrity.** `generate.py` gained a fail-loud `validate()` preflight that runs before any
+page is written: each incident's `coverage_class` and vendor claim must be present and valid, a block
+claim must be consistent with an `action_coverable` class and ship a real check, a non-coverable class
+must name an owner, and the meta rollups must equal the real per-entry counts. A second (non-agentx)
+vendor claim fails loud rather than being silently dropped (multi-vendor rendering is a follow-up).
+
+### Data
+
+Registry changes: the 7 incidents in the renamed `other_discipline` class (from the action-centric
+`out_of_scope`), and harm-based severities assigned to the 8 previously-unranked entries
+(`ARE-2026-026` through `-033`; first drafts flagged for maintainer review). `ARE-2026-031`'s
+`owned_by` dropped an "on the AgentX roadmap" aside. **No id was reused, renamed, or removed**; every
+prior citation still resolves. All 11 keyless repros still block (`test_repros.py` green).
+
 ## [1.2.1] - 2026-07-24
 
 ### Assigned
@@ -203,6 +259,7 @@ either backed by a repro you can run or honestly marked as not ours.
   `ARE Incident Database (AREDB), aredb.org`, with the `ARE-YYYY-NNN` identifiers
   kept intact.
 
+[1.3.0]: https://github.com/vdalal/ARE-Incident-Database/releases/tag/v1.3.0
 [1.2.1]: https://github.com/vdalal/ARE-Incident-Database/releases/tag/v1.2.1
 [1.2.0]: https://github.com/vdalal/ARE-Incident-Database/releases/tag/v1.2.0
 [1.1.0]: https://github.com/vdalal/ARE-Incident-Database/releases/tag/v1.1.0

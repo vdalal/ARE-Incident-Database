@@ -14,7 +14,7 @@ The registrar role, not the license, is where category authority lives (CC-BY pr
 
 ## Lane stewards (the CNA-equivalent)
 
-The incidents AREDB flags `judge_or_org` or `out_of_scope` are owned by other reliability and security disciplines (see `PARTNERS.md`). A partner may become the **steward of a lane** (content-safety, API-authz, context-management, and so on):
+The incidents AREDB classifies `needs_judge_or_org` or `other_discipline` are owned by other reliability and security disciplines (see `PARTNERS.md`). A partner may become the **steward of a lane** (content-safety, API-authz, context-management, and so on):
 
 - a steward proposes and maintains the **coverage mappings** for incidents in their lane ("here is how our product handles `ARE-2026-045`");
 - the ANA **ratifies** those mappings and retains final say on classification and honesty;

@@ -1,6 +1,6 @@
 # Partners: complete the category
 
-An action firewall covers what an agent **does**. The incidents in this database flagged `judge_or_org` or `out_of_scope` are owned by other reliability and security disciplines. This is an open map. If your product owns one of these lanes, we invite you to map your coverage into it.
+Agent reliability spans many control disciplines. The incidents in this registry classified `needs_judge_or_org` or `other_discipline` are owned by disciplines other than deterministic action interception. This is an open map. If your product owns one of these lanes, you are invited to map your coverage onto it, on the same terms as any other vendor.
 
 ## Open lanes
 
@@ -21,4 +21,4 @@ Open a pull request (see [`CONTRIBUTING.md`](CONTRIBUTING.md)) that maps your pr
 ## Principles
 
 - **Honesty first.** Claims are mapped to what a product actually does. We do not overstate coverage, ours or a partner's.
-- **One convener, many lanes.** AgentX-Core maintains the taxonomy and owns the runtime action-enforcement and recovery lane; partners own their lanes. This is a standard, not a bake-off.
+- **One convener, many lanes.** AgentX-Core maintains the registry as the ARE Numbering Authority. It is also one vendor among the lanes: its coverage claims (the action-enforcement and recovery lane) live in its own namespaced rows, held to the same terms as any partner's. Partners own their lanes. This is a standard, not a bake-off.
