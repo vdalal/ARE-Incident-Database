@@ -203,4 +203,7 @@ either backed by a repro you can run or honestly marked as not ours.
   `ARE Incident Database (AREDB), aredb.org`, with the `ARE-YYYY-NNN` identifiers
   kept intact.
 
+[1.2.1]: https://github.com/vdalal/ARE-Incident-Database/releases/tag/v1.2.1
+[1.2.0]: https://github.com/vdalal/ARE-Incident-Database/releases/tag/v1.2.0
+[1.1.0]: https://github.com/vdalal/ARE-Incident-Database/releases/tag/v1.1.0
 [1.0.0]: https://github.com/vdalal/ARE-Incident-Database/releases/tag/v1.0.0

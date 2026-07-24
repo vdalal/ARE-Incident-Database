@@ -23,7 +23,7 @@ We block what an agent *does*, and we say plainly which OWASP ASI categories we 
 | OWASP ASI categories fully covered at the action layer | **6 of 10** (ASI01-05, ASI08) |
 | Cited incidents with a deterministic repro | **25** (23 blocked today, 2 partial) |
 | Severity-1 coverable, closed | **15 / 15** |
-| Boundary exemplars (honestly out of scope, mapped to ASI) | **8** |
+| Boundary exemplars (non-coverable: out of scope or judge/org) | **8** |
 | Total entries | **33** |
 
 **Coverage claims are vendor claims, not registry findings.** A vendor may claim that its product stops one of these failures. A claim is listed only if it ships a check a stranger can run, the check runs on every push, and a claim that stops holding is withdrawn rather than reworded. The registry records what was claimed, by whom, and whether the check still passes. It does not rank vendors and it does not endorse them.
