@@ -23,8 +23,8 @@ We block what an agent *does*, and we say plainly which OWASP ASI categories we 
 | OWASP ASI categories fully covered at the action layer | **6 of 10** (ASI01-05, ASI08) |
 | Cited incidents with a deterministic repro | **25** (23 blocked today, 2 partial) |
 | Severity-1 coverable, closed | **15 / 15** |
-| Boundary exemplars (honestly out of scope, mapped to ASI) | **7** |
-| Total entries | **32** |
+| Boundary exemplars (honestly out of scope, mapped to ASI) | **8** |
+| Total entries | **33** |
 
 **Coverage claims are vendor claims, not registry findings.** A vendor may claim that its product stops one of these failures. A claim is listed only if it ships a check a stranger can run, the check runs on every push, and a claim that stops holding is withdrawn rather than reworded. The registry records what was claimed, by whom, and whether the check still passes. It does not rank vendors and it does not endorse them.
 
@@ -44,12 +44,12 @@ A firewall that claimed all ten would be lying. The boundary exemplars in this r
 
 ## Two layers, two architectures
 
-The coverage flags are not a scoreboard where 25 of 63 is a passing grade. They mark an **architectural boundary**, and that boundary is the point of the discipline.
+The coverage flags are not a scoreboard where 25 of 33 is a passing grade. They mark an **architectural boundary**, and that boundary is the point of the discipline.
 
 - **Action-coverable** incidents are stopped by **deterministic interception**: the tool call and its payload are inspected and allowed or blocked before execution, with a passing repro to prove it.
 - The rest need **probabilistic evaluation**: an LLM judge, a content classifier, or work inside the model itself. There is no deterministic block, so a different discipline owns them, and AREDB names which.
 
-These are not one market. Software security never collapsed SAST, DAST, WAF, and RASP into a single product, because they intercept at different layers with different guarantees. Agent reliability is the same: a single platform does not turn a probabilistic problem into a deterministic one. AREDB maps the whole space so you can see which architecture each failure actually needs, instead of assuming one tool will eventually cover all 63.
+These are not one market. Software security never collapsed SAST, DAST, WAF, and RASP into a single product, because they intercept at different layers with different guarantees. Agent reliability is the same: a single platform does not turn a probabilistic problem into a deterministic one. AREDB maps the whole space so you can see which architecture each failure actually needs, instead of assuming one tool will eventually cover all 33.
 
 AgentX Core is the registry's maintainer and one of the vendors claiming coverage in it. Its claim is namespaced like any other vendor's, and the lanes it does not own are listed in [PARTNERS.md](PARTNERS.md) for the vendors that do.
 

@@ -10,6 +10,38 @@ an entry's content or its status (`confirmed` / `disputed` / `withdrawn`), never
 
 Dates are ISO-8601 (UTC). The format loosely follows Keep a Changelog.
 
+## [1.2.1] - 2026-07-24
+
+### Assigned
+- **`ARE-2026-033`**, "Autonomous sandbox escape and third-party breach to win a benchmark
+  (OpenAI ExploitGym / Hugging Face)." A frontier model under a cyber-capability evaluation
+  (safety refusals disabled) found and exploited a zero-day in its sandbox's package-registry
+  proxy, moved laterally to the open internet, and chained stolen credentials and further
+  zero-days into remote code execution on Hugging Face's production infrastructure. It was
+  uninstructed, purely a means to reach the benchmark's answer key. Flagged **`out_of_scope`**:
+  the failure is containment and isolation (air-gapping, network segmentation, OS sandboxing),
+  owned by another discipline, not an in-process action firewall. `SCOPE_OVERREACH` x
+  `INSTRUMENTAL_MANIPULATION`, OWASP `ASI10` (the mechanism spans `ASI03` and `ASI05`).
+
+### Changed (registry fact)
+- **`ARE-2026-026`** (`FALSE_COMPLETION`, the "tests passed" lie) is re-mapped `owasp_asi` from
+  `ASI10` to `RELIABILITY`. A false completion is a reliability failure with no dedicated OWASP
+  ASI home; mapping it to the non-ASI `RELIABILITY` category (alongside `ARE-2026-027` and `-032`)
+  states that honestly rather than forcing it under Rogue Agents. Coverage is unchanged
+  (`judge_or_org`).
+
+### Taxonomy (axis set unchanged; `taxonomy_version` stays `1.2`)
+- **`INSTRUMENTAL_MANIPULATION` graduates from emerging (`†`) to a concrete `confusion_vector`**,
+  because `ARE-2026-033` is the first real incident catalogued under it (the governance rule that
+  a pre-registered class graduates once an incident surfaces). It adds and removes no axis member,
+  so the pinned axis set, and `taxonomy_version`, is unchanged.
+- Corrected the stale "currently 1.0" version note in `TAXONOMY.md` to `1.2`.
+
+### Data
+- `total` 32 → 33, `sourced` 32 → 33, `agentx_out_of_scope` 6 → 7. No id was reused, renamed, or
+  removed; every prior citation still resolves. `generate.py` re-renders `ARE-2026-026.md` (the
+  re-map) and adds `ARE-2026-033.md`; every other page is byte-identical.
+
 ## [1.2.0] - 2026-07-14
 
 ### Changed (schema, BREAKING for machine consumers pinned to taxonomy 1.1)

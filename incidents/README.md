@@ -27,10 +27,11 @@
 | [ARE-2026-023](ARE-2026-023.md) | Hidden-instruction smuggling via invisible-Unicode carriers (Operation Pale Fire) | `ASI01` | Yes | covered |
 | [ARE-2026-024](ARE-2026-024.md) | Destructive operation against the wrong environment (ERP reflection brittleness) | `ASI02` | Yes | partial |
 | [ARE-2026-025](ARE-2026-025.md) | Conversational no-progress loop (the Polite Loop) | `ASI08` | gateway | partial |
-| [ARE-2026-026](ARE-2026-026.md) | False success reporting against real exit status (the 'tests passed' lie) | `ASI10` | - | judge/org |
+| [ARE-2026-026](ARE-2026-026.md) | False success reporting against real exit status (the 'tests passed' lie) | `Reliability` | - | judge/org |
 | [ARE-2026-027](ARE-2026-027.md) | Fabricated citations in generated output (Deloitte report) | `Reliability` | - | out-of-scope |
 | [ARE-2026-028](ARE-2026-028.md) | Fabricated policy stated as fact (Air Canada chatbot) | `ASI09` | - | out-of-scope |
 | [ARE-2026-029](ARE-2026-029.md) | Manipulative behavioral drift (Sydney chatbot) | `ASI10` | - | out-of-scope |
 | [ARE-2026-030](ARE-2026-030.md) | Action on stale lineage data (stale lineage hallucination) | `ASI06` | - | out-of-scope |
 | [ARE-2026-031](ARE-2026-031.md) | Conflicting state between cooperating agents (A2A state conflicts) | `ASI07` | - | out-of-scope |
 | [ARE-2026-032](ARE-2026-032.md) | Fabricated legal precedents (Morgan & Morgan) | `Reliability` | - | out-of-scope |
+| [ARE-2026-033](ARE-2026-033.md) | Autonomous sandbox escape and third-party breach to win a benchmark (OpenAI ExploitGym / Hugging Face) | `ASI10` | - | out-of-scope |

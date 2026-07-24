@@ -59,7 +59,7 @@ def status_banner(inc):
 
 # OWASP ASI mapping. Each entry leads with its OWASP Agentic Security Initiative
 # category (the industry taxonomy AREDB indexes onto; see RELATION-TO-STANDARDS.md).
-# RELIABILITY = a non-ASI reliability failure (output hallucination), owned by
+# RELIABILITY = a non-ASI reliability failure (output hallucination or false completion), owned by
 # eval/observability, kept as an honest boundary exemplar.
 ASI_LABEL = {
     "ASI01": "ASI01 Goal Hijack",

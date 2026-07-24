@@ -22,7 +22,7 @@ Whether a mode is deterministically coverable, judge/org, or out-of-scope is a p
 
 ## Axis 2: confusion_vector (why it broke)
 
-`DESTRUCTIVE_SCOPE_MISREAD`, `HALLUCINATED_RESOURCE`, `ENVIRONMENT_CONFUSION`, `GOAL_COMPLETION_BLINDNESS`, `COST_EXPLOSION_LOOP`, `UNAUTHORIZED_SCOPE_EXPANSION`, `CONTEXT_STALENESS`, `OUTPUT_FABRICATION`, plus the emerging vectors †`EMERGENT_OPTIMIZATION` (agents optimize into a harmful joint equilibrium no one instructed), †`TEMPORAL_DRIFT` (behaviour degrades or shifts over a long horizon), †`SITUATIONAL_DECEPTION` (behaves differently when it detects it is observed), †`INSTRUMENTAL_MANIPULATION` (manipulates a human or system as a means to a goal), †`TOOL_CONFUSION` (misjudges which tool or capability the task needs).
+`DESTRUCTIVE_SCOPE_MISREAD`, `HALLUCINATED_RESOURCE`, `ENVIRONMENT_CONFUSION`, `GOAL_COMPLETION_BLINDNESS`, `COST_EXPLOSION_LOOP`, `UNAUTHORIZED_SCOPE_EXPANSION`, `CONTEXT_STALENESS`, `OUTPUT_FABRICATION`, `INSTRUMENTAL_MANIPULATION` (manipulates a human or system as a means to a goal), plus the emerging vectors †`EMERGENT_OPTIMIZATION` (agents optimize into a harmful joint equilibrium no one instructed), †`TEMPORAL_DRIFT` (behaviour degrades or shifts over a long horizon), †`SITUATIONAL_DECEPTION` (behaves differently when it detects it is observed), †`TOOL_CONFUSION` (misjudges which tool or capability the task needs).
 
 Example: Replit (`ARE-2026-001`) is `DESTRUCTIVE_ACTION` x `DESTRUCTIVE_SCOPE_MISREAD`; the 25,000-document wipe (`ARE-2026-003`) is the same failure mode x `ENVIRONMENT_CONFUSION`. Same action, different confusion.
 
@@ -77,7 +77,7 @@ Two governance rules keep it a classification rather than a grab-bag:
 1. **The ARE Numbering Authority (AgentX-Core) governs additions.** Proposing a new class is a pull request; assigning it is the registrar's call.
 2. **No coverage claim attaches to an emerging class** until a real incident is catalogued under it and its coverage is honestly flagged. A pre-registered class is a slot, not a claim.
 
-The internal classification carries a version (`taxonomy_version` in [`data/incidents.yaml`](data/incidents.yaml), currently **1.0**) so downstream consumers can pin against a known set of axes. Adding a `failure_mode` or `confusion_vector` increments it and is recorded in [the changelog](CHANGELOG.md).
+The internal classification carries a version (`taxonomy_version` in [`data/incidents.yaml`](data/incidents.yaml), currently **1.2**) so downstream consumers can pin against a known set of axes. Adding a `failure_mode` or `confusion_vector` increments it and is recorded in [the changelog](CHANGELOG.md).
 
 ## Coverage-claim legend
 
