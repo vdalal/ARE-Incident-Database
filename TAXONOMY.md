@@ -18,7 +18,7 @@ The failure-mode space, grouped. Modes marked **†emerging** are anticipated cl
 - **Alignment & content** (model-owned): `MODEL_ALIGNMENT`, †`DECEPTIVE_ALIGNMENT` (aligned when observed, not otherwise), `CONTENT_SAFETY`, `OUTPUT_HALLUCINATION`, `CLASSIFICATION_QUALITY`, `MULTIMODAL_QUALITY`, `MODEL_INTERNALS`
 - **Process:** `WORKFLOW_GOVERNANCE`, `DATA_FRESHNESS`, `SDLC_CICD`
 
-Whether a mode is deterministically coverable, judge/org, or out-of-scope is a property of the specific incident (recorded per entry as its coverage flag), not of the mode itself.
+Whether a mode is deterministically coverable, judge/org, or out-of-scope is a property of the specific incident (recorded per entry as its `coverage_class`: `action_coverable`, `needs_judge_or_org`, or `out_of_scope`), not of the mode itself.
 
 ## Axis 2: confusion_vector (why it broke)
 
@@ -77,7 +77,7 @@ Two governance rules keep it a classification rather than a grab-bag:
 1. **The ARE Numbering Authority (AgentX-Core) governs additions.** Proposing a new class is a pull request; assigning it is the registrar's call.
 2. **No coverage claim attaches to an emerging class** until a real incident is catalogued under it and its coverage is honestly flagged. A pre-registered class is a slot, not a claim.
 
-This classification carries a version (`taxonomy_version` in [`data/incidents.yaml`](data/incidents.yaml), currently **1.3**) so downstream consumers can pin against a known set of axes. Adding a `failure_mode` or `confusion_vector` increments it and is recorded in [the changelog](CHANGELOG.md).
+This classification carries a version (`taxonomy_version` in [`data/incidents.yaml`](data/incidents.yaml), currently **1.3**) so downstream consumers can pin against a known schema. Adding a `failure_mode` or `confusion_vector`, or otherwise changing the entry field schema (as the 1.3 addition of the neutral `coverage_class` field did), increments it and is recorded in [the changelog](CHANGELOG.md).
 
 ## Coverage-claim legend
 

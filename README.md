@@ -21,7 +21,8 @@ Every count here is a registry fact about the incidents. It is not a claim that 
 | | Count |
 |---|---|
 | Total incidents | **33** |
-| Each mapped to an OWASP ASI category | **33** |
+| Mapped to an OWASP ASI category (ASI01-10) | **30** |
+| Non-ASI reliability failures (the Reliability bucket) | **3** |
 | **Action-coverable** (manifests as an inspectable tool call; addressable at the action layer) | **25** |
 | **Needs a judge or org ground truth** (no deterministic action-layer block) | **1** |
 | **Out of scope for the action layer** (owned by another discipline) | **7** |

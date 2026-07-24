@@ -34,6 +34,23 @@ COVERAGE_CLASS_LABEL = {
     "out_of_scope": "Out of scope for the action layer -- owned by another discipline (environmental isolation, model alignment, content safety, and the like).",
 }
 
+# Index-only presentation per coverage class. Kept beside the label dicts and key-checked at
+# import (below) so a class added to the labels but not here fails LOUDLY at startup rather
+# than KeyError-ing mid-regen on a user's machine.
+INDEX_ORDER = {"action_coverable": 0, "needs_judge_or_org": 1, "out_of_scope": 2}
+INDEX_BADGE = {
+    "action_coverable": "action-coverable",
+    "needs_judge_or_org": "needs judge/org",
+    "out_of_scope": "out-of-scope",
+}
+
+# One key set for the coverage classes: every class dict must carry exactly the same keys.
+assert set(COVERAGE_CLASS_SHORT) == set(COVERAGE_CLASS_LABEL) == set(INDEX_ORDER) == set(INDEX_BADGE), (
+    "coverage-class dicts are out of sync: "
+    + repr({"short": sorted(COVERAGE_CLASS_SHORT), "label": sorted(COVERAGE_CLASS_LABEL),
+            "order": sorted(INDEX_ORDER), "badge": sorted(INDEX_BADGE)})
+)
+
 # VENDOR-CLAIM label: how one vendor's claim reads. NOT a registry finding. Rendered only in
 # the fenced vendor section.
 COVERAGE_LABEL = {
@@ -42,6 +59,18 @@ COVERAGE_LABEL = {
     "judge_or_org": "Judge / org-policy -- needs an LLM judge or the org's ground truth",
     "out_of_scope": "Out of scope for an action firewall -- owned by another discipline",
 }
+
+# Valid values for the namespaced vendor CLAIM fields. A block claim (covered/partial) is the
+# only kind that renders a vendor section + repro; the other two are non-claims.
+VENDOR_COVERAGE_VALUES = {"covered", "partial", "judge_or_org", "out_of_scope"}
+VENDOR_BLOCK_CLAIMS = {"covered", "partial"}
+VENDOR_CHECK_VALUES = {"keyless_pip", "gateway_wired"}
+
+# The renderer understands only the maintainer's `agentx_` namespace today. The schema INVITES
+# other vendors (CONTRIBUTING.md), but rendering a second vendor needs schema the repo does not
+# yet carry (a namespaced repro, a vendor URL/label). Until that lands, a second vendor's claim
+# must FAIL LOUD in validate() rather than be silently dropped from the page.
+SUPPORTED_VENDORS = {"agentx"}
 
 # Entry standing. `confirmed` is the silent default (an entry omits `status`); a
 # `disputed` or `withdrawn` entry is MARKED in place and keeps its id forever, never
@@ -258,13 +287,7 @@ def vendor_claims_cell(inc):
 
 
 def render_index(incidents):
-    order = {"action_coverable": 0, "needs_judge_or_org": 1, "out_of_scope": 2}
-    badge = {
-        "action_coverable": "action-coverable",
-        "needs_judge_or_org": "needs judge/org",
-        "out_of_scope": "out-of-scope",
-    }
-    rows = sorted(incidents, key=lambda i: (order[coverage_class(i)], i["id"]))
+    rows = sorted(incidents, key=lambda i: (INDEX_ORDER[coverage_class(i)], i["id"]))
     out = ["# AREDB incidents (index)", "",
            "Each incident is a registry fact: what happened, its OWASP ASI category, and the "
            "control architecture it requires (its coverage class). Whether a specific product "
@@ -282,15 +305,117 @@ def render_index(incidents):
         asi = "Reliability" if asi == "RELIABILITY" else asi
         out.append(
             f"| [{i['id']}]({i['id']}.md) | {title} | "
-            f"`{asi}` | {badge[coverage_class(i)]} | {vendor_claims_cell(i)} |"
+            f"`{asi}` | {INDEX_BADGE[coverage_class(i)]} | {vendor_claims_cell(i)} |"
         )
     out.append("")
     return "\n".join(out)
 
 
+def vendor_prefixes(inc):
+    """Every vendor namespace on an entry, discovered from its `<prefix>_coverage` keys."""
+    return sorted(k[: -len("_coverage")] for k in inc if k.endswith("_coverage"))
+
+
+def repro_call_for(inc, prefix):
+    """The runnable repro for a vendor's keyless claim. The maintainer's (agentx) repro is the
+    historical un-namespaced `repro_call`; a future vendor would namespace it `<prefix>_repro_call`."""
+    if prefix == "agentx":
+        return inc.get("repro_call")
+    return inc.get(f"{prefix}_repro_call")
+
+
+def validate(doc):
+    """Fail loud, and BEFORE any file is written, on anything that would render a wrong,
+    contradictory, or partial page.
+
+    The pre-1.3 single-field code got this for free: an unconditional `COVERAGE_LABEL[agentx_coverage]`
+    subscript KeyError-ed on any bad value. Splitting the neutral `coverage_class` fact from the
+    per-vendor claim removed that safety net and, because the two are stored independently, added a
+    new way to be inconsistent. This restores the loud posture and adds the checks the split needs:
+
+      * `coverage_class` present and valid.
+      * each vendor claim present and valid; only supported vendor namespaces (renderer can't drop one).
+      * a block claim (covered/partial) must be consistent with an action-coverable class, and must
+        ship a valid check + response (+ a repro for a keyless claim) -- no fabricated delivery line.
+      * a non-coverable class must name an owner (the 'Who owns it' section cannot be blank).
+      * the meta rollups must equal the real per-entry counts.
+
+    Raises SystemExit listing every problem, so a contributor fixes them in one pass and the
+    filesystem is never touched on bad input.
+    """
+    incidents = doc["incidents"]
+    meta = doc.get("meta", {})
+    errors = []
+
+    for inc in incidents:
+        eid = inc.get("id", "<no id>")
+        cc = inc.get("coverage_class")
+        if cc not in COVERAGE_CLASS_LABEL:
+            errors.append(f"{eid}: coverage_class {cc!r} missing/invalid (use {sorted(COVERAGE_CLASS_LABEL)})")
+
+        for p in vendor_prefixes(inc):
+            if p not in SUPPORTED_VENDORS:
+                errors.append(
+                    f"{eid}: vendor claim {p!r} present, but the renderer supports only "
+                    f"{sorted(SUPPORTED_VENDORS)} today -- extend vendor_section()/vendor_claims_cell() "
+                    f"(and add a namespaced repro/label to the schema) before adding a second vendor."
+                )
+            cov = inc.get(f"{p}_coverage")
+            if cov not in VENDOR_COVERAGE_VALUES:
+                errors.append(f"{eid}: {p}_coverage {cov!r} invalid (use {sorted(VENDOR_COVERAGE_VALUES)})")
+                continue
+            if cov in VENDOR_BLOCK_CLAIMS:
+                if cc in COVERAGE_CLASS_LABEL and cc != "action_coverable":
+                    errors.append(
+                        f"{eid}: {p}_coverage={cov} claims a deterministic block, but coverage_class={cc} "
+                        f"-- a block claim requires coverage_class action_coverable"
+                    )
+                chk = inc.get(f"{p}_check")
+                if chk not in VENDOR_CHECK_VALUES:
+                    errors.append(f"{eid}: {p}_coverage={cov} but {p}_check {chk!r} invalid (use {sorted(VENDOR_CHECK_VALUES)})")
+                if not (inc.get(f"{p}_response") or "").strip():
+                    errors.append(f"{eid}: {p}_coverage={cov} but {p}_response is empty")
+                if chk == "keyless_pip" and not repro_call_for(inc, p):
+                    errors.append(f"{eid}: {p} is keyless_pip but has no repro_call to render")
+
+        if cc in ("needs_judge_or_org", "out_of_scope") and not (inc.get("owned_by") or "").strip():
+            errors.append(f"{eid}: coverage_class={cc} but owned_by is empty (the 'Who owns it' section would be blank)")
+
+    # Meta rollups must equal the real counts. Only keys actually present in meta are checked, so
+    # this never demands a rollup the file does not carry.
+    ax = {}
+    cc_counts = {}
+    for i in incidents:
+        cc_counts[i.get("coverage_class")] = cc_counts.get(i.get("coverage_class"), 0) + 1
+        ax[i.get("agentx_coverage")] = ax.get(i.get("agentx_coverage"), 0) + 1
+    expected = {
+        "total": len(incidents),
+        "sourced": sum(1 for i in incidents if (i.get("source") or "").strip()),
+        "disputed": sum(1 for i in incidents if i.get("status") == "disputed"),
+        "withdrawn": sum(1 for i in incidents if i.get("status") == "withdrawn"),
+        "action_coverable": cc_counts.get("action_coverable", 0),
+        "needs_judge_or_org": cc_counts.get("needs_judge_or_org", 0),
+        "out_of_scope": cc_counts.get("out_of_scope", 0),
+        "agentx_covered": ax.get("covered", 0),
+        "agentx_partial": ax.get("partial", 0),
+        "agentx_judge_or_org": ax.get("judge_or_org", 0),
+        "agentx_out_of_scope": ax.get("out_of_scope", 0),
+        "agentx_coverable": ax.get("covered", 0) + ax.get("partial", 0),
+    }
+    for key, want in expected.items():
+        if key in meta and meta[key] != want:
+            errors.append(f"meta.{key} = {meta[key]!r} but the real count is {want}")
+
+    if errors:
+        raise SystemExit(
+            "data/incidents.yaml failed validation (no pages were written):\n  - " + "\n  - ".join(errors)
+        )
+
+
 def main():
     with open(DATA, encoding="utf-8") as f:
         doc = yaml.safe_load(f)
+    validate(doc)  # fail loud BEFORE any filesystem mutation (orphan removal or page writes)
     incidents = doc["incidents"]
     os.makedirs(OUT, exist_ok=True)
     # Remove incident pages whose entry is no longer in the yaml, so the folder never
