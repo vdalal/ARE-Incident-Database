@@ -1,6 +1,6 @@
 # How AREDB relates to OWASP ASI, CVE, and CWE
 
-Short version: **OWASP ASI is the weakness taxonomy; AREDB is the incident registry and the proof of what stops each one.** We index onto the established standards. We do not compete with them.
+Short version: **OWASP ASI is the weakness taxonomy; AREDB is the incident registry underneath it.** AREDB indexes onto the established standards. It does not compete with them.
 
 ## OWASP ASI is the map. AREDB is the incidents plus the patch.
 
@@ -8,18 +8,18 @@ The OWASP Agentic Security Initiative's **Top 10 for Agentic Applications (ASI01
 
 AREDB sits one layer down, where CVE sits under CWE. For each real, cited incident it answers the two questions a category cannot:
 1. **Did this actually happen, to whom, with what blast radius** (a specific event, not a risk class), and
-2. **Is it deterministically preventable today, and here is the one-line repro that proves it.**
+2. **Which control architecture it requires**, and, where a vendor claims coverage, a one-line repro that proves the claim.
 
-So every AREDB entry carries its **OWASP ASI id**. Read them together: ASI names the risk, AREDB is the incident under it and the proof of coverage. `ARE-2026-001` (the Replit production-database wipe) is an instance of **ASI02 Tool Misuse**, and it ships a keyless `pip` repro that blocks it.
+So every AREDB entry carries its **OWASP ASI id**. Read them together: ASI names the risk, AREDB is the incident under it. `ARE-2026-001` (the Replit production-database wipe) is an instance of **ASI02 Tool Misuse**, classified `action-coverable`; the maintainer's vendor claim against it ships a keyless `pip` repro on the entry page.
 
-## What we deterministically cover, and what we do not (the honest part)
+## What the action layer can address, and what it cannot (the honest part)
 
-AgentX is a deterministic action firewall: it intercepts the tool call before it executes. That structurally covers the ASI categories that manifest as an *action*, and structurally does not cover the ones that require judging content, memory, or behavior. We say so out loud:
+An action layer intercepts a tool call before it executes. That structurally addresses the ASI categories that manifest as an *action*, and structurally does not address the ones that require judging content, memory, or behavior. AREDB states the boundary out loud, independent of any product:
 
-- **Covered at the action layer** (cited incidents + repros in this database): **ASI01** Goal Hijack, **ASI02** Tool Misuse, **ASI03** Identity & Privilege Abuse, **ASI04** Supply Chain Compromise, **ASI05** Unexpected Code Execution, **ASI08** Cascading Agent Failures.
-- **Not an action-firewall problem** (use an LLM judge, observability, or governance): **ASI06** Memory & Context Poisoning, **ASI07** Insecure Inter-Agent Communication, **ASI09** Human-Agent Trust Exploitation, **ASI10** Rogue Agents.
+- **Manifests as an action** (cited incidents classified `action-coverable` in this registry): **ASI01** Goal Hijack, **ASI02** Tool Misuse, **ASI03** Identity & Privilege Abuse, **ASI04** Supply Chain Compromise, **ASI05** Unexpected Code Execution, **ASI08** Cascading Agent Failures.
+- **Not an action-interception problem** (owned by an LLM judge, observability, environmental isolation, or governance): **ASI06** Memory & Context Poisoning, **ASI07** Insecure Inter-Agent Communication, **ASI09** Human-Agent Trust Exploitation, **ASI10** Rogue Agents.
 
-A firewall that claimed all ten would be lying. The four we name are owned by other disciplines, and pretending otherwise is exactly the snake oil AREDB exists to counter.
+A tool that claimed all ten would be lying. The categories in the second group are owned by other disciplines, and pretending otherwise is exactly the snake oil AREDB exists to counter.
 
 ## CVE and CWE
 
@@ -27,4 +27,4 @@ Where an incident's root cause is a specific disclosed vulnerability, the entry 
 
 ## In one line
 
-OWASP ASI catalogs the agentic weakness classes, CVE catalogs the specific software vulnerabilities, and AREDB is the registry of real agent-failure incidents mapped onto both, each flagged with whether a deterministic action firewall stops it and a repro that proves it.
+OWASP ASI catalogs the agentic weakness classes, CVE catalogs the specific software vulnerabilities, and AREDB is the registry of real agent-failure incidents mapped onto both, each classified by the control architecture it requires, with any vendor coverage claim recorded and marked as a claim.

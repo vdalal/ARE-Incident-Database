@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-generate.py -- render one Markdown page per incident from data/incidents.yaml,
+"""generate.py -- render one Markdown page per incident from data/incidents.yaml,
 plus an index, for the ARE Incident Database (AREDB).
 
 MIT License. Copyright (c) 2026 AgentX-Core.
@@ -8,6 +7,12 @@ MIT License. Copyright (c) 2026 AgentX-Core.
 Usage:  python generate.py
 Reads:  data/incidents.yaml
 Writes: incidents/ARE-YYYY-NNN.md (one per incident) + incidents/README.md (index)
+
+Neutrality is structural, not editorial. A page's body is registry FACTS only: what
+happened, the blast radius, the OWASP ASI category, and the neutral coverage_class (the
+control architecture the failure requires). Any vendor's claim that its product stops the
+failure is rendered in a separate, fenced "Vendor coverage claims" section, attributed and
+namespaced, and only where a claim actually exists. The registry does not endorse it.
 """
 import os
 import yaml
@@ -16,6 +21,21 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(HERE, "data", "incidents.yaml")
 OUT = os.path.join(HERE, "incidents")
 
+# NEUTRAL registry classification: which control architecture the failure requires. A
+# structural fact about the incident, independent of any product. Header (short) + body (full).
+COVERAGE_CLASS_SHORT = {
+    "action_coverable": "Action-coverable",
+    "needs_judge_or_org": "Needs judge/org",
+    "out_of_scope": "Out of scope",
+}
+COVERAGE_CLASS_LABEL = {
+    "action_coverable": "Action-coverable -- the failure manifests as an inspectable tool call, so an action-layer control can address it.",
+    "needs_judge_or_org": "Needs a judge or the org's ground truth -- there is no deterministic action-layer block; an LLM judge or the organisation's own truth is required.",
+    "out_of_scope": "Out of scope for the action layer -- owned by another discipline (environmental isolation, model alignment, content safety, and the like).",
+}
+
+# VENDOR-CLAIM label: how one vendor's claim reads. NOT a registry finding. Rendered only in
+# the fenced vendor section.
 COVERAGE_LABEL = {
     "covered": "Covered -- blocked deterministically today",
     "partial": "Partial -- honest scope stated below",
@@ -35,7 +55,7 @@ STATUS_LABEL = {
 
 def entry_status(inc):
     """Validated status for an incident; absent -> confirmed. Fail loud on a typo so a
-    bad value can never render as a silent confirmed (mirrors COVERAGE_LABEL's KeyError)."""
+    bad value can never render as a silent confirmed (mirrors the KeyError posture)."""
     status = inc.get("status", "confirmed")
     if status not in STATUS_LABEL:
         raise KeyError(
@@ -81,21 +101,25 @@ def asi_label(inc):
     return ASI_LABEL.get(v, v or "-")
 
 
-def layer0(inc, short=False):
-    r = inc.get("agentx_check")
-    if r == "keyless_pip":
-        return "Yes"
-    if r == "gateway_wired":
-        return "gateway" if short else "No (gateway)"
-    return "-"
+def coverage_class(inc):
+    """The neutral registry class. Fail loud on a missing/unknown value (mirrors the
+    COVERAGE_LABEL KeyError posture) so a bad entry cannot render a blank class."""
+    cc = inc.get("coverage_class")
+    if cc not in COVERAGE_CLASS_LABEL:
+        raise KeyError(
+            f"{inc['id']}: unknown coverage_class {cc!r} "
+            f"(use action_coverable|needs_judge_or_org|out_of_scope)"
+        )
+    return cc
 
 
 def ticket_header(inc):
-    """The exploit-ticket header: front-loads the two authority signals (OWASP ASI id
-    + whether the keyless Layer-0 shield reproduces it) so an entry reads like a
-    registry ticket, not a blog paragraph."""
+    """Registry ticket header: shared authority signals only. The OWASP ASI id (industry
+    taxonomy) and the neutral coverage class (which control architecture the failure
+    requires). No vendor field here: whether a specific product blocks it lives in the
+    fenced vendor section, never the header."""
     bits = [f"`{inc['id']}`", f"**OWASP ASI:** {asi_label(inc)}",
-            f"**AgentX check:** {layer0(inc)}"]
+            f"**Coverage class:** {COVERAGE_CLASS_SHORT[coverage_class(inc)]}"]
     if inc.get("severity"):
         bits.append(f"**Severity:** {inc['severity']}")
     return "> " + " &nbsp;·&nbsp; ".join(bits)
@@ -107,8 +131,7 @@ def repro_block(inc):
         call = inc.get("repro_call")
         if not call:
             # A keyless entry with no runnable call is a claim with no proof. Fail loud
-            # rather than quietly emitting the old prose-only "repro" (mirrors the
-            # COVERAGE_LABEL KeyError posture).
+            # rather than quietly emitting a prose-only "repro" (mirrors the KeyError posture).
             raise KeyError(f"{inc['id']}: agentx_check is keyless_pip but no repro_call to render")
         tool, param, action = call["tool"], call["param"], call["action"]
         payload = call["payload"]
@@ -128,10 +151,10 @@ def repro_block(inc):
         )
     if r == "gateway_wired":
         return (
-            "**Repro (gateway):** this block runs in the AgentX gateway, so it does "
+            "**Repro (gateway).** This block runs in the AgentX gateway, so it does "
             "not fire from a bare `pip install`. The gateway is free and self-serve: "
             "pull it at [agentx-core.com/gateway](https://agentx-core.com/gateway) and "
-            "run it locally to reproduce this entry.\n\n"
+            "run it locally to reproduce this claim.\n\n"
         )
     return ""
 
@@ -146,6 +169,38 @@ def field_line(inc):
     return " &nbsp;·&nbsp; ".join(bits)
 
 
+def vendor_section(inc):
+    """The fenced vendor-claims block. Rendered ONLY where a vendor actually claims a block
+    (covered/partial), so the boundary and judge pages stay purely neutral, with zero vendor
+    mention. Attributed and namespaced; the registry records the claim, it does not endorse it."""
+    cov = inc.get("agentx_coverage")
+    if cov not in ("covered", "partial"):
+        return ""
+    keyless = inc.get("agentx_check") == "keyless_pip"
+    delivery = ("from the keyless SDK (no key, no gateway)" if keyless
+                else "wired to the AgentX gateway")
+    out = [
+        "## Vendor coverage claims",
+        "",
+        "_Claims by vendors about their own products, not registry findings. The registry "
+        "records what was claimed, by whom, and whether the check still passes; it does not "
+        "rank or endorse vendors. Any vendor may add a claim under its own prefix; see "
+        "[CONTRIBUTING.md](../CONTRIBUTING.md)._",
+        "",
+        f"**AgentX Core** (the registry maintainer) claims: **{COVERAGE_LABEL[cov]}**, "
+        f"{delivery}. The full claim, including what it does not stop, is at "
+        f"[agentx-core.com/aredb](https://agentx-core.com/aredb).",
+        "",
+        inc["agentx_response"].strip(),
+        "",
+    ]
+    rb = repro_block(inc)
+    if rb:
+        out.append(rb.strip())
+        out.append("")
+    return "\n".join(out)
+
+
 def render(inc):
     lines = []
     lines.append(f"# {inc['id']}: {inc['title']}")
@@ -158,7 +213,7 @@ def render(inc):
     lines.append("")
     lines.append(field_line(inc))
     lines.append("")
-    lines.append(f"**Coverage claim (AgentX Core, the maintainer):** {COVERAGE_LABEL[inc['agentx_coverage']]}")
+    lines.append(f"**Coverage class:** {COVERAGE_CLASS_LABEL[coverage_class(inc)]}")
     lines.append("")
     lines.append("## What happened")
     lines.append("")
@@ -169,18 +224,9 @@ def render(inc):
         lines.append("")
         lines.append(inc["blast_radius"].strip())
         lines.append("")
-    if inc["agentx_coverage"] in ("covered", "partial"):
-        lines.append("## How AgentX Core responds")
-        lines.append("")
-        lines.append("_A vendor claim by the registry's maintainer, not a registry finding. It ships a check you can run; see below._")
-        lines.append("")
-        lines.append(inc["agentx_response"].strip())
-        lines.append("")
-        rb = repro_block(inc)
-        if rb:
-            lines.append(rb.strip())
-            lines.append("")
-    else:
+    # For failures the action layer does not deterministically cover, name the discipline that
+    # does. A neutral registry fact, not a vendor claim.
+    if coverage_class(inc) in ("needs_judge_or_org", "out_of_scope"):
         lines.append("## Who owns it")
         lines.append("")
         lines.append((inc.get("owned_by") or "").strip())
@@ -189,20 +235,43 @@ def render(inc):
     lines.append("")
     lines.append(f"<{inc['source']}>")
     lines.append("")
+    # Vendor coverage claims: fenced and separated from the registry facts above by a rule,
+    # rendered only where a vendor actually claims a block.
+    vs = vendor_section(inc)
+    if vs:
+        lines.append("---")
+        lines.append("")
+        lines.append(vs.strip())
+        lines.append("")
     return "\n".join(lines)
 
 
+def vendor_claims_cell(inc):
+    """Compact index cell: which vendor(s) claim this entry, clearly labelled as claims.
+    Only AgentX Core claims today; another vendor would appear here on the same terms."""
+    cov = inc.get("agentx_coverage")
+    if cov == "covered":
+        return "AgentX (keyless)" if inc.get("agentx_check") == "keyless_pip" else "AgentX (gateway)"
+    if cov == "partial":
+        return "AgentX (partial)"
+    return "-"
+
+
 def render_index(incidents):
-    order = {"covered": 0, "partial": 1, "judge_or_org": 2, "out_of_scope": 3}
+    order = {"action_coverable": 0, "needs_judge_or_org": 1, "out_of_scope": 2}
     badge = {
-        "covered": "covered",
-        "partial": "partial",
-        "judge_or_org": "judge/org",
+        "action_coverable": "action-coverable",
+        "needs_judge_or_org": "needs judge/org",
         "out_of_scope": "out-of-scope",
     }
-    rows = sorted(incidents, key=lambda i: (order[i["agentx_coverage"]], i["id"]))
+    rows = sorted(incidents, key=lambda i: (order[coverage_class(i)], i["id"]))
     out = ["# AREDB incidents (index)", "",
-           "| ID | Incident | OWASP ASI | AgentX check | AgentX coverage claim |",
+           "Each incident is a registry fact: what happened, its OWASP ASI category, and the "
+           "control architecture it requires (its coverage class). Whether a specific product "
+           "stops it is a vendor claim, shown in the last column and detailed, attributed, on "
+           "each entry's page.",
+           "",
+           "| ID | Incident | OWASP ASI | Coverage class | Vendor claims |",
            "|---|---|---|---|---|"]
     for i in rows:
         # A disputed/withdrawn entry stays in the index (id never disappears) but is
@@ -213,7 +282,7 @@ def render_index(incidents):
         asi = "Reliability" if asi == "RELIABILITY" else asi
         out.append(
             f"| [{i['id']}]({i['id']}.md) | {title} | "
-            f"`{asi}` | {layer0(i, short=True)} | {badge[i['agentx_coverage']]} |"
+            f"`{asi}` | {badge[coverage_class(i)]} | {vendor_claims_cell(i)} |"
         )
     out.append("")
     return "\n".join(out)

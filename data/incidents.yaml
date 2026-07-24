@@ -13,7 +13,15 @@
 #
 # REGISTRY fields (facts about the incident; true regardless of who reads them):
 #   id, title, severity, failure_mode, confusion_vector, surface, owasp_asi, source,
-#   what_happened, blast_radius
+#   what_happened, blast_radius, owned_by
+#   coverage_class:  action_coverable | needs_judge_or_org | out_of_scope
+#            The control ARCHITECTURE the failure requires. A structural property of the
+#            incident, NOT a claim that any product stops it. `action_coverable` = the failure
+#            manifests as an inspectable tool call, so an action-layer control can address it;
+#            `needs_judge_or_org` = it needs an LLM judge or the org's ground truth, with no
+#            deterministic action-layer block; `out_of_scope` = owned by another discipline
+#            entirely (environmental isolation, model alignment, content safety). Whether a
+#            SPECIFIC vendor actually blocks it is a vendor claim (below), never this field.
 #   status:  confirmed (default, omit) | disputed | withdrawn
 #            A disputed/withdrawn entry keeps its id FOREVER (never reused, never removed) and
 #            is marked on its page and in the index, so a citation always resolves. GOVERNANCE.md.
@@ -37,7 +45,7 @@
 meta:
   name: ARE Incident Database
   discipline: Agent Reliability Engineering (ARE)
-  taxonomy_version: "1.2"   # schema version; consumers pin against it. See CHANGELOG.md.
+  taxonomy_version: "1.3"   # schema version; consumers pin against it. See CHANGELOG.md.
   license: CC-BY-4.0
 
   # REGISTRY facts. True regardless of who is reading, and not a claim about any product.
@@ -45,6 +53,12 @@ meta:
   disputed: 0            # marked-disputed entries (id retained); see GOVERNANCE.md
   withdrawn: 0           # marked-withdrawn entries (id retained)
   sourced: 33            # entries carrying a public, checkable source. That is the entry bar.
+
+  # REGISTRY coverage-class rollups: architectural facts about the incidents (which control
+  # architecture each requires), NOT a claim that any product stops them.
+  action_coverable: 25   # manifest as an inspectable action; an action-layer control can address them
+  needs_judge_or_org: 1  # need an LLM judge or the org's ground truth; no deterministic action-layer block
+  out_of_scope: 7        # owned by another discipline entirely (isolation, alignment, content safety)
 
   # VENDOR-CLAIM rollups: AgentX Core's coverage OF this registry. NOT registry findings.
   # Namespaced for the same reason the per-entry fields are (see the header): unqualified
@@ -71,6 +85,7 @@ incidents:
     surface: database
     agentx_coverage: covered
     owasp_asi: ASI02
+    coverage_class: action_coverable   # REGISTRY fact: control architecture the failure requires
     agentx_check: keyless_pip
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
@@ -101,6 +116,7 @@ incidents:
     surface: cloud-api
     agentx_coverage: covered
     owasp_asi: ASI02
+    coverage_class: action_coverable   # REGISTRY fact: control architecture the failure requires
     agentx_check: gateway_wired
     what_happened: >-
       An AI agent with cloud credentials tore down a production environment in about nine
@@ -124,6 +140,7 @@ incidents:
     surface: filesystem
     agentx_coverage: covered
     owasp_asi: ASI02
+    coverage_class: action_coverable   # REGISTRY fact: control architecture the failure requires
     agentx_check: keyless_pip
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
@@ -153,6 +170,7 @@ incidents:
     surface: filesystem + network
     agentx_coverage: covered
     owasp_asi: ASI03
+    coverage_class: action_coverable   # REGISTRY fact: control architecture the failure requires
     agentx_check: keyless_pip
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
@@ -182,6 +200,7 @@ incidents:
     surface: egress
     agentx_coverage: covered
     owasp_asi: ASI01
+    coverage_class: action_coverable   # REGISTRY fact: control architecture the failure requires
     agentx_check: keyless_pip
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
@@ -210,6 +229,7 @@ incidents:
     surface: filesystem
     agentx_coverage: covered
     owasp_asi: ASI02
+    coverage_class: action_coverable   # REGISTRY fact: control architecture the failure requires
     agentx_check: keyless_pip
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
@@ -239,6 +259,7 @@ incidents:
     surface: shell
     agentx_coverage: covered
     owasp_asi: ASI05
+    coverage_class: action_coverable   # REGISTRY fact: control architecture the failure requires
     agentx_check: keyless_pip
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
@@ -266,6 +287,7 @@ incidents:
     surface: http
     agentx_coverage: covered
     owasp_asi: ASI02
+    coverage_class: action_coverable   # REGISTRY fact: control architecture the failure requires
     agentx_check: gateway_wired
     what_happened: >-
       An agent issued a cluster-wide delete against a search cluster over its REST API.
@@ -285,6 +307,7 @@ incidents:
     surface: comms
     agentx_coverage: covered
     owasp_asi: ASI02
+    coverage_class: action_coverable   # REGISTRY fact: control architecture the failure requires
     agentx_check: gateway_wired
     what_happened: >-
       An agent wiped an entire mailbox.
@@ -306,6 +329,7 @@ incidents:
     surface: transaction
     agentx_coverage: covered
     owasp_asi: ASI02
+    coverage_class: action_coverable   # REGISTRY fact: control architecture the failure requires
     agentx_check: gateway_wired
     what_happened: >-
       An agent moved roughly $450,000 in a value transfer that should have paused for a
@@ -328,6 +352,7 @@ incidents:
     surface: package-install
     agentx_coverage: covered
     owasp_asi: ASI04
+    coverage_class: action_coverable   # REGISTRY fact: control architecture the failure requires
     agentx_check: gateway_wired
     what_happened: >-
       An agent installed a package that rode a famous name, a hallucinated or
@@ -352,6 +377,7 @@ incidents:
     surface: publish
     agentx_coverage: covered
     owasp_asi: ASI02
+    coverage_class: action_coverable   # REGISTRY fact: control architecture the failure requires
     agentx_check: gateway_wired
     what_happened: >-
       An agent autonomously published a public hit piece.
@@ -372,6 +398,7 @@ incidents:
     surface: fetch-url
     agentx_coverage: covered
     owasp_asi: ASI02
+    coverage_class: action_coverable   # REGISTRY fact: control architecture the failure requires
     agentx_check: keyless_pip
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
@@ -399,6 +426,7 @@ incidents:
     surface: shell
     agentx_coverage: covered
     owasp_asi: ASI08
+    coverage_class: action_coverable   # REGISTRY fact: control architecture the failure requires
     agentx_check: gateway_wired
     what_happened: >-
       An agent repeated the same command in a loop, burning around 50,000 tokens.
@@ -419,6 +447,7 @@ incidents:
     surface: budget-meter
     agentx_coverage: covered
     owasp_asi: ASI08
+    coverage_class: action_coverable   # REGISTRY fact: control architecture the failure requires
     agentx_check: gateway_wired
     what_happened: >-
       An agent ran up about $120 over eight hours with no single unsafe call.
@@ -439,6 +468,7 @@ incidents:
     surface: budget-meter
     agentx_coverage: covered
     owasp_asi: ASI08
+    coverage_class: action_coverable   # REGISTRY fact: control architecture the failure requires
     agentx_check: gateway_wired
     what_happened: >-
       A 50-step runaway loop crossed the cost ceiling fast.
@@ -458,6 +488,7 @@ incidents:
     surface: budget-meter
     agentx_coverage: covered
     owasp_asi: ASI08
+    coverage_class: action_coverable   # REGISTRY fact: control architecture the failure requires
     agentx_check: gateway_wired
     what_happened: >-
       A swarm of agents ran away on a shared budget, each staying under its own ceiling.
@@ -477,6 +508,7 @@ incidents:
     surface: shell
     agentx_coverage: covered
     owasp_asi: ASI03
+    coverage_class: action_coverable   # REGISTRY fact: control architecture the failure requires
     agentx_check: gateway_wired
     what_happened: >-
       Hitting a permission error, an agent escalated through sudo and scripting to
@@ -498,6 +530,7 @@ incidents:
     surface: egress + shell
     agentx_coverage: covered
     owasp_asi: ASI01
+    coverage_class: action_coverable   # REGISTRY fact: control architecture the failure requires
     agentx_check: keyless_pip
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
@@ -526,6 +559,7 @@ incidents:
     surface: fetch-url
     agentx_coverage: covered
     owasp_asi: ASI02
+    coverage_class: action_coverable   # REGISTRY fact: control architecture the failure requires
     agentx_check: keyless_pip
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
@@ -554,6 +588,7 @@ incidents:
     surface: budget-meter
     agentx_coverage: covered
     owasp_asi: ASI08
+    coverage_class: action_coverable   # REGISTRY fact: control architecture the failure requires
     agentx_check: gateway_wired
     what_happened: >-
       A multi-agent conversation looped for eleven days and cost about $47,000.
@@ -574,6 +609,7 @@ incidents:
     surface: cloud-api + network
     agentx_coverage: covered
     owasp_asi: ASI02
+    coverage_class: action_coverable   # REGISTRY fact: control architecture the failure requires
     agentx_check: gateway_wired
     what_happened: >-
       An agent pointed at a networking task ran wide port and host scans and spun up a
@@ -596,6 +632,7 @@ incidents:
     surface: any
     agentx_coverage: covered
     owasp_asi: ASI01
+    coverage_class: action_coverable   # REGISTRY fact: control architecture the failure requires
     agentx_check: keyless_pip
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
@@ -624,6 +661,7 @@ incidents:
     surface: filesystem
     agentx_coverage: partial
     owasp_asi: ASI02
+    coverage_class: action_coverable   # REGISTRY fact: control architecture the failure requires
     agentx_check: keyless_pip
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
@@ -652,6 +690,7 @@ incidents:
     surface: conversational
     agentx_coverage: partial
     owasp_asi: ASI08
+    coverage_class: action_coverable   # REGISTRY fact: control architecture the failure requires
     agentx_check: gateway_wired
     what_happened: >-
       A conversational agent looped, re-emitting near-identical turns without progress.
@@ -680,6 +719,7 @@ incidents:
     surface: status/build
     agentx_coverage: judge_or_org
     owasp_asi: RELIABILITY
+    coverage_class: needs_judge_or_org   # REGISTRY fact: control architecture the failure requires
     agentx_check: none
     what_happened: >-
       An agent reported that tests passed when they had not.
@@ -696,6 +736,7 @@ incidents:
     surface: document
     agentx_coverage: out_of_scope
     owasp_asi: RELIABILITY
+    coverage_class: out_of_scope   # REGISTRY fact: control architecture the failure requires
     agentx_check: none
     what_happened: An agent produced a report with fabricated citations.
     owned_by: Output guardrail / retrieval grounding.
@@ -707,6 +748,7 @@ incidents:
     surface: chat
     agentx_coverage: out_of_scope
     owasp_asi: ASI09
+    coverage_class: out_of_scope   # REGISTRY fact: control architecture the failure requires
     agentx_check: none
     what_happened: A chatbot stated a policy that did not exist, and the company was held to it.
     owned_by: Policy-grounded output guardrail.
@@ -718,6 +760,7 @@ incidents:
     surface: chat
     agentx_coverage: out_of_scope
     owasp_asi: ASI10
+    coverage_class: out_of_scope   # REGISTRY fact: control architecture the failure requires
     agentx_check: none
     what_happened: A chatbot exhibited manipulative behavioral drift.
     owned_by: Model alignment / content moderation.
@@ -729,6 +772,7 @@ incidents:
     surface: data
     agentx_coverage: out_of_scope
     owasp_asi: ASI06
+    coverage_class: out_of_scope   # REGISTRY fact: control architecture the failure requires
     agentx_check: none
     what_happened: An agent acted on stale lineage data.
     owned_by: Org data governance / retrieval freshness.
@@ -740,9 +784,10 @@ incidents:
     surface: backend
     agentx_coverage: out_of_scope
     owasp_asi: ASI07
+    coverage_class: out_of_scope   # REGISTRY fact: control architecture the failure requires
     agentx_check: none
     what_happened: Conflicting state between cooperating agents.
-    owned_by: Multi-agent concurrency (on the AgentX roadmap, deferred; not impossible).
+    owned_by: Multi-agent coordination and concurrency (distributed-systems state consistency between cooperating agents; a coordination discipline, not an action-layer control).
     source: https://github.com/NousResearch/hermes-agent/issues/514
 
   - id: ARE-2026-032
@@ -751,6 +796,7 @@ incidents:
     surface: document
     agentx_coverage: out_of_scope
     owasp_asi: RELIABILITY
+    coverage_class: out_of_scope   # REGISTRY fact: control architecture the failure requires
     agentx_check: none
     what_happened: An agent cited fabricated legal precedents.
     owned_by: Retrieval grounding / output guardrail.
@@ -763,6 +809,7 @@ incidents:
     surface: infrastructure
     agentx_coverage: out_of_scope
     owasp_asi: ASI10
+    coverage_class: out_of_scope   # REGISTRY fact: control architecture the failure requires
     agentx_check: none
     what_happened: >-
       During an offensive-cyber capability evaluation with safety refusals disabled, a

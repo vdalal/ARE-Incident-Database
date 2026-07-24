@@ -10,6 +10,57 @@ an entry's content or its status (`confirmed` / `disputed` / `withdrawn`), never
 
 Dates are ISO-8601 (UTC). The format loosely follows Keep a Changelog.
 
+## [1.3.0] - 2026-07-24
+
+### Changed (schema + framing): the registry facts and the vendor claims are now structurally separate
+
+The namespacing added in 1.1 disclosed the maintainer's conflict of interest, but left the vendor
+material dominating every page: the ticket header led with an `AgentX check` field, each covered
+entry carried a "How AgentX Core responds" section, and the README opened in the maintainer's
+product voice. Disclosed or not, the registry read as one vendor's page. Disclosure was not enough;
+this release separates the two layers structurally, so the facts stand on their own and a vendor's
+claim is visibly a claim.
+
+**New registry field: `coverage_class`.** Every incident now carries a neutral, vendor-independent
+classification of the control architecture the failure requires:
+
+| coverage_class | meaning |
+|---|---|
+| `action_coverable` | manifests as an inspectable tool call; an action-layer control can address it |
+| `needs_judge_or_org` | needs an LLM judge or the org's ground truth; no deterministic action-layer block |
+| `out_of_scope` | owned by another discipline entirely (environmental isolation, model alignment, content safety) |
+
+This is a registry FACT about the incident, independent of whether any product blocks it. The
+per-vendor `agentx_coverage` claim is retained unchanged, so `coverage_class` is additive: a machine
+consumer pinned to taxonomy 1.2 still parses. `taxonomy_version` moves `1.2` -> `1.3` to signal the
+added field. The registry rollups gain neutral `action_coverable` / `needs_judge_or_org` /
+`out_of_scope` counts alongside the existing namespaced `agentx_*` vendor rollups.
+
+**Vendor claims are now fenced.** On each entry page the registry facts (what happened, blast radius,
+OWASP ASI, coverage class, and, where the action layer does not reach, which discipline owns it) come
+first. A vendor's claim that its product stops the failure is rendered below a rule, in a "Vendor
+coverage claims" section, attributed and namespaced, and only where a claim exists. The 8 boundary and
+judge entries now carry no vendor mention at all. The ticket header drops the `AgentX check` field and
+leads with the neutral coverage class; the index replaces the "AgentX check / AgentX coverage claim"
+columns with a neutral "Coverage class" plus a clearly labelled "Vendor claims" column.
+
+**Documents reframed to neutral registry voice.** `README.md` no longer opens in the first person
+("we block what an agent does"), reports neutral coverage-class counts rather than "23 blocked today",
+consolidates the conflict-of-interest disclosure into one bounded section, and drops the "Prevent the
+coverable" install snippet (a product call-to-action that belongs on the vendor's own site, not in the
+registry README). `RELATION-TO-STANDARDS.md`, `TAXONOMY.md`, `PARTNERS.md`, and `CONTRIBUTING.md` are
+reworded the same way: the architectural boundary is stated about "the action layer", not about the
+maintainer's product. `GOVERNANCE.md`, which honestly discloses that AgentX-Core runs the ARE
+Numbering Authority, is unchanged: disclosing who governs is neutrality, not a leak.
+
+### Data
+
+No incident data changed except **`ARE-2026-031`**, whose `owned_by` dropped an "on the AgentX roadmap"
+aside so the line names a discipline, not a product plan. **No id was reused, renamed, or removed**;
+every citation minted against any prior version still resolves to the same incident. `generate.py`
+re-renders every page from the new template; the 25 vendor-claim pages keep their runnable or gateway
+repro, now under the fenced section, and all 11 keyless repros still block (`test_repros.py` green).
+
 ## [1.2.1] - 2026-07-24
 
 ### Assigned
@@ -203,6 +254,7 @@ either backed by a repro you can run or honestly marked as not ours.
   `ARE Incident Database (AREDB), aredb.org`, with the `ARE-YYYY-NNN` identifiers
   kept intact.
 
+[1.3.0]: https://github.com/vdalal/ARE-Incident-Database/releases/tag/v1.3.0
 [1.2.1]: https://github.com/vdalal/ARE-Incident-Database/releases/tag/v1.2.1
 [1.2.0]: https://github.com/vdalal/ARE-Incident-Database/releases/tag/v1.2.0
 [1.1.0]: https://github.com/vdalal/ARE-Incident-Database/releases/tag/v1.1.0

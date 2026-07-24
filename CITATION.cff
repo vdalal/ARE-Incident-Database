@@ -3,8 +3,9 @@ title: "Agent Reliability Engineering Database (AREDB)"
 abstract: >-
   A public registry of catastrophic autonomous-agent failures, indexed onto the
   OWASP Agentic Security Initiative Top 10. Each incident carries a stable
-  ARE-YYYY-NNN identifier, a cited source, and an honest coverage flag stating
-  whether the failure is deterministically preventable at the action layer.
+  ARE-YYYY-NNN identifier, a cited source, and a coverage class stating the control
+  architecture the failure requires. Vendor coverage claims, where present, are
+  recorded per entry and marked as claims, not registry findings.
   Cite the identifiers (e.g. ARE-2026-001) as the shared reference for the field.
 message: >-
   If you use this database, please cite it and keep the ARE-YYYY-NNN
@@ -23,7 +24,7 @@ repository-code: "https://github.com/vdalal/ARE-Incident-Database"
 # KEEP IN SYNC, all three move together at release: this `version` + `date-released`,
 # the CHANGELOG.md release heading, and the `v*` git tag. `date-released` is what
 # supplies the year in a rendered citation; without it citations render year-less.
-version: "1.2.1"
+version: "1.3.0"
 date-released: "2026-07-24"
 license: CC-BY-4.0
 keywords:
