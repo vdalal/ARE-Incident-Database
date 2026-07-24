@@ -12,9 +12,9 @@ AREDB sits one layer down, where CVE sits under CWE. For each real, cited incide
 
 So every AREDB entry carries its **OWASP ASI id**. Read them together: ASI names the risk, AREDB is the incident under it. `ARE-2026-001` (the Replit production-database wipe) is an instance of **ASI02 Tool Misuse**, classified `action-coverable`; the maintainer's vendor claim against it ships a keyless `pip` repro on the entry page.
 
-## What the action layer can address, and what it cannot (the honest part)
+## Which control discipline each failure needs (the honest part)
 
-An action layer intercepts a tool call before it executes. That structurally addresses the ASI categories that manifest as an *action*, and structurally does not address the ones that require judging content, memory, or behavior. AREDB states the boundary out loud, independent of any product:
+Deterministic action interception inspects a tool call before it executes. That structurally addresses the ASI categories that manifest as an *action*, and structurally does not address the ones that require judging content, memory, or behavior, which other disciplines own. AREDB states the boundary out loud, independent of any product:
 
 - **Manifests as an action** (cited incidents classified `action-coverable` in this registry): **ASI01** Goal Hijack, **ASI02** Tool Misuse, **ASI03** Identity & Privilege Abuse, **ASI04** Supply Chain Compromise, **ASI05** Unexpected Code Execution, **ASI08** Cascading Agent Failures.
 - **Not an action-interception problem** (owned by an LLM judge, observability, environmental isolation, or governance): **ASI06** Memory & Context Poisoning, **ASI07** Insecure Inter-Agent Communication, **ASI09** Human-Agent Trust Exploitation, **ASI10** Rogue Agents.

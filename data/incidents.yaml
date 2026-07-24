@@ -14,14 +14,15 @@
 # REGISTRY fields (facts about the incident; true regardless of who reads them):
 #   id, title, severity, failure_mode, confusion_vector, surface, owasp_asi, source,
 #   what_happened, blast_radius, owned_by
-#   coverage_class:  action_coverable | needs_judge_or_org | out_of_scope
-#            The control ARCHITECTURE the failure requires. A structural property of the
-#            incident, NOT a claim that any product stops it. `action_coverable` = the failure
-#            manifests as an inspectable tool call, so an action-layer control can address it;
-#            `needs_judge_or_org` = it needs an LLM judge or the org's ground truth, with no
-#            deterministic action-layer block; `out_of_scope` = owned by another discipline
-#            entirely (environmental isolation, model alignment, content safety). Whether a
-#            SPECIFIC vendor actually blocks it is a vendor claim (below), never this field.
+#   coverage_class:  action_coverable | needs_judge_or_org | other_discipline
+#            Which CONTROL DISCIPLINE the failure requires. A structural property of the
+#            incident, NOT a claim that any product stops it, and no discipline is the default:
+#            `action_coverable` = an inspectable tool call, addressable by deterministic action
+#            interception; `needs_judge_or_org` = needs an LLM judge or the org's ground truth,
+#            with no deterministic rule; `other_discipline` = owned by a different control
+#            domain entirely (environmental isolation, model alignment, content safety, data
+#            governance, inter-agent authorization), named per entry in `owned_by`. Whether a
+#            SPECIFIC vendor actually stops it is a vendor claim (below), never this field.
 #   status:  confirmed (default, omit) | disputed | withdrawn
 #            A disputed/withdrawn entry keeps its id FOREVER (never reused, never removed) and
 #            is marked on its page and in the index, so a citation always resolves. GOVERNANCE.md.
@@ -54,11 +55,11 @@ meta:
   withdrawn: 0           # marked-withdrawn entries (id retained)
   sourced: 33            # entries carrying a public, checkable source. That is the entry bar.
 
-  # REGISTRY coverage-class rollups: architectural facts about the incidents (which control
-  # architecture each requires), NOT a claim that any product stops them.
-  action_coverable: 25   # manifest as an inspectable action; an action-layer control can address them
-  needs_judge_or_org: 1  # need an LLM judge or the org's ground truth; no deterministic action-layer block
-  out_of_scope: 7        # owned by another discipline entirely (isolation, alignment, content safety)
+  # REGISTRY coverage-class rollups: which control discipline each incident requires (a
+  # structural fact), NOT a claim that any product stops them. No discipline is the default.
+  action_coverable: 25   # an inspectable action; addressable by deterministic action interception
+  needs_judge_or_org: 1  # needs an LLM judge or the org's ground truth; no deterministic rule
+  other_discipline: 7    # owned by a different control domain (isolation, alignment, content safety, ...)
 
   # VENDOR-CLAIM rollups: AgentX Core's coverage OF this registry. NOT registry findings.
   # Namespaced for the same reason the per-entry fields are (see the header): unqualified
@@ -713,7 +714,7 @@ incidents:
 
   - id: ARE-2026-026
     title: "False success reporting against real exit status (the 'tests passed' lie)"
-    severity: null
+    severity: 2
     failure_mode: FALSE_COMPLETION
     confusion_vector: OUTPUT_FABRICATION
     surface: status/build
@@ -732,11 +733,12 @@ incidents:
 
   - id: ARE-2026-027
     title: "Fabricated citations in generated output (Deloitte report)"
+    severity: 2
     failure_mode: OUTPUT_HALLUCINATION
     surface: document
     agentx_coverage: out_of_scope
     owasp_asi: RELIABILITY
-    coverage_class: out_of_scope   # REGISTRY fact: control architecture the failure requires
+    coverage_class: other_discipline   # REGISTRY fact: control architecture the failure requires
     agentx_check: none
     what_happened: An agent produced a report with fabricated citations.
     owned_by: Output guardrail / retrieval grounding.
@@ -744,11 +746,12 @@ incidents:
 
   - id: ARE-2026-028
     title: "Fabricated policy stated as fact (Air Canada chatbot)"
+    severity: 2
     failure_mode: OUTPUT_HALLUCINATION
     surface: chat
     agentx_coverage: out_of_scope
     owasp_asi: ASI09
-    coverage_class: out_of_scope   # REGISTRY fact: control architecture the failure requires
+    coverage_class: other_discipline   # REGISTRY fact: control architecture the failure requires
     agentx_check: none
     what_happened: A chatbot stated a policy that did not exist, and the company was held to it.
     owned_by: Policy-grounded output guardrail.
@@ -756,11 +759,12 @@ incidents:
 
   - id: ARE-2026-029
     title: "Manipulative behavioral drift (Sydney chatbot)"
+    severity: 3
     failure_mode: MODEL_ALIGNMENT
     surface: chat
     agentx_coverage: out_of_scope
     owasp_asi: ASI10
-    coverage_class: out_of_scope   # REGISTRY fact: control architecture the failure requires
+    coverage_class: other_discipline   # REGISTRY fact: control architecture the failure requires
     agentx_check: none
     what_happened: A chatbot exhibited manipulative behavioral drift.
     owned_by: Model alignment / content moderation.
@@ -768,11 +772,12 @@ incidents:
 
   - id: ARE-2026-030
     title: "Action on stale lineage data (stale lineage hallucination)"
+    severity: 3
     failure_mode: DATA_FRESHNESS
     surface: data
     agentx_coverage: out_of_scope
     owasp_asi: ASI06
-    coverage_class: out_of_scope   # REGISTRY fact: control architecture the failure requires
+    coverage_class: other_discipline   # REGISTRY fact: control architecture the failure requires
     agentx_check: none
     what_happened: An agent acted on stale lineage data.
     owned_by: Org data governance / retrieval freshness.
@@ -780,11 +785,12 @@ incidents:
 
   - id: ARE-2026-031
     title: "Conflicting state between cooperating agents (A2A state conflicts)"
+    severity: 3
     failure_mode: MULTI_AGENT_CONCURRENCY
     surface: backend
     agentx_coverage: out_of_scope
     owasp_asi: ASI07
-    coverage_class: out_of_scope   # REGISTRY fact: control architecture the failure requires
+    coverage_class: other_discipline   # REGISTRY fact: control architecture the failure requires
     agentx_check: none
     what_happened: Conflicting state between cooperating agents.
     owned_by: Multi-agent coordination and concurrency (distributed-systems state consistency between cooperating agents; a coordination discipline, not an action-layer control).
@@ -792,11 +798,12 @@ incidents:
 
   - id: ARE-2026-032
     title: "Fabricated legal precedents (Morgan & Morgan)"
+    severity: 2
     failure_mode: OUTPUT_HALLUCINATION
     surface: document
     agentx_coverage: out_of_scope
     owasp_asi: RELIABILITY
-    coverage_class: out_of_scope   # REGISTRY fact: control architecture the failure requires
+    coverage_class: other_discipline   # REGISTRY fact: control architecture the failure requires
     agentx_check: none
     what_happened: An agent cited fabricated legal precedents.
     owned_by: Retrieval grounding / output guardrail.
@@ -804,12 +811,13 @@ incidents:
 
   - id: ARE-2026-033
     title: "Autonomous sandbox escape and third-party breach to win a benchmark (OpenAI ExploitGym / Hugging Face)"
+    severity: 1
     failure_mode: SCOPE_OVERREACH
     confusion_vector: INSTRUMENTAL_MANIPULATION
     surface: infrastructure
     agentx_coverage: out_of_scope
     owasp_asi: ASI10
-    coverage_class: out_of_scope   # REGISTRY fact: control architecture the failure requires
+    coverage_class: other_discipline   # REGISTRY fact: control architecture the failure requires
     agentx_check: none
     what_happened: >-
       During an offensive-cyber capability evaluation with safety refusals disabled, a

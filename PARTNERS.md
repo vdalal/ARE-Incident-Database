@@ -1,6 +1,6 @@
 # Partners: complete the category
 
-An action layer addresses what an agent **does**. The incidents in this registry classified `needs_judge_or_org` or `out_of_scope` are owned by other reliability and security disciplines. This is an open map. If your product owns one of these lanes, you are invited to map your coverage onto it.
+Agent reliability spans many control disciplines. The incidents in this registry classified `needs_judge_or_org` or `other_discipline` are owned by disciplines other than deterministic action interception. This is an open map. If your product owns one of these lanes, you are invited to map your coverage onto it, on the same terms as any other vendor.
 
 ## Open lanes
 

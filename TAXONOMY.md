@@ -18,7 +18,7 @@ The failure-mode space, grouped. Modes marked **†emerging** are anticipated cl
 - **Alignment & content** (model-owned): `MODEL_ALIGNMENT`, †`DECEPTIVE_ALIGNMENT` (aligned when observed, not otherwise), `CONTENT_SAFETY`, `OUTPUT_HALLUCINATION`, `CLASSIFICATION_QUALITY`, `MULTIMODAL_QUALITY`, `MODEL_INTERNALS`
 - **Process:** `WORKFLOW_GOVERNANCE`, `DATA_FRESHNESS`, `SDLC_CICD`
 
-Whether a mode is deterministically coverable, judge/org, or out-of-scope is a property of the specific incident (recorded per entry as its `coverage_class`: `action_coverable`, `needs_judge_or_org`, or `out_of_scope`), not of the mode itself.
+Whether a mode needs deterministic action interception, a judge or org ground truth, or another discipline is a property of the specific incident (recorded per entry as its `coverage_class`: `action_coverable`, `needs_judge_or_org`, or `other_discipline`), not of the mode itself.
 
 ## Axis 2: confusion_vector (why it broke)
 
@@ -66,7 +66,7 @@ Three properties separate it from its neighbours:
    undetected — so it degrades the evidence base a reliability registry exists to provide.
 
 **No vendor here claims a deterministic block for it.** `ARE-2026-026` is honestly flagged
-`judge_or_org`: knowing a completion claim is false requires an LLM judge or the organisation's own
+`judge_or_org`: knowing a completion claim is false requires an LLM judge or the organization's own
 ground truth to check the claim against the trace. That flag is unchanged by the rename.
 
 ## The frontier (a living, extensible classification)
@@ -97,7 +97,7 @@ Applied to a claim, the tiers mean:
 
 ## Severity
 
-Severity is the blast radius of the **interceptable action**, not of the real-world harm. A high-harm incident (for example, harmful health advice) can be out of scope here because it is not an action-interception problem at all. Keep the two ideas separate: action-coverable incidents carry a severity; non-coverable ones do not.
+Severity is the **real-world blast radius of the incident** (Sev-1 = catastrophic: irreversible data loss, a security breach, major financial or third-party harm), independent of which control discipline the failure requires. Every incident carries one, so the most dangerous entries rank as such whether or not a deterministic rule could have stopped them. Severity is a property of the harm, never of any product's coverage.
 
 ## Check flags (`<vendor>_check`)
 

@@ -21,34 +21,34 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(HERE, "data", "incidents.yaml")
 OUT = os.path.join(HERE, "incidents")
 
-# NEUTRAL registry classification: which control architecture the failure requires. A
-# structural fact about the incident, independent of any product. Header (short) + body (full).
+# NEUTRAL registry classification: which control discipline the failure requires. A structural
+# fact about the incident, independent of any product; no discipline is the default. The action
+# layer is one lane among peers. Header (short) + body (full).
 COVERAGE_CLASS_SHORT = {
     "action_coverable": "Action-coverable",
     "needs_judge_or_org": "Needs judge/org",
-    "out_of_scope": "Out of scope",
+    "other_discipline": "Another discipline",
 }
 COVERAGE_CLASS_LABEL = {
-    "action_coverable": "Action-coverable -- the failure manifests as an inspectable tool call, so an action-layer control can address it.",
-    "needs_judge_or_org": "Needs a judge or the org's ground truth -- there is no deterministic action-layer block; an LLM judge or the organisation's own truth is required.",
-    "out_of_scope": "Out of scope for the action layer -- owned by another discipline (environmental isolation, model alignment, content safety, and the like).",
+    "action_coverable": "Action-coverable -- an inspectable tool call, addressable by deterministic action interception before it runs.",
+    "needs_judge_or_org": "Needs a judge or org ground truth -- catching it needs an LLM judge or the organization's own truth, not a deterministic rule.",
+    "other_discipline": "Another discipline -- owned by a different control domain (environmental isolation, model alignment, content safety, data governance, inter-agent authorization); the entry names which.",
 }
 
-# Index-only presentation per coverage class. Kept beside the label dicts and key-checked at
-# import (below) so a class added to the labels but not here fails LOUDLY at startup rather
-# than KeyError-ing mid-regen on a user's machine.
-INDEX_ORDER = {"action_coverable": 0, "needs_judge_or_org": 1, "out_of_scope": 2}
+# Index-only badge per coverage class. Kept beside the label dicts and key-checked at import
+# (below) so a class added to the labels but not here fails LOUDLY at startup rather than
+# KeyError-ing mid-regen on a user's machine.
 INDEX_BADGE = {
     "action_coverable": "action-coverable",
     "needs_judge_or_org": "needs judge/org",
-    "out_of_scope": "out-of-scope",
+    "other_discipline": "another discipline",
 }
 
 # One key set for the coverage classes: every class dict must carry exactly the same keys.
-assert set(COVERAGE_CLASS_SHORT) == set(COVERAGE_CLASS_LABEL) == set(INDEX_ORDER) == set(INDEX_BADGE), (
+assert set(COVERAGE_CLASS_SHORT) == set(COVERAGE_CLASS_LABEL) == set(INDEX_BADGE), (
     "coverage-class dicts are out of sync: "
     + repr({"short": sorted(COVERAGE_CLASS_SHORT), "label": sorted(COVERAGE_CLASS_LABEL),
-            "order": sorted(INDEX_ORDER), "badge": sorted(INDEX_BADGE)})
+            "badge": sorted(INDEX_BADGE)})
 )
 
 # VENDOR-CLAIM label: how one vendor's claim reads. NOT a registry finding. Rendered only in
@@ -109,7 +109,7 @@ def status_banner(inc):
 # OWASP ASI mapping. Each entry leads with its OWASP Agentic Security Initiative
 # category (the industry taxonomy AREDB indexes onto; see RELATION-TO-STANDARDS.md).
 # RELIABILITY = a non-ASI reliability failure (output hallucination or false completion), owned by
-# eval/observability, kept as an honest boundary exemplar.
+# eval/observability, a control discipline in its own right.
 ASI_LABEL = {
     "ASI01": "ASI01 Goal Hijack",
     "ASI02": "ASI02 Tool Misuse",
@@ -255,7 +255,7 @@ def render(inc):
         lines.append("")
     # For failures the action layer does not deterministically cover, name the discipline that
     # does. A neutral registry fact, not a vendor claim.
-    if coverage_class(inc) in ("needs_judge_or_org", "out_of_scope"):
+    if coverage_class(inc) in ("needs_judge_or_org", "other_discipline"):
         lines.append("## Who owns it")
         lines.append("")
         lines.append((inc.get("owned_by") or "").strip())
@@ -287,10 +287,15 @@ def vendor_claims_cell(inc):
 
 
 def render_index(incidents):
-    rows = sorted(incidents, key=lambda i: (INDEX_ORDER[coverage_class(i)], i["id"]))
+    # Neutral order: by the shared OWASP ASI taxonomy, then id -- never by coverage class.
+    # Ordering by coverage class stacked every AgentX-claimed row at the top and read as a
+    # scoreboard; the incident ids are coverage-ordered too (the founding batch numbered the
+    # coverable ones first), so ordering by the industry taxonomy foregrounds the shared map
+    # and interleaves the boundary incidents instead.
+    rows = sorted(incidents, key=lambda i: (i.get("owasp_asi") or "", i["id"]))
     out = ["# AREDB incidents (index)", "",
            "Each incident is a registry fact: what happened, its OWASP ASI category, and the "
-           "control architecture it requires (its coverage class). Whether a specific product "
+           "control discipline it requires (its coverage class). Whether a specific product "
            "stops it is a vendor claim, shown in the last column and detailed, attributed, on "
            "each entry's page.",
            "",
@@ -378,7 +383,7 @@ def validate(doc):
                 if chk == "keyless_pip" and not repro_call_for(inc, p):
                     errors.append(f"{eid}: {p} is keyless_pip but has no repro_call to render")
 
-        if cc in ("needs_judge_or_org", "out_of_scope") and not (inc.get("owned_by") or "").strip():
+        if cc in ("needs_judge_or_org", "other_discipline") and not (inc.get("owned_by") or "").strip():
             errors.append(f"{eid}: coverage_class={cc} but owned_by is empty (the 'Who owns it' section would be blank)")
 
     # Meta rollups must equal the real counts. Only keys actually present in meta are checked, so
@@ -395,7 +400,7 @@ def validate(doc):
         "withdrawn": sum(1 for i in incidents if i.get("status") == "withdrawn"),
         "action_coverable": cc_counts.get("action_coverable", 0),
         "needs_judge_or_org": cc_counts.get("needs_judge_or_org", 0),
-        "out_of_scope": cc_counts.get("out_of_scope", 0),
+        "other_discipline": cc_counts.get("other_discipline", 0),
         "agentx_covered": ax.get("covered", 0),
         "agentx_partial": ax.get("partial", 0),
         "agentx_judge_or_org": ax.get("judge_or_org", 0),
