@@ -91,6 +91,11 @@ VENDOR_INVITATION = (
     "reworded._"
 )
 
+# Source provenance labels. A registry prefers a FIRST-PARTY disclosure (the involved org's own
+# account) over secondary reporting; an entry may carry several `sources`, each labelled, so a
+# reader can see the primary record. `source` (a single URL) stays valid for entries with one.
+SOURCE_KIND = {"first-party": "First-party", "reporting": "Reporting"}
+
 # Entry standing. `confirmed` is the silent default (an entry omits `status`); a
 # `disputed` or `withdrawn` entry is MARKED in place and keeps its id forever, never
 # deleted, so external citations always resolve. This backs the GOVERNANCE.md promise.
@@ -341,10 +346,20 @@ def render(inc, vendors):
         lines.append("")
         lines.append((inc.get("owned_by") or "").strip())
         lines.append("")
-    lines.append("## Source")
-    lines.append("")
-    lines.append(f"<{inc['source']}>")
-    lines.append("")
+    sources = inc.get("sources")
+    if sources:
+        lines.append("## Sources")
+        lines.append("")
+        for s in sources:
+            label = SOURCE_KIND.get(s.get("kind"), s.get("kind") or "Source")
+            by = f" ({s['by']})" if (s.get("by") or "").strip() else ""
+            lines.append(f"- **{label}**{by}: <{s['url']}>")
+        lines.append("")
+    else:
+        lines.append("## Source")
+        lines.append("")
+        lines.append(f"<{inc['source']}>")
+        lines.append("")
     # Vendor coverage claims: fenced and separated from the registry facts above by a rule,
     # rendered only where a vendor actually claims a block.
     vs = vendor_section(inc, vendors)
@@ -482,6 +497,18 @@ def validate(doc):
         if cc in ("needs_judge_or_org", "other_discipline") and not (inc.get("owned_by") or "").strip():
             errors.append(f"{eid}: coverage_class={cc} but owned_by is empty (the 'Who owns it' section would be blank)")
 
+        # Source provenance: an entry carries a single `source` or a `sources` list; each listed
+        # source needs a url and a valid kind, so a labelled citation is never blank or mislabelled.
+        srcs = inc.get("sources")
+        if srcs:
+            for s in srcs:
+                if not (s.get("url") or "").strip():
+                    errors.append(f"{eid}: a sources entry has no url")
+                if s.get("kind") not in SOURCE_KIND:
+                    errors.append(f"{eid}: sources entry kind {s.get('kind')!r} invalid (use {sorted(SOURCE_KIND)})")
+        elif not (inc.get("source") or "").strip():
+            errors.append(f"{eid}: no source or sources")
+
     # Meta rollups must equal the real counts. Only keys actually present in meta are checked, so
     # this never demands a rollup the file does not carry.
     ax = {}
@@ -491,7 +518,7 @@ def validate(doc):
         ax[i.get("agentx_coverage")] = ax.get(i.get("agentx_coverage"), 0) + 1
     expected = {
         "total": len(incidents),
-        "sourced": sum(1 for i in incidents if (i.get("source") or "").strip()),
+        "sourced": sum(1 for i in incidents if (i.get("source") or "").strip() or i.get("sources")),
         "disputed": sum(1 for i in incidents if i.get("status") == "disputed"),
         "withdrawn": sum(1 for i in incidents if i.get("status") == "withdrawn"),
         "action_coverable": cc_counts.get("action_coverable", 0),

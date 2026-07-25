@@ -6,7 +6,7 @@ AREDB is a community map of catastrophic agent failures. Two kinds of contributi
 
 Open a pull request adding an entry to [`data/incidents.yaml`](data/incidents.yaml), then run the generator (below). Requirements:
 
-- A **real, cited incident** with a working source URL.
+- A **real, cited incident** with a working source URL. Prefer a **first-party** source (the involved organization's own disclosure, or the primary record) over secondary reporting. When more than one authoritative account exists, use a `sources:` list instead of `source:`, labelling each `kind: first-party` or `kind: reporting` (see `ARE-2026-033`).
 - The **two-axis classification** (`failure_mode` x `confusion_vector`); see [`TAXONOMY.md`](TAXONOMY.md).
 - An honest **coverage class** (`action_coverable`, `needs_judge_or_org`, or `other_discipline`): the control discipline the failure requires, a registry fact. If you also add a vendor coverage claim (below), do not claim a deterministic block that does not exist. The honesty is the point of this database.
 

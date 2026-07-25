@@ -39,12 +39,24 @@ paper and unrendered in practice. This wires it.
   maintainer first, shows the invitation on an unclaimed entry, and fails loud on an undeclared
   vendor. It runs in CI.
 
+### Changed (schema): first-party sources, labelled
+
+Citations are the registry's backbone, and a first-party disclosure (the involved organization's own
+account) is a stronger record than secondary reporting. An entry may now carry a `sources:` list
+instead of a single `source:`, each labelled `first-party` or `reporting` and optionally attributed,
+so a reader sees the primary record first. Additive and back-compat: a single-source entry keeps
+`source:` and renders byte-identically. `generate.py` validates each listed source has a url and a
+valid kind, and `CONTRIBUTING.md` asks contributors to prefer a first-party source. `ARE-2026-033`
+(the OpenAI / Hugging Face sandbox-escape breach) now leads with the two first-party disclosures
+(Hugging Face and OpenAI) and keeps the secondary reporting as corroboration.
+
 ### Data
 
 No incident data changed: no id was reused, renamed, or removed, and every citation still resolves.
 The only schema addition is `meta.vendors` (vendor identities, not incident facts); `taxonomy_version`
-is unchanged (no axis member added or removed). Regeneration touches only the 8 previously-silent
-boundary and judge pages (the new invitation line); all 25 claimed pages are byte-identical. All 11
+is unchanged (no axis member added or removed). Regeneration touches the 8 previously-silent
+boundary and judge pages (the new invitation line) plus `ARE-2026-033`'s Source section (now a
+labelled Sources list); all 25 claimed pages are byte-identical. All 11
 keyless repros still block (`test_repros.py` green).
 
 ## [1.3.0] - 2026-07-24
