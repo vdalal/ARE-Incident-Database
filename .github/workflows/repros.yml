@@ -40,5 +40,8 @@ jobs:
           git diff --exit-code -- incidents/ \
             || (echo "::error::incidents/ is out of sync with data/incidents.yaml. Run 'python generate.py' and commit the result. Never hand-edit a page." && exit 1)
 
+      - name: The multi-vendor renderer holds (fixture, no live data)
+        run: python test_multivendor.py
+
       - name: Every published repro blocks, from a bare pip install
         run: python test_repros.py

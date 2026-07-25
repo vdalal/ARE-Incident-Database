@@ -73,6 +73,16 @@ meta:
   agentx_out_of_scope: 7
   agentx_sev1_coverable_closed: "15/15"
 
+  # VENDOR REGISTRY: display identity for each vendor namespace used in the entries below. A claim
+  # (agentx_coverage, acme_coverage, ...) is attributed using this; a prefix that claims an entry
+  # but is absent here fails validation, so an attributed claim can never render without a name.
+  # Listing a vendor is not endorsement. Any vendor may be added on the terms in CONTRIBUTING.md.
+  vendors:
+    agentx:
+      name: "AgentX Core"
+      url: "https://agentx-core.com/aredb"
+      role: maintainer
+
   note_confusion_vector: "Replit (0001) and 25k-docs (0008) confusion_vectors are confirmed in the internal taxonomy; the rest are best-fit assignments for founder review."
 
 incidents:
