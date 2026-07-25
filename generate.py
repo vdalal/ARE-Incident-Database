@@ -85,10 +85,10 @@ VENDOR_DISCLAIMER = (
 # leaving boundary and judge pages silent. This is the registry's own open-participation line, not
 # a vendor claim, so it names no product.
 VENDOR_INVITATION = (
-    "_No vendor has yet claimed to stop this failure. Any vendor may add a claim under its own "
-    "prefix, on the terms in [CONTRIBUTING.md](../CONTRIBUTING.md): it must ship a check a stranger "
-    "can run, the check runs on every push, and a claim that stops holding is withdrawn, not "
-    "reworded._"
+    "_No vendor has claimed to address this failure. Any vendor that does may add a claim under "
+    "its own prefix, on the terms in [CONTRIBUTING.md](../CONTRIBUTING.md): a claim must ship a "
+    "check a stranger can run, that check runs on every push, and a claim that stops holding is "
+    "withdrawn, not reworded._"
 )
 
 # Source provenance labels. A registry prefers a FIRST-PARTY disclosure (the involved org's own
@@ -360,30 +360,26 @@ def render(inc, vendors):
         lines.append("")
         lines.append(f"<{inc['source']}>")
         lines.append("")
-    # Vendor coverage claims: fenced and separated from the registry facts above by a rule,
-    # rendered only where a vendor actually claims a block.
+    # The vendor-claims section, fenced off from the registry facts above by a rule. It renders on
+    # EVERY entry now: the vendors that claim a block, or the open invitation where none has.
     vs = vendor_section(inc, vendors)
-    if vs:
-        lines.append("---")
-        lines.append("")
-        lines.append(vs.strip())
-        lines.append("")
+    lines.append("---")
+    lines.append("")
+    lines.append(vs.strip())
+    lines.append("")
     return "\n".join(lines)
 
 
 def vendor_claims_cell(inc, vendors):
-    """Compact index cell: which vendor(s) claim this entry, labelled as claims. Lists every
-    block-claiming vendor (maintainer first); '-' when none has claimed yet."""
-    cells = []
-    for prefix in vendor_claim_prefixes(inc):
-        cov = inc.get(f"{prefix}_coverage")
-        if prefix == "agentx":
-            if cov == "covered":
-                cells.append("AgentX (keyless)" if inc.get("agentx_check") == "keyless_pip" else "AgentX (gateway)")
-            else:
-                cells.append("AgentX (partial)")
-        else:
-            cells.append(f"{vendor_meta(vendors, prefix)['name']} ({cov})")
+    """Compact index cell: which vendor(s) claim this entry and at what tier. Every vendor renders
+    the same way -- name + coverage tier, the maintainer included -- so the shared index gives no
+    vendor richer treatment than another. (Delivery detail such as keyless vs gateway is AgentX
+    product-specific; it lives on the entry page, not in this neutral column.) '-' when none has
+    claimed."""
+    cells = [
+        f"{vendor_meta(vendors, p)['name']} ({inc.get(f'{p}_coverage')})"
+        for p in vendor_claim_prefixes(inc)
+    ]
     return ", ".join(cells) if cells else "-"
 
 

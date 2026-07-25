@@ -55,8 +55,9 @@ valid kind, and `CONTRIBUTING.md` asks contributors to prefer a first-party sour
 No incident data changed: no id was reused, renamed, or removed, and every citation still resolves.
 The only schema addition is `meta.vendors` (vendor identities, not incident facts); `taxonomy_version`
 is unchanged (no axis member added or removed). Regeneration touches the 8 previously-silent
-boundary and judge pages (the new invitation line) plus `ARE-2026-033`'s Source section (now a
-labelled Sources list); all 25 claimed pages are byte-identical. All 11
+boundary and judge pages (the new invitation line), the index's vendor-claim column (now uniform:
+every vendor shown as name + tier, the maintainer included), and `ARE-2026-033`'s Source section
+(now a labelled Sources list); all 25 claimed entry pages are byte-identical. All 11
 keyless repros still block (`test_repros.py` green).
 
 ## [1.3.0] - 2026-07-24

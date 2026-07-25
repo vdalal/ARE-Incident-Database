@@ -57,7 +57,7 @@ def main():
     check("index lists both vendors", "AgentX" in cell and "Acme Guard" in cell)
 
     inv = g.vendor_section(UNCLAIMED, VENDORS)
-    check("unclaimed entry shows the invitation", "No vendor has yet claimed" in inv)
+    check("unclaimed entry shows the invitation", "No vendor has claimed" in inv)
     check("unclaimed entry names no product", "AgentX" not in inv and "Acme" not in inv)
 
     # An undeclared vendor must fail loud rather than render an anonymous claim.
