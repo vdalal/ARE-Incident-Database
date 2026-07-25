@@ -14,6 +14,10 @@ Every keyless entry must satisfy three things:
                                  warning while the action still happens is not a block)
   * the process exits clean     (a crash is not a block either)
 
+A non-maintainer vendor's repro is SELF-VERIFYING instead: it asserts its own block and exits
+non-zero if the tool ran, so this runner keys the contract off the SDK the snippet imports
+(agentx_sdk -> the three checks above; anything else -> a clean exit is the whole proof).
+
 If an entry cannot satisfy that, the honest fix is to RECLASSIFY it in
 data/incidents.yaml, not to soften the wording on the page. See GOVERNANCE.md: the
 coverage flag is a claim, and a claim that fails is withdrawn, not edited.
@@ -101,19 +105,31 @@ def main():
     checked, failed = 0, []
     for page in pages:
         eid = os.path.basename(page)[:-3]
-        snippet = PY_FENCE.search(open(page, encoding="utf-8").read())
-        if not snippet:
-            continue  # gateway-wired and out-of-scope entries carry no keyless snippet
-        checked += 1
-        p = run_snippet(snippet.group(1))
-        blocked = re.search(r"^True\s*$", p.stdout or "", re.M) is not None
-        tool_ran = "EXECUTED" in (p.stdout or "")
-        ok = blocked and not tool_ran and p.returncode == 0
-        print(f"{eid}  {'ok' if ok else 'FAIL'}")
-        if not ok:
-            failed.append(eid)
-            print(f"    blocked={blocked} tool_ran={tool_ran} rc={p.returncode}")
-            print("    " + safe(((p.stdout or "") + (p.stderr or "")).strip()[:500]))
+        # A page may carry more than one repro now (one per vendor claiming it), so run EVERY
+        # published python block, not just the first. Gateway-wired / out-of-scope / unclaimed
+        # entries carry none and are skipped by the empty loop.
+        blocks = PY_FENCE.findall(open(page, encoding="utf-8").read())
+        for idx, block in enumerate(blocks):
+            checked += 1
+            label = eid if len(blocks) == 1 else f"{eid}[{idx + 1}]"
+            p = run_snippet(block)
+            if "agentx_sdk" in block:
+                # The maintainer's templated repro proves itself by what it PRINTS: the block
+                # fires (a lone True) and the tool body never runs (no EXECUTED), on a clean exit.
+                blocked = re.search(r"^True\s*$", p.stdout or "", re.M) is not None
+                tool_ran = "EXECUTED" in (p.stdout or "")
+                ok = blocked and not tool_ran and p.returncode == 0
+                detail = f"blocked={blocked} tool_ran={tool_ran} rc={p.returncode}"
+            else:
+                # A generic vendor's repro is SELF-VERIFYING: it asserts its own block and exits
+                # non-zero if the tool ran, so the registry never has to understand its SDK.
+                ok = p.returncode == 0
+                detail = f"rc={p.returncode} (self-verifying snippet)"
+            print(f"{label}  {'ok' if ok else 'FAIL'}")
+            if not ok:
+                failed.append(label)
+                print(f"    {detail}")
+                print("    " + safe(((p.stdout or "") + (p.stderr or "")).strip()[:500]))
 
     print(f"\n{checked - len(failed)}/{checked} published repros block as claimed.")
     if failed:

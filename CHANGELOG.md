@@ -10,6 +10,56 @@ an entry's content or its status (`confirmed` / `disputed` / `withdrawn`), never
 
 Dates are ISO-8601 (UTC). The format loosely follows Keep a Changelog.
 
+## [1.4.0] - 2026-07-25
+
+### Changed (tooling + schema): the vendor-claims column is genuinely multi-vendor
+
+The 1.3 release fenced and attributed the maintainer's coverage claim, but the renderer only drew
+the `agentx_` namespace and failed loud on any second vendor, so the open invitation was real on
+paper and unrendered in practice. This wires it.
+
+- **Vendor registry.** `meta.vendors` maps each vendor namespace to a display name, URL, and role.
+  Attribution is now data: a competitor's claim renders under its own name and link. A namespace
+  that claims an entry but is not declared here fails validation, so an attributed claim can never
+  render without a name.
+- **Multi-vendor rendering.** `generate.py` draws every vendor that claims a block on an entry,
+  maintainer first, each attributed and namespaced. The maintainer's `agentx_` claim keeps its
+  original templated rendering, so every previously-claimed page is byte-identical and its scraped
+  repro keeps passing unchanged.
+- **A generic vendor's runnable proof.** A non-maintainer vendor ships a self-verifying
+  `<prefix>_repro` snippet: it installs the product, runs the incident's attack, and asserts the
+  block fired and the tool body never ran, exiting non-zero if not. `test_repros.py` runs it and
+  keys the contract off the SDK the snippet imports, so the registry never has to understand each
+  product's API.
+- **The open column is visible on every entry.** An entry that no vendor has claimed now carries a
+  one-line invitation (any vendor may claim it, on the terms in `CONTRIBUTING.md`) instead of
+  showing nothing, so the column reads as an open standard rather than the maintainer's showcase.
+- **Docs + proof.** `CONTRIBUTING.md` documents the full path end to end with a worked second-vendor
+  example; a `test_multivendor.py` fixture proves the renderer draws two vendors, orders the
+  maintainer first, shows the invitation on an unclaimed entry, and fails loud on an undeclared
+  vendor. It runs in CI.
+
+### Changed (schema): first-party sources, labelled
+
+Citations are the registry's backbone, and a first-party disclosure (the involved organization's own
+account) is a stronger record than secondary reporting. An entry may now carry a `sources:` list
+instead of a single `source:`, each labelled `first-party` or `reporting` and optionally attributed,
+so a reader sees the primary record first. Additive and back-compat: a single-source entry keeps
+`source:` and renders byte-identically. `generate.py` validates each listed source has a url and a
+valid kind, and `CONTRIBUTING.md` asks contributors to prefer a first-party source. `ARE-2026-033`
+(the OpenAI / Hugging Face sandbox-escape breach) now leads with the two first-party disclosures
+(Hugging Face and OpenAI) and keeps the secondary reporting as corroboration.
+
+### Data
+
+No incident data changed: no id was reused, renamed, or removed, and every citation still resolves.
+The only schema addition is `meta.vendors` (vendor identities, not incident facts); `taxonomy_version`
+is unchanged (no axis member added or removed). Regeneration touches the 8 previously-silent
+boundary and judge pages (the new invitation line), the index's vendor-claim column (now uniform:
+every vendor shown as name + tier, the maintainer included), and `ARE-2026-033`'s Source section
+(now a labelled Sources list); all 25 claimed entry pages are byte-identical. All 11
+keyless repros still block (`test_repros.py` green).
+
 ## [1.3.0] - 2026-07-24
 
 ### Changed (schema + framing): a vendor-neutral registry, facts separated from claims
@@ -259,6 +309,7 @@ either backed by a repro you can run or honestly marked as not ours.
   `ARE Incident Database (AREDB), aredb.org`, with the `ARE-YYYY-NNN` identifiers
   kept intact.
 
+[1.4.0]: https://github.com/vdalal/ARE-Incident-Database/releases/tag/v1.4.0
 [1.3.0]: https://github.com/vdalal/ARE-Incident-Database/releases/tag/v1.3.0
 [1.2.1]: https://github.com/vdalal/ARE-Incident-Database/releases/tag/v1.2.1
 [1.2.0]: https://github.com/vdalal/ARE-Incident-Database/releases/tag/v1.2.0

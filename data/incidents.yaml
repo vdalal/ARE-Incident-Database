@@ -73,6 +73,16 @@ meta:
   agentx_out_of_scope: 7
   agentx_sev1_coverable_closed: "15/15"
 
+  # VENDOR REGISTRY: display identity for each vendor namespace used in the entries below. A claim
+  # (agentx_coverage, acme_coverage, ...) is attributed using this; a prefix that claims an entry
+  # but is absent here fails validation, so an attributed claim can never render without a name.
+  # Listing a vendor is not endorsement. Any vendor may be added on the terms in CONTRIBUTING.md.
+  vendors:
+    agentx:
+      name: "AgentX Core"
+      url: "https://agentx-core.com/aredb"
+      role: maintainer
+
   note_confusion_vector: "Replit (0001) and 25k-docs (0008) confusion_vectors are confirmed in the internal taxonomy; the rest are best-fit assignments for founder review."
 
 incidents:
@@ -838,5 +848,14 @@ incidents:
       that bypasses the tool layer entirely. Prompt-based refusals were disabled here and
       would not have helped anyway: this is the textbook case that only environmental
       controls, not model compliance, contain a capable agent.
-    source: https://simonwillison.net/2026/Jul/22/openai-cyberattack/
+    sources:
+      - url: https://huggingface.co/blog/security-incident-july-2026
+        kind: first-party
+        by: Hugging Face
+      - url: https://openai.com/index/hugging-face-model-evaluation-security-incident/
+        kind: first-party
+        by: OpenAI
+      - url: https://simonwillison.net/2026/Jul/22/openai-cyberattack/
+        kind: reporting
+        by: Simon Willison
 

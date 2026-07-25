@@ -66,11 +66,35 @@ VENDOR_COVERAGE_VALUES = {"covered", "partial", "judge_or_org", "out_of_scope"}
 VENDOR_BLOCK_CLAIMS = {"covered", "partial"}
 VENDOR_CHECK_VALUES = {"keyless_pip", "gateway_wired"}
 
-# The renderer understands only the maintainer's `agentx_` namespace today. The schema INVITES
-# other vendors (CONTRIBUTING.md), but rendering a second vendor needs schema the repo does not
-# yet carry (a namespaced repro, a vendor URL/label). Until that lands, a second vendor's claim
-# must FAIL LOUD in validate() rather than be silently dropped from the page.
-SUPPORTED_VENDORS = {"agentx"}
+# Multi-vendor: the renderer draws EVERY vendor namespace found on an entry, attributed via the
+# meta.vendors registry. The maintainer's `agentx_` claim keeps its original templated rendering
+# (so the founding pages stay byte-identical and their scraped repros keep passing unchanged); any
+# other vendor is data-driven from its namespaced fields plus a self-verifying `<prefix>_repro`
+# snippet. A vendor that claims an entry but is not declared in meta.vendors FAILS LOUD in
+# validate(), so an attributed claim can never render without a name.
+
+# The shared header note above the claims. One vendor or many, it reads the same.
+VENDOR_DISCLAIMER = (
+    "_Claims by vendors about their own products, not registry findings. The registry records "
+    "what was claimed, by whom, and whether the check still passes; it does not rank or endorse "
+    "vendors. Any vendor may add a claim under its own prefix; see "
+    "[CONTRIBUTING.md](../CONTRIBUTING.md)._"
+)
+
+# Shown on an entry that NO vendor has claimed, so every page shows the column is open rather than
+# leaving boundary and judge pages silent. This is the registry's own open-participation line, not
+# a vendor claim, so it names no product.
+VENDOR_INVITATION = (
+    "_No vendor has claimed to address this failure. Any vendor that does may add a claim under "
+    "its own prefix, on the terms in [CONTRIBUTING.md](../CONTRIBUTING.md): a claim must ship a "
+    "check a stranger can run, that check runs on every push, and a claim that stops holding is "
+    "withdrawn, not reworded._"
+)
+
+# Source provenance labels. A registry prefers a FIRST-PARTY disclosure (the involved org's own
+# account) over secondary reporting; an entry may carry several `sources`, each labelled, so a
+# reader can see the primary record. `source` (a single URL) stays valid for entries with one.
+SOURCE_KIND = {"first-party": "First-party", "reporting": "Reporting"}
 
 # Entry standing. `confirmed` is the silent default (an entry omits `status`); a
 # `disputed` or `withdrawn` entry is MARKED in place and keeps its id forever, never
@@ -198,24 +222,41 @@ def field_line(inc):
     return " &nbsp;·&nbsp; ".join(bits)
 
 
-def vendor_section(inc):
-    """The fenced vendor-claims block. Rendered ONLY where a vendor actually claims a block
-    (covered/partial), so the boundary and judge pages stay purely neutral, with zero vendor
-    mention. Attributed and namespaced; the registry records the claim, it does not endorse it."""
+def vendor_meta(vendors, prefix):
+    """Display identity for a vendor prefix, from meta.vendors. Fail loud if a claiming vendor is
+    not declared, so an attributed claim never renders without a name (mirrors the KeyError posture
+    used everywhere else here)."""
+    v = (vendors or {}).get(prefix)
+    if not v or not (v.get("name") or "").strip():
+        raise KeyError(
+            f"vendor {prefix!r} makes a claim but is not declared in meta.vendors "
+            f"(needs at least a name; url and role are optional)"
+        )
+    return v
+
+
+def link_text(url):
+    """A bare display label for a URL: scheme stripped, no trailing slash."""
+    return url.split("://", 1)[-1].rstrip("/")
+
+
+def vendor_claim_prefixes(inc):
+    """Prefixes that make a BLOCK claim (covered/partial) on this entry, maintainer first (agentx),
+    then alphabetical. A non-block value (judge_or_org / out_of_scope) is a vendor saying 'not us',
+    not a claim, and does not render in this section."""
+    claiming = [p for p in vendor_prefixes(inc) if inc.get(f"{p}_coverage") in VENDOR_BLOCK_CLAIMS]
+    return sorted(claiming, key=lambda p: (p != "agentx", p))
+
+
+def agentx_claim_block(inc):
+    """The maintainer's claim, rendered EXACTLY as it always has been. Kept as its own frozen path
+    (not routed through the generic renderer) so the founding pages stay byte-identical and their
+    scraped repros keep passing untouched. Non-maintainer vendors go through generic_vendor_block."""
     cov = inc.get("agentx_coverage")
-    if cov not in ("covered", "partial"):
-        return ""
     keyless = inc.get("agentx_check") == "keyless_pip"
     delivery = ("from the keyless SDK (no key, no gateway)" if keyless
                 else "wired to the AgentX gateway")
     out = [
-        "## Vendor coverage claims",
-        "",
-        "_Claims by vendors about their own products, not registry findings. The registry "
-        "records what was claimed, by whom, and whether the check still passes; it does not "
-        "rank or endorse vendors. Any vendor may add a claim under its own prefix; see "
-        "[CONTRIBUTING.md](../CONTRIBUTING.md)._",
-        "",
         f"**AgentX Core** (the registry maintainer) claims: **{COVERAGE_LABEL[cov]}**, "
         f"{delivery}. The full claim, including what it does not stop, is at "
         f"[agentx-core.com/aredb](https://agentx-core.com/aredb).",
@@ -227,10 +268,55 @@ def vendor_section(inc):
     if rb:
         out.append(rb.strip())
         out.append("")
-    return "\n".join(out)
+    return "\n".join(out).rstrip()
 
 
-def render(inc):
+def generic_vendor_block(inc, prefix, vendors):
+    """Any non-maintainer vendor's claim, data-driven from its namespaced fields and the
+    meta.vendors registry. Its runnable proof is a self-verifying `<prefix>_repro` snippet, embedded
+    verbatim and executed by test_repros.py (which keys the contract off the SDK the snippet
+    imports). The registry records the claim; it does not endorse it."""
+    v = vendor_meta(vendors, prefix)
+    cov = inc.get(f"{prefix}_coverage")
+    role_paren = " (the registry maintainer)" if v.get("role") == "maintainer" else ""
+    link = f" Full claim at [{link_text(v['url'])}]({v['url']})." if (v.get("url") or "").strip() else ""
+    out = [
+        f"**{v['name']}**{role_paren} claims: **{COVERAGE_LABEL[cov]}**.{link}",
+        "",
+        (inc.get(f"{prefix}_response") or "").strip(),
+        "",
+    ]
+    snippet = (inc.get(f"{prefix}_repro") or "").strip()
+    if snippet:
+        out.append(
+            f"**Repro ({v['name']}).** Runs against a real install and asserts the block fired and "
+            f"the tool body never executed, exiting non-zero if not. Copy it and run it."
+        )
+        out.append("")
+        out.append(snippet)
+        out.append("")
+    return "\n".join(out).rstrip()
+
+
+def vendor_section(inc, vendors):
+    """The fenced vendor-claims block, multi-vendor. Renders every vendor that claims a block on
+    this entry (maintainer first), each attributed and namespaced. If NO vendor claims a block, it
+    renders the open invitation instead, so every entry shows the column is open rather than leaving
+    boundary and judge pages silent. The registry records claims; it does not endorse them."""
+    claiming = vendor_claim_prefixes(inc)
+    out = ["## Vendor coverage claims", ""]
+    if not claiming:
+        out += [VENDOR_INVITATION, ""]
+        return "\n".join(out).rstrip()
+    out += [VENDOR_DISCLAIMER, ""]
+    for prefix in claiming:
+        block = agentx_claim_block(inc) if prefix == "agentx" else generic_vendor_block(inc, prefix, vendors)
+        out.append(block)
+        out.append("")
+    return "\n".join(out).rstrip()
+
+
+def render(inc, vendors):
     lines = []
     lines.append(f"# {inc['id']}: {inc['title']}")
     lines.append("")
@@ -260,33 +346,44 @@ def render(inc):
         lines.append("")
         lines.append((inc.get("owned_by") or "").strip())
         lines.append("")
-    lines.append("## Source")
-    lines.append("")
-    lines.append(f"<{inc['source']}>")
-    lines.append("")
-    # Vendor coverage claims: fenced and separated from the registry facts above by a rule,
-    # rendered only where a vendor actually claims a block.
-    vs = vendor_section(inc)
-    if vs:
-        lines.append("---")
+    sources = inc.get("sources")
+    if sources:
+        lines.append("## Sources")
         lines.append("")
-        lines.append(vs.strip())
+        for s in sources:
+            label = SOURCE_KIND.get(s.get("kind"), s.get("kind") or "Source")
+            by = f" ({s['by']})" if (s.get("by") or "").strip() else ""
+            lines.append(f"- **{label}**{by}: <{s['url']}>")
         lines.append("")
+    else:
+        lines.append("## Source")
+        lines.append("")
+        lines.append(f"<{inc['source']}>")
+        lines.append("")
+    # The vendor-claims section, fenced off from the registry facts above by a rule. It renders on
+    # EVERY entry now: the vendors that claim a block, or the open invitation where none has.
+    vs = vendor_section(inc, vendors)
+    lines.append("---")
+    lines.append("")
+    lines.append(vs.strip())
+    lines.append("")
     return "\n".join(lines)
 
 
-def vendor_claims_cell(inc):
-    """Compact index cell: which vendor(s) claim this entry, clearly labelled as claims.
-    Only AgentX Core claims today; another vendor would appear here on the same terms."""
-    cov = inc.get("agentx_coverage")
-    if cov == "covered":
-        return "AgentX (keyless)" if inc.get("agentx_check") == "keyless_pip" else "AgentX (gateway)"
-    if cov == "partial":
-        return "AgentX (partial)"
-    return "-"
+def vendor_claims_cell(inc, vendors):
+    """Compact index cell: which vendor(s) claim this entry and at what tier. Every vendor renders
+    the same way -- name + coverage tier, the maintainer included -- so the shared index gives no
+    vendor richer treatment than another. (Delivery detail such as keyless vs gateway is AgentX
+    product-specific; it lives on the entry page, not in this neutral column.) '-' when none has
+    claimed."""
+    cells = [
+        f"{vendor_meta(vendors, p)['name']} ({inc.get(f'{p}_coverage')})"
+        for p in vendor_claim_prefixes(inc)
+    ]
+    return ", ".join(cells) if cells else "-"
 
 
-def render_index(incidents):
+def render_index(incidents, vendors):
     # Neutral order: by the shared OWASP ASI taxonomy, then id -- never by coverage class.
     # Ordering by coverage class stacked every AgentX-claimed row at the top and read as a
     # scoreboard; the incident ids are coverage-ordered too (the founding batch numbered the
@@ -310,7 +407,7 @@ def render_index(incidents):
         asi = "Reliability" if asi == "RELIABILITY" else asi
         out.append(
             f"| [{i['id']}]({i['id']}.md) | {title} | "
-            f"`{asi}` | {INDEX_BADGE[coverage_class(i)]} | {vendor_claims_cell(i)} |"
+            f"`{asi}` | {INDEX_BADGE[coverage_class(i)]} | {vendor_claims_cell(i, vendors)} |"
         )
     out.append("")
     return "\n".join(out)
@@ -350,6 +447,7 @@ def validate(doc):
     """
     incidents = doc["incidents"]
     meta = doc.get("meta", {})
+    vendors = meta.get("vendors", {})
     errors = []
 
     for inc in incidents:
@@ -359,32 +457,53 @@ def validate(doc):
             errors.append(f"{eid}: coverage_class {cc!r} missing/invalid (use {sorted(COVERAGE_CLASS_LABEL)})")
 
         for p in vendor_prefixes(inc):
-            if p not in SUPPORTED_VENDORS:
+            if p not in vendors:
                 errors.append(
-                    f"{eid}: vendor claim {p!r} present, but the renderer supports only "
-                    f"{sorted(SUPPORTED_VENDORS)} today -- extend vendor_section()/vendor_claims_cell() "
-                    f"(and add a namespaced repro/label to the schema) before adding a second vendor."
+                    f"{eid}: vendor claim {p!r} present, but {p!r} is not declared in meta.vendors "
+                    f"(add its name[, url, role] there so the claim renders attributed)"
                 )
             cov = inc.get(f"{p}_coverage")
             if cov not in VENDOR_COVERAGE_VALUES:
                 errors.append(f"{eid}: {p}_coverage {cov!r} invalid (use {sorted(VENDOR_COVERAGE_VALUES)})")
                 continue
-            if cov in VENDOR_BLOCK_CLAIMS:
-                if cc in COVERAGE_CLASS_LABEL and cc != "action_coverable":
-                    errors.append(
-                        f"{eid}: {p}_coverage={cov} claims a deterministic block, but coverage_class={cc} "
-                        f"-- a block claim requires coverage_class action_coverable"
-                    )
-                chk = inc.get(f"{p}_check")
+            if cov not in VENDOR_BLOCK_CLAIMS:
+                continue  # a non-claim (judge_or_org / out_of_scope) renders nothing to check
+            # A block claim (covered/partial) must be consistent and must ship runnable proof.
+            if cc in COVERAGE_CLASS_LABEL and cc != "action_coverable":
+                errors.append(
+                    f"{eid}: {p}_coverage={cov} claims a deterministic block, but coverage_class={cc} "
+                    f"-- a block claim requires coverage_class action_coverable"
+                )
+            if not (inc.get(f"{p}_response") or "").strip():
+                errors.append(f"{eid}: {p}_coverage={cov} but {p}_response is empty")
+            if p == "agentx":
+                chk = inc.get("agentx_check")
                 if chk not in VENDOR_CHECK_VALUES:
-                    errors.append(f"{eid}: {p}_coverage={cov} but {p}_check {chk!r} invalid (use {sorted(VENDOR_CHECK_VALUES)})")
-                if not (inc.get(f"{p}_response") or "").strip():
-                    errors.append(f"{eid}: {p}_coverage={cov} but {p}_response is empty")
-                if chk == "keyless_pip" and not repro_call_for(inc, p):
-                    errors.append(f"{eid}: {p} is keyless_pip but has no repro_call to render")
+                    errors.append(f"{eid}: agentx_coverage={cov} but agentx_check {chk!r} invalid (use {sorted(VENDOR_CHECK_VALUES)})")
+                if chk == "keyless_pip" and not repro_call_for(inc, "agentx"):
+                    errors.append(f"{eid}: agentx is keyless_pip but has no repro_call to render")
+            else:
+                # A generic vendor's runnable proof is a self-verifying `<prefix>_repro` snippet.
+                if not (inc.get(f"{p}_repro") or "").strip():
+                    errors.append(
+                        f"{eid}: {p}_coverage={cov} claims a block but ships no {p}_repro snippet "
+                        f"(a claim must ship a check a stranger can run; see CONTRIBUTING.md)"
+                    )
 
         if cc in ("needs_judge_or_org", "other_discipline") and not (inc.get("owned_by") or "").strip():
             errors.append(f"{eid}: coverage_class={cc} but owned_by is empty (the 'Who owns it' section would be blank)")
+
+        # Source provenance: an entry carries a single `source` or a `sources` list; each listed
+        # source needs a url and a valid kind, so a labelled citation is never blank or mislabelled.
+        srcs = inc.get("sources")
+        if srcs:
+            for s in srcs:
+                if not (s.get("url") or "").strip():
+                    errors.append(f"{eid}: a sources entry has no url")
+                if s.get("kind") not in SOURCE_KIND:
+                    errors.append(f"{eid}: sources entry kind {s.get('kind')!r} invalid (use {sorted(SOURCE_KIND)})")
+        elif not (inc.get("source") or "").strip():
+            errors.append(f"{eid}: no source or sources")
 
     # Meta rollups must equal the real counts. Only keys actually present in meta are checked, so
     # this never demands a rollup the file does not carry.
@@ -395,7 +514,7 @@ def validate(doc):
         ax[i.get("agentx_coverage")] = ax.get(i.get("agentx_coverage"), 0) + 1
     expected = {
         "total": len(incidents),
-        "sourced": sum(1 for i in incidents if (i.get("source") or "").strip()),
+        "sourced": sum(1 for i in incidents if (i.get("source") or "").strip() or i.get("sources")),
         "disputed": sum(1 for i in incidents if i.get("status") == "disputed"),
         "withdrawn": sum(1 for i in incidents if i.get("status") == "withdrawn"),
         "action_coverable": cc_counts.get("action_coverable", 0),
@@ -422,6 +541,7 @@ def main():
         doc = yaml.safe_load(f)
     validate(doc)  # fail loud BEFORE any filesystem mutation (orphan removal or page writes)
     incidents = doc["incidents"]
+    vendors = doc.get("meta", {}).get("vendors", {})
     os.makedirs(OUT, exist_ok=True)
     # Remove incident pages whose entry is no longer in the yaml, so the folder never
     # ships an orphan the index does not reference.
@@ -444,9 +564,9 @@ def main():
     for inc in incidents:
         path = os.path.join(OUT, f"{inc['id']}.md")
         with open(path, "w", encoding="utf-8") as f:
-            f.write(render(inc))
+            f.write(render(inc, vendors))
     with open(os.path.join(OUT, "README.md"), "w", encoding="utf-8") as f:
-        f.write(render_index(incidents))
+        f.write(render_index(incidents, vendors))
     print(f"Rendered {len(incidents)} incident pages + index into {OUT}")
 
 
