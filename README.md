@@ -2,7 +2,7 @@
 
 [![repros](https://github.com/vdalal/ARE-Incident-Database/actions/workflows/repros.yml/badge.svg)](https://github.com/vdalal/ARE-Incident-Database/actions/workflows/repros.yml)
 
-**The incident registry for the OWASP Agentic Security Top 10. Real, cited agent failures, each with a stable `ARE-YYYY-NNN` identifier, mapped to its OWASP ASI category and classified by the control discipline it requires to prevent.**
+**The incident registry for the OWASP Agentic Security Initiative (ASI) Top 10. Real, cited agent failures, each with a stable `ARE-YYYY-NNN` identifier, mapped to its OWASP ASI category and classified by the control discipline it requires to prevent.**
 
 Agent Reliability Engineering (ARE) is the discipline of preventing them. [OWASP ASI](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/) is the map of what goes wrong with an agent; AREDB is the cited incidents under it. Each entry records what happened, its blast radius, and which kind of control the failure requires. Cite the `ARE-YYYY-NNN` identifiers as the shared reference for the field.
 
@@ -34,18 +34,6 @@ Each incident is also classified by the **control discipline it requires** to pr
 | **Another discipline** (environmental isolation, model alignment, content safety, data governance, ...) | **7** |
 
 **Whether a specific product stops a given failure is a separate question, and a vendor claim, not a registry finding.** It is recorded per entry, in a clearly marked "Vendor coverage claims" section, never mixed into the registry's facts. See [Maintainer and conflict of interest](#maintainer-and-conflict-of-interest).
-
-## Different failures need different controls
-
-An incident's coverage class is not a scoreboard where 25 of 33 is a passing grade. It records which **control discipline** the failure requires, and different disciplines give different guarantees:
-
-- **Action interception** stops an inspectable tool call with a deterministic rule, before it runs.
-- **Semantic judgment** (an LLM judge, a content classifier, or the organization's own ground truth) is needed where no deterministic rule applies.
-- **Other disciplines** own the rest: environmental isolation, model alignment, content safety, data governance, inter-agent authorization. The entry names which.
-
-Software security has always been layered this way: SAST, DAST, WAF, and RASP each intercept at a different point with different guarantees, and no one of them subsumes the others. Agent reliability is no different. AREDB maps each failure to the discipline it actually needs, so a reader can see the whole space rather than assume one kind of control reaches all of it.
-
-Some OWASP ASI categories manifest as an inspectable action (an agent *doing* something); others are about what an agent *says*, what it *believes*, or how a system of agents is *governed*. **ASI07** (Insecure Inter-Agent Communication) is a protocol and authorization problem; **ASI09** (Human-Agent Trust) is a UX and social one. Output hallucination, content safety, and model alignment are their own disciplines again. The incidents in those categories are cited proof that the map extends well beyond any single control.
 
 ## How incidents are classified
 
