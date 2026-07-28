@@ -36,6 +36,8 @@ Each incident is also classified by its **control domain**: the discipline that 
 | **Data governance** (freshness, lineage, retrieval correctness) | **1** |
 | **Multi-agent coordination** (state consistency between cooperating agents) | **1** |
 
+_These counts reflect what has been catalogued so far, not how often each failure occurs in the wild. The founding batch started with the incidents a concrete control can reach and test, so `Action mediation` is over-represented by collection order; the balance shifts as the registry grows across every discipline._
+
 **Whether a specific product stops a given failure is a separate question, and a vendor claim, not a registry finding.** It is recorded per entry, in a clearly marked "Vendor coverage claims" section, never mixed into the registry's facts. See [Maintainer and conflict of interest](#maintainer-and-conflict-of-interest).
 
 ## How incidents are classified
