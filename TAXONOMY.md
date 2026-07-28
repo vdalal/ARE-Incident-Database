@@ -77,7 +77,7 @@ Two governance rules keep it a classification rather than a grab-bag:
 1. **The ARE Numbering Authority (AgentX-Core) governs additions.** Proposing a new class is a pull request; assigning it is the registrar's call.
 2. **No coverage claim attaches to an emerging class** until a real incident is catalogued under it and its coverage is honestly flagged. A pre-registered class is a slot, not a claim.
 
-This classification carries a version (`taxonomy_version` in [`data/incidents.yaml`](data/incidents.yaml), currently **1.4**) so downstream consumers can pin against a known schema. Adding a `failure_mode` or `confusion_vector`, or otherwise changing the entry field schema (as the 1.3 addition of the neutral `coverage_class` field did, and the 1.4 addition of the neutral `control_domain` primary axis), increments it and is recorded in [the changelog](CHANGELOG.md).
+This classification carries a version (`taxonomy_version` in [`data/incidents.yaml`](data/incidents.yaml), currently **1.4**) so downstream consumers can pin against a known schema. Adding a `failure_mode` or `confusion_vector`, or otherwise changing the entry field schema (as the 1.3 addition of the `coverage_class` field did, and the 1.4 addition of the neutral `control_domain` primary axis), increments it and is recorded in [the changelog](CHANGELOG.md).
 
 ## Coverage-claim legend
 

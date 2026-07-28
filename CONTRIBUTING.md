@@ -40,8 +40,8 @@ meta:
 ```
 
 **Step 2 -- add your claim to the entry,** namespaced with that prefix so a reader can always tell
-whose claim is whose. The registry fields (`owasp_asi`, `coverage_class`, and the rest) are facts
-about the incident and are not yours to change:
+whose claim is whose. The registry fields (`owasp_asi`, `control_domain`, `coverage_class`, and the rest) are maintained
+by the registry and are not yours to change:
 
 ```yaml
   - id: ARE-2026-001
