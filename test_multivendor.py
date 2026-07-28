@@ -19,6 +19,7 @@ VENDORS = {
 TWO_VENDOR = {
     "id": "ARE-2026-901",
     "coverage_class": "action_coverable",
+    "control_domain": "Action mediation",
     "agentx_coverage": "covered",
     "agentx_check": "keyless_pip",
     "agentx_response": "AgentX denies the destructive call before it runs.",
@@ -35,6 +36,7 @@ TWO_VENDOR = {
 UNCLAIMED = {
     "id": "ARE-2026-902",
     "coverage_class": "other_discipline",
+    "control_domain": "Environmental isolation",
     "agentx_coverage": "out_of_scope",
     "owned_by": "Environmental isolation.",
 }
@@ -52,9 +54,6 @@ def main():
     check("each vendor's own repro embedded", "agentx-security-sdk" in section and "acme-guard" in section)
     check("maintainer rendered first", section.index("AgentX Core") < section.index("Acme Guard"))
     check("non-maintainer link rendered", "acme.example/agentx" in section)
-
-    cell = g.vendor_claims_cell(TWO_VENDOR, VENDORS)
-    check("index lists both vendors", "AgentX" in cell and "Acme Guard" in cell)
 
     inv = g.vendor_section(UNCLAIMED, VENDORS)
     check("unclaimed entry shows the invitation", "No vendor has claimed" in inv)

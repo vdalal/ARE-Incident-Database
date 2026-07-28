@@ -21,35 +21,32 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(HERE, "data", "incidents.yaml")
 OUT = os.path.join(HERE, "incidents")
 
-# NEUTRAL registry classification: which control discipline the failure requires. A structural
-# fact about the incident, independent of any product; no discipline is the default. The action
-# layer is one lane among peers. Header (short) + body (full).
-COVERAGE_CLASS_SHORT = {
-    "action_coverable": "Action-coverable",
-    "needs_judge_or_org": "Needs judge/org",
-    "other_discipline": "Another discipline",
+# NEUTRAL registry classification, the PRIMARY axis: the control DOMAIN that owns the failure. A
+# generic, vendor-agnostic discipline that exists in the field regardless of any product -- the
+# action layer is ONE peer among many, never the frame. This is what the index and the entry pages
+# lead with. Keep these names as the industry already knows them (do not brand them AREDB-anything;
+# the registry names disciplines as peers, not as ours).
+CONTROL_DOMAIN = {
+    "Action mediation",
+    "Output grounding & verification",
+    "Model alignment & content safety",
+    "Environmental isolation",
+    "Identity & access",
+    "Data governance",
+    "Multi-agent coordination",
 }
+
+# ACTION-LAYER REACHABILITY (NOT a neutral headline): whether an action firewall reaches the
+# failure with a deterministic rule (action_coverable), needs an LLM judge or the org's ground
+# truth (needs_judge_or_org), or is owned by a different discipline entirely (other_discipline).
+# This is the action layer's OWN architecture -- exactly the vendor-shaped framing that must not
+# frame the neutral registry -- so it is kept OFF the neutral rendered surfaces (index, entry
+# header) and used only to gate a vendor's block claim in validate().
 COVERAGE_CLASS_LABEL = {
     "action_coverable": "Action-coverable -- an inspectable tool call, addressable by deterministic action interception before it runs.",
     "needs_judge_or_org": "Needs a judge or org ground truth -- catching it needs an LLM judge or the organization's own truth, not a deterministic rule.",
     "other_discipline": "Another discipline -- owned by a different control domain (environmental isolation, model alignment, content safety, data governance, inter-agent authorization); the entry names which.",
 }
-
-# Index-only badge per coverage class. Kept beside the label dicts and key-checked at import
-# (below) so a class added to the labels but not here fails LOUDLY at startup rather than
-# KeyError-ing mid-regen on a user's machine.
-INDEX_BADGE = {
-    "action_coverable": "action-coverable",
-    "needs_judge_or_org": "needs judge/org",
-    "other_discipline": "another discipline",
-}
-
-# One key set for the coverage classes: every class dict must carry exactly the same keys.
-assert set(COVERAGE_CLASS_SHORT) == set(COVERAGE_CLASS_LABEL) == set(INDEX_BADGE), (
-    "coverage-class dicts are out of sync: "
-    + repr({"short": sorted(COVERAGE_CLASS_SHORT), "label": sorted(COVERAGE_CLASS_LABEL),
-            "badge": sorted(INDEX_BADGE)})
-)
 
 # VENDOR-CLAIM label: how one vendor's claim reads. NOT a registry finding. Rendered only in
 # the fenced vendor section.
@@ -145,7 +142,7 @@ ASI_LABEL = {
     "ASI08": "ASI08 Cascading Failures",
     "ASI09": "ASI09 Human-Agent Trust",
     "ASI10": "ASI10 Rogue Agents",
-    "RELIABILITY": "Reliability (non-ASI)",
+    "RELIABILITY": "AREDB-Reliability (proposed; OWASP ASI has no category for it yet)",
 }
 
 
@@ -154,25 +151,37 @@ def asi_label(inc):
     return ASI_LABEL.get(v, v or "-")
 
 
+def control_domain(inc):
+    """The PRIMARY neutral axis: the generic control DOMAIN that owns the failure. Fail loud on a
+    missing/unknown value (mirrors the coverage_class posture) so a bad entry cannot render a blank
+    or off-vocabulary discipline."""
+    cd = inc.get("control_domain")
+    if cd not in CONTROL_DOMAIN:
+        raise KeyError(
+            f"{inc['id']}: unknown control_domain {cd!r} (use one of {sorted(CONTROL_DOMAIN)})"
+        )
+    return cd
+
+
 def coverage_class(inc):
-    """The neutral registry class. Fail loud on a missing/unknown value (mirrors the
-    COVERAGE_LABEL KeyError posture) so a bad entry cannot render a blank class."""
+    """The action layer's OWN reachability view (not a neutral headline; see CONTROL_DOMAIN). Fail
+    loud on a missing/unknown value so a bad entry cannot slip through the block-claim gate."""
     cc = inc.get("coverage_class")
     if cc not in COVERAGE_CLASS_LABEL:
         raise KeyError(
             f"{inc['id']}: unknown coverage_class {cc!r} "
-            f"(use action_coverable|needs_judge_or_org|out_of_scope)"
+            f"(use action_coverable|needs_judge_or_org|other_discipline)"
         )
     return cc
 
 
 def ticket_header(inc):
     """Registry ticket header: shared authority signals only. The OWASP ASI id (industry
-    taxonomy) and the neutral coverage class (which control architecture the failure
-    requires). No vendor field here: whether a specific product blocks it lives in the
-    fenced vendor section, never the header."""
+    taxonomy) and the neutral control domain (which discipline owns the failure). No vendor
+    field, and NOT the action layer's own coverage_class: whether a specific product blocks it
+    lives in the fenced vendor section, never the header."""
     bits = [f"`{inc['id']}`", f"**OWASP ASI:** {asi_label(inc)}",
-            f"**Coverage class:** {COVERAGE_CLASS_SHORT[coverage_class(inc)]}"]
+            f"**Control domain:** {control_domain(inc)}"]
     if inc.get("severity"):
         bits.append(f"**Severity:** {inc['severity']}")
     return "> " + " &nbsp;·&nbsp; ".join(bits)
@@ -328,8 +337,6 @@ def render(inc, vendors):
     lines.append("")
     lines.append(field_line(inc))
     lines.append("")
-    lines.append(f"**Coverage class:** {COVERAGE_CLASS_LABEL[coverage_class(inc)]}")
-    lines.append("")
     lines.append("## What happened")
     lines.append("")
     lines.append(inc["what_happened"].strip())
@@ -370,45 +377,39 @@ def render(inc, vendors):
     return "\n".join(lines)
 
 
-def vendor_claims_cell(inc, vendors):
-    """Compact index cell: which vendor(s) claim this entry and at what tier. Every vendor renders
-    the same way -- name + coverage tier, the maintainer included -- so the shared index gives no
-    vendor richer treatment than another. (Delivery detail such as keyless vs gateway is AgentX
-    product-specific; it lives on the entry page, not in this neutral column.) '-' when none has
-    claimed."""
-    cells = [
-        f"{vendor_meta(vendors, p)['name']} ({inc.get(f'{p}_coverage')})"
-        for p in vendor_claim_prefixes(inc)
-    ]
-    return ", ".join(cells) if cells else "-"
-
-
-def render_index(incidents, vendors):
-    # Neutral order: by the shared OWASP ASI taxonomy, then id -- never by coverage class.
-    # Ordering by coverage class stacked every AgentX-claimed row at the top and read as a
-    # scoreboard; the incident ids are coverage-ordered too (the founding batch numbered the
-    # coverable ones first), so ordering by the industry taxonomy foregrounds the shared map
-    # and interleaves the boundary incidents instead.
+def render_index(incidents):
+    # Neutral order: by the shared OWASP ASI taxonomy, then id -- never by our own classes.
+    # Ordering by control domain or coverage class stacked the action-layer rows at the top and
+    # read as a scoreboard; ordering by the industry taxonomy foregrounds the shared map and
+    # interleaves the boundary incidents instead.
     rows = sorted(incidents, key=lambda i: (i.get("owasp_asi") or "", i["id"]))
     out = ["# AREDB incidents (index)", "",
-           "Each incident is a registry fact: what happened, its OWASP ASI category, and the "
-           "control discipline it requires (its coverage class). Whether a specific product "
-           "stops it is a vendor claim, shown in the last column and detailed, attributed, on "
-           "each entry's page.",
+           "Each incident is a registry fact: its OWASP ASI category (the shared industry "
+           "taxonomy), a permanent id, what happened, and the neutral control domain -- the "
+           "discipline that owns the failure, where the action layer is one discipline among "
+           "peers. Whether a specific product stops a given failure is a vendor claim, not a "
+           "registry finding, and is recorded per entry on each page.",
            "",
-           "| ID | Incident | OWASP ASI | Coverage class | Vendor claims |",
-           "|---|---|---|---|---|"]
+           "| OWASP ASI | ID | Incident | Control domain |",
+           "|---|---|---|---|"]
     for i in rows:
         # A disputed/withdrawn entry stays in the index (id never disappears) but is
         # marked so a reader is not misled by a normal-looking row.
         status = entry_status(i)
         title = i["title"] if status == "confirmed" else f"{i['title']} _({STATUS_LABEL[status].lower()})_"
-        asi = i.get("owasp_asi") or "-"
-        asi = "Reliability" if asi == "RELIABILITY" else asi
+        raw = i.get("owasp_asi") or "-"
+        # AREDB-Reliability is a proposed category, marked with the dagger the legend explains. The
+        # dagger sits OUTSIDE the code span so it is not swallowed into the literal `...` text.
+        asi_cell = "`AREDB-Reliability`†" if raw == "RELIABILITY" else f"`{raw}`"
         out.append(
-            f"| [{i['id']}]({i['id']}.md) | {title} | "
-            f"`{asi}` | {INDEX_BADGE[coverage_class(i)]} | {vendor_claims_cell(i, vendors)} |"
+            f"| {asi_cell} | [{i['id']}]({i['id']}.md) | {title} | {control_domain(i)} |"
         )
+    out.append("")
+    out.append(
+        "† **AREDB-Reliability** is a category AREDB proposes for reliability failures the OWASP "
+        "ASI Top 10 has no home for (false completion, output fabrication). It will be realigned "
+        "if OWASP ASI ratifies a matching category."
+    )
     out.append("")
     return "\n".join(out)
 
@@ -455,6 +456,10 @@ def validate(doc):
         cc = inc.get("coverage_class")
         if cc not in COVERAGE_CLASS_LABEL:
             errors.append(f"{eid}: coverage_class {cc!r} missing/invalid (use {sorted(COVERAGE_CLASS_LABEL)})")
+
+        cd = inc.get("control_domain")
+        if cd not in CONTROL_DOMAIN:
+            errors.append(f"{eid}: control_domain {cd!r} missing/invalid (use {sorted(CONTROL_DOMAIN)})")
 
         for p in vendor_prefixes(inc):
             if p not in vendors:
@@ -530,6 +535,22 @@ def validate(doc):
         if key in meta and meta[key] != want:
             errors.append(f"meta.{key} = {meta[key]!r} but the real count is {want}")
 
+    # Neutral control-domain rollups (a nested map in meta): every listed domain's count must match
+    # the real count, and every domain that occurs must be listed, so the "At a glance" table on the
+    # README (which is hand-written from these) is green-on-truth and red-on-drift.
+    if "control_domains" in meta:
+        listed = meta.get("control_domains") or {}
+        real = {}
+        for i in incidents:
+            real[i.get("control_domain")] = real.get(i.get("control_domain"), 0) + 1
+        real = {d: c for d, c in real.items() if d is not None}
+        for dom, want in real.items():
+            if listed.get(dom) != want:
+                errors.append(f"meta.control_domains[{dom!r}] = {listed.get(dom)!r} but the real count is {want}")
+        for dom in listed:
+            if dom not in real:
+                errors.append(f"meta.control_domains lists {dom!r} but no incident carries that control_domain")
+
     if errors:
         raise SystemExit(
             "data/incidents.yaml failed validation (no pages were written):\n  - " + "\n  - ".join(errors)
@@ -566,7 +587,7 @@ def main():
         with open(path, "w", encoding="utf-8") as f:
             f.write(render(inc, vendors))
     with open(os.path.join(OUT, "README.md"), "w", encoding="utf-8") as f:
-        f.write(render_index(incidents, vendors))
+        f.write(render_index(incidents))
     print(f"Rendered {len(incidents)} incident pages + index into {OUT}")
 
 

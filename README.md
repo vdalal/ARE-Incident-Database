@@ -2,7 +2,7 @@
 
 [![repros](https://github.com/vdalal/ARE-Incident-Database/actions/workflows/repros.yml/badge.svg)](https://github.com/vdalal/ARE-Incident-Database/actions/workflows/repros.yml)
 
-**The incident registry for the OWASP Agentic Security Initiative (ASI) Top 10. Real, cited agent failures, each with a stable `ARE-YYYY-NNN` identifier, mapped to its OWASP ASI category and classified by the control discipline it requires to prevent.**
+**The incident registry for the OWASP Agentic Security Initiative (ASI) Top 10. Real, cited agent failures, each with a stable `ARE-YYYY-NNN` identifier, mapped to its OWASP ASI category and classified by the control domain that owns it.**
 
 Agent Reliability Engineering (ARE) is the discipline of preventing them. [OWASP ASI](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/) is the map of what goes wrong with an agent; AREDB is the cited incidents under it. Each entry records what happened, its blast radius, and which kind of control the failure requires. Cite the `ARE-YYYY-NNN` identifiers as the shared reference for the field.
 
@@ -22,32 +22,43 @@ Every count here is a registry fact about the incidents. It is not a claim that 
 |---|---|
 | Total incidents | **33** |
 | Mapped to an OWASP ASI category (ASI01-10) | **30** |
-| Non-ASI reliability failures (the Reliability bucket) | **3** |
+| Non-ASI reliability failures (the AREDB-Reliability bucket) | **3** |
 | Severity-1 (highest real-world harm) | **16** |
 
-Each incident is also classified by the **control discipline it requires** to prevent. This is a structural property of the failure, not a claim that any product stops it, and no discipline is the default:
+Each incident is also classified by its **control domain**: the discipline that owns the failure. This is a neutral, structural property of the incident, not a claim that any product stops it. The disciplines are peers; the action layer is one of them, not the frame:
 
-| Control discipline | Count |
+| Control domain | Count |
 |---|---|
-| **Action interception** (an inspectable tool call, stoppable by a deterministic rule before it runs) | **25** |
-| **Judge or org ground truth** (needs an LLM judge or the organization's own truth) | **1** |
-| **Another discipline** (environmental isolation, model alignment, content safety, data governance, ...) | **7** |
+| **Action mediation** (an agent's tool call, gated at the point it acts) | **25** |
+| **Output grounding & verification** (the agent stated something false; it needed checking against ground truth) | **4** |
+| **Model alignment & content safety** (the model's own behavior or outputs) | **1** |
+| **Environmental isolation** (sandbox, network segmentation, egress control) | **1** |
+| **Data governance** (freshness, lineage, retrieval correctness) | **1** |
+| **Multi-agent coordination** (state consistency between cooperating agents) | **1** |
+
+_These counts reflect what has been catalogued so far, not how often each failure occurs in the wild. The founding batch started with the incidents a concrete control can reach and test, so `Action mediation` is over-represented by collection order; the balance shifts as the registry grows across every discipline._
 
 **Whether a specific product stops a given failure is a separate question, and a vendor claim, not a registry finding.** It is recorded per entry, in a clearly marked "Vendor coverage claims" section, never mixed into the registry's facts. See [Maintainer and conflict of interest](#maintainer-and-conflict-of-interest).
 
 ## How incidents are classified
 
-Every incident carries its **OWASP ASI category** (the shared industry taxonomy) plus a neutral **coverage class**, a structural property of the failure naming which control discipline it requires:
+Every incident carries its **OWASP ASI category** (the shared industry taxonomy) plus its neutral **control domain**: the generic discipline that owns the failure, named as the field already knows it. The action layer is one discipline among peers, never the frame:
 
-- **action-coverable**: an inspectable tool call, addressable by deterministic action interception.
-- **needs judge/org**: catching it needs an LLM judge or the organization's own ground truth; there is no deterministic rule.
-- **another discipline**: owned by a different control domain entirely (environmental isolation, model alignment, content safety, data governance, inter-agent authorization); the entry names which.
+- **Action mediation**: an agent's tool call, gated at the point it acts.
+- **Output grounding & verification**: the agent stated something false as fact (a made-up citation, a "tests passed" that wasn't); catching it means checking the claim against ground truth.
+- **Model alignment & content safety**: the model's own behavior or outputs.
+- **Environmental isolation**: sandbox, network segmentation, and egress control.
+- **Data governance**: freshness, lineage, and retrieval correctness.
+- **Multi-agent coordination**: state consistency between cooperating agents.
+- **Identity & access**: authorization, privilege, and blast-radius limits.
+
+Each entry also carries a finer, action-layer-specific field, `coverage_class` (`action_coverable` / `needs_judge_or_org` / `other_discipline`): the action firewall's own view of whether a deterministic rule reaches the failure. It gates a vendor's block claim and is not a neutral registry finding, so it does not lead the entry pages or the index.
 
 On top of the OWASP category, each entry also carries AREDB's finer two-axis classification (`failure_mode` by `confusion_vector`), documented in [`TAXONOMY.md`](TAXONOMY.md). For how AREDB relates to OWASP ASI, CVE, and CWE (and why it indexes onto them rather than competing), see [`RELATION-TO-STANDARDS.md`](RELATION-TO-STANDARDS.md).
 
 ## How to read an entry
 
-Each incident lives at [`incidents/ARE-2026-NNN.md`](incidents/) and states, as registry facts: what happened, the blast radius, the severity, the OWASP ASI category, the coverage class, and, where no deterministic rule applies, which discipline owns it. Machine-readable source of record: [`data/incidents.yaml`](data/incidents.yaml).
+Each incident lives at [`incidents/ARE-2026-NNN.md`](incidents/) and states, as registry facts: what happened, the blast radius, the severity, the OWASP ASI category, the control domain, and, where no deterministic rule applies, which discipline owns it. Machine-readable source of record: [`data/incidents.yaml`](data/incidents.yaml).
 
 Every entry also carries a **status**, `confirmed` by default. Per [`GOVERNANCE.md`](GOVERNANCE.md), a `disputed` or `withdrawn` entry keeps its `ARE-YYYY-NNN` id forever and is marked in place, never deleted, so any citation always resolves.
 
@@ -57,7 +68,7 @@ Below the registry facts, an entry may carry a fenced **Vendor coverage claims**
 
 **AgentX Core maintains this registry and also sells a product in this space.** That is a real conflict of interest, and hiding it would be the thing that discredits the registry, so it is disclosed here and contained structurally:
 
-- The registry's facts (the incident, its OWASP ASI category, its coverage class) are vendor-neutral. They do not name a product.
+- The registry's facts (the incident, its OWASP ASI category, its control domain) are vendor-neutral. They do not name a product.
 - AgentX Core's coverage claims are namespaced (`agentx_coverage`, `agentx_check`, `agentx_response`) and rendered only in the fenced "Vendor coverage claims" section on each entry, never in the facts. Its full claim, including what it does not stop, lives on its own site at [agentx-core.com/aredb](https://agentx-core.com/aredb).
 - The honesty rule is applied to the maintainer most strictly of all: no claim is listed unless it ships a check a stranger can run, the check runs on every push ([`test_repros.py`](test_repros.py) executes the exact snippet off each page and asserts the block fires *and* that the tool body never ran), and a claim that stops holding is **withdrawn, not reworded** ([`GOVERNANCE.md`](GOVERNANCE.md)).
 
@@ -65,9 +76,9 @@ Below the registry facts, an entry may carry a fenced **Vendor coverage claims**
 
 ## Scope and the living taxonomy
 
-Agent failure is an open, growing space, and its taxonomy is now the OWASP Agentic Security Initiative's (ASI01 through ASI10). AREDB does not compete with it. AREDB owns the **incident registry**: stable `ARE-YYYY-NNN` identifiers for real, cited events, each indexed onto its OWASP ASI category and classified by the control discipline it requires.
+Agent failure is an open, growing space, and its taxonomy is now the OWASP Agentic Security Initiative's (ASI01 through ASI10). AREDB does not compete with it. AREDB owns the **incident registry**: stable `ARE-YYYY-NNN` identifiers for real, cited events, each indexed onto its OWASP ASI category and classified by the control domain that owns it.
 
-New incidents get an `ARE-YYYY-NNN` id and an OWASP ASI mapping as they surface, across every control discipline, not only the ones a deterministic rule can reach. How the registry is governed as it grows (the ARE Numbering Authority, lane stewards, the honesty rule) is in [`GOVERNANCE.md`](GOVERNANCE.md).
+New incidents get an `ARE-YYYY-NNN` id and an OWASP ASI mapping as they surface, across every control domain, not only the ones a deterministic rule can reach. How the registry is governed as it grows (the ARE Numbering Authority, lane stewards, the honesty rule) is in [`GOVERNANCE.md`](GOVERNANCE.md).
 
 ## Disciplines and lanes
 

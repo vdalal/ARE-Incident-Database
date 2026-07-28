@@ -18,7 +18,7 @@ The failure-mode space, grouped. Modes marked **†emerging** are anticipated cl
 - **Alignment & content** (model-owned): `MODEL_ALIGNMENT`, †`DECEPTIVE_ALIGNMENT` (aligned when observed, not otherwise), `CONTENT_SAFETY`, `OUTPUT_HALLUCINATION`, `CLASSIFICATION_QUALITY`, `MULTIMODAL_QUALITY`, `MODEL_INTERNALS`
 - **Process:** `WORKFLOW_GOVERNANCE`, `DATA_FRESHNESS`, `SDLC_CICD`
 
-Whether a mode needs deterministic action interception, a judge or org ground truth, or another discipline is a property of the specific incident (recorded per entry as its `coverage_class`: `action_coverable`, `needs_judge_or_org`, or `other_discipline`), not of the mode itself.
+Which discipline owns a given incident is a property of the specific incident, not of the mode itself. It is recorded per entry as the neutral `control_domain` (the generic discipline that owns it, the action layer being one peer among many), with the action layer's own reachability view kept in the finer `coverage_class` (`action_coverable`, `needs_judge_or_org`, or `other_discipline`).
 
 ## Axis 2: confusion_vector (why it broke)
 
@@ -77,7 +77,7 @@ Two governance rules keep it a classification rather than a grab-bag:
 1. **The ARE Numbering Authority (AgentX-Core) governs additions.** Proposing a new class is a pull request; assigning it is the registrar's call.
 2. **No coverage claim attaches to an emerging class** until a real incident is catalogued under it and its coverage is honestly flagged. A pre-registered class is a slot, not a claim.
 
-This classification carries a version (`taxonomy_version` in [`data/incidents.yaml`](data/incidents.yaml), currently **1.3**) so downstream consumers can pin against a known schema. Adding a `failure_mode` or `confusion_vector`, or otherwise changing the entry field schema (as the 1.3 addition of the neutral `coverage_class` field did), increments it and is recorded in [the changelog](CHANGELOG.md).
+This classification carries a version (`taxonomy_version` in [`data/incidents.yaml`](data/incidents.yaml), currently **1.4**) so downstream consumers can pin against a known schema. Adding a `failure_mode` or `confusion_vector`, or otherwise changing the entry field schema (as the 1.3 addition of the `coverage_class` field did, and the 1.4 addition of the neutral `control_domain` primary axis), increments it and is recorded in [the changelog](CHANGELOG.md).
 
 ## Coverage-claim legend
 
@@ -97,7 +97,7 @@ Applied to a claim, the tiers mean:
 
 ## Severity
 
-Severity is the **real-world blast radius of the incident** (Sev-1 = catastrophic: irreversible data loss, a security breach, major financial or third-party harm), independent of which control discipline the failure requires. Every incident carries one, so the most dangerous entries rank as such whether or not a deterministic rule could have stopped them. Severity is a property of the harm, never of any product's coverage.
+Severity is the **real-world blast radius of the incident** (Sev-1 = catastrophic: irreversible data loss, a security breach, major financial or third-party harm), independent of which control domain owns the failure. Every incident carries one, so the most dangerous entries rank as such whether or not a deterministic rule could have stopped them. Severity is a property of the harm, never of any product's coverage.
 
 ## Check flags (`<vendor>_check`)
 

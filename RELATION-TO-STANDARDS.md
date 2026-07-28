@@ -8,13 +8,13 @@ The OWASP Agentic Security Initiative's **Top 10 for Agentic Applications (ASI01
 
 AREDB sits one layer down, where CVE sits under CWE. For each real, cited incident it answers the two questions a category cannot:
 1. **Did this actually happen, to whom, with what blast radius** (a specific event, not a risk class), and
-2. **Which control architecture it requires**, and, where a vendor claims coverage, a one-line repro that proves the claim.
+2. **Which discipline owns it** (its neutral `control_domain`), and, where a vendor claims coverage, a one-line repro that proves the claim.
 
-So every AREDB entry carries its **OWASP ASI id**. Read them together: ASI names the risk, AREDB is the incident under it. `ARE-2026-001` (the Replit production-database wipe) is an instance of **ASI02 Tool Misuse**, classified `action-coverable`; the maintainer's vendor claim against it ships a keyless `pip` repro on the entry page.
+So every AREDB entry carries its **OWASP ASI id**. Read them together: ASI names the risk, AREDB is the incident under it. `ARE-2026-001` (the Replit production-database wipe) is an instance of **ASI02 Tool Misuse**, control domain **Action mediation**; the maintainer's vendor claim against it ships a keyless `pip` repro on the entry page.
 
-## Which control discipline each failure needs (the honest part)
+## Which failures the action layer reaches (the honest part)
 
-Deterministic action interception inspects a tool call before it executes. That structurally addresses the ASI categories that manifest as an *action*, and structurally does not address the ones that require judging content, memory, or behavior, which other disciplines own. AREDB states the boundary out loud, independent of any product:
+The registry's primary neutral classification is the **control domain** (the discipline that owns a failure; the action layer is one peer among many). This section is the narrower *action-layer reachability* view: which ASI categories manifest as an action a deterministic rule can reach. Deterministic action interception inspects a tool call before it executes. That structurally addresses the ASI categories that manifest as an *action*, and structurally does not address the ones that require judging content, memory, or behavior, which other disciplines own. AREDB states the boundary out loud, independent of any product:
 
 - **Manifests as an action** (cited incidents classified `action-coverable` in this registry): **ASI01** Goal Hijack, **ASI02** Tool Misuse, **ASI03** Identity & Privilege Abuse, **ASI04** Supply Chain Compromise, **ASI05** Unexpected Code Execution, **ASI08** Cascading Agent Failures.
 - **Not an action-interception problem** (owned by an LLM judge, observability, environmental isolation, or governance): **ASI06** Memory & Context Poisoning, **ASI07** Insecure Inter-Agent Communication, **ASI09** Human-Agent Trust Exploitation, **ASI10** Rogue Agents.
@@ -27,4 +27,4 @@ Where an incident's root cause is a specific disclosed vulnerability, the entry 
 
 ## In one line
 
-OWASP ASI catalogs the agentic weakness classes, CVE catalogs the specific software vulnerabilities, and AREDB is the registry of real agent-failure incidents mapped onto both, each classified by the control architecture it requires, with any vendor coverage claim recorded and marked as a claim.
+OWASP ASI catalogs the agentic weakness classes, CVE catalogs the specific software vulnerabilities, and AREDB is the registry of real agent-failure incidents mapped onto both, each classified by the control domain that owns it, with any vendor coverage claim recorded and marked as a claim.

@@ -8,7 +8,8 @@ Open a pull request adding an entry to [`data/incidents.yaml`](data/incidents.ya
 
 - A **real, cited incident** with a working source URL. Prefer a **first-party** source (the involved organization's own disclosure, or the primary record) over secondary reporting. When more than one authoritative account exists, use a `sources:` list instead of `source:`, labelling each `kind: first-party` or `kind: reporting` (see `ARE-2026-033`).
 - The **two-axis classification** (`failure_mode` x `confusion_vector`); see [`TAXONOMY.md`](TAXONOMY.md).
-- An honest **coverage class** (`action_coverable`, `needs_judge_or_org`, or `other_discipline`): the control discipline the failure requires, a registry fact. If you also add a vendor coverage claim (below), do not claim a deterministic block that does not exist. The honesty is the point of this database.
+- A neutral **control domain** (one of: `Action mediation`, `Output grounding & verification`, `Model alignment & content safety`, `Environmental isolation`, `Identity & access`, `Data governance`, `Multi-agent coordination`): the generic discipline that owns the failure, a registry fact, named as the field already knows it. The action layer is one discipline among peers.
+- An honest **coverage class** (`action_coverable`, `needs_judge_or_org`, or `other_discipline`): the action layer's own view of whether a deterministic rule reaches the failure. It gates a vendor block claim, so do not mark `action_coverable` unless a deterministic rule genuinely reaches it, and if you add a vendor coverage claim (below) do not claim a block that does not exist. The honesty is the point of this database.
 
 **What qualifies.** An ARE incident is a real, publicly reported failure with **material consequences**: data loss, a security breach, financial or resource harm, or a comparable catastrophic outcome. A routine model mistake with no real-world consequence (a weak answer, an ordinary hallucination, a style complaint) is below the threshold and is declined. The bar is consequence and citation, not novelty; a harmful, cited hallucination qualifies, an ordinary one does not.
 
@@ -39,8 +40,8 @@ meta:
 ```
 
 **Step 2 -- add your claim to the entry,** namespaced with that prefix so a reader can always tell
-whose claim is whose. The registry fields (`owasp_asi`, `coverage_class`, and the rest) are facts
-about the incident and are not yours to change:
+whose claim is whose. The registry fields (`owasp_asi`, `control_domain`, `coverage_class`, and the rest) are maintained
+by the registry and are not yours to change:
 
 ```yaml
   - id: ARE-2026-001
