@@ -10,6 +10,18 @@ an entry's content or its status (`confirmed` / `disputed` / `withdrawn`), never
 
 Dates are ISO-8601 (UTC). The format loosely follows Keep a Changelog.
 
+## [1.5.0] - 2026-07-27
+
+### Changed (schema + tooling): a neutral, generic control-domain axis; the index leads with it
+
+The registry's primary neutral classification is now the **control domain** -- the generic, vendor-agnostic discipline that owns a failure -- with the action layer as one discipline among peers rather than the frame. The prior `coverage_class` axis (`action_coverable` / `needs_judge_or_org` / `other_discipline`) is *an action firewall's own architecture*; leading with it quietly centered the maintainer's product on a neutral registry. It stays in the schema (it gates a vendor's block claim) but no longer renders on the neutral surfaces.
+
+- **New `control_domain` field (taxonomy 1.4)** on every entry: `Action mediation`, `Output grounding & verification`, `Model alignment & content safety`, `Environmental isolation`, `Identity & access`, `Data governance`, or `Multi-agent coordination`. Named as the field already knows the disciplines, not branded AREDB-anything. `validate()` fails loud on a missing/unknown value and on a `meta.control_domains` rollup that does not equal the real counts.
+- **The index leads with the shared taxonomy.** Columns are now `OWASP ASI | ID | Incident | Control domain`, sorted by OWASP ASI. The `Vendor claims` column is dropped from the index: it named only the maintainer and would grow out of proportion, and removing it keeps the shared index a purely neutral registry fact. Vendor claims still render, attributed and namespaced, in the fenced section on each entry page.
+- **`coverage_class` demoted, not removed.** It comes off the index and the entry-page header (pages now lead with the neutral control domain) and is documented as the action layer's own reachability view. It still gates a vendor block claim (a block requires `action_coverable`).
+- **The non-ASI reliability bucket is now `AREDB-Reliability`.** In the OWASP ASI column it renders `AREDB-Reliability` with a footnote: a category AREDB proposes for reliability failures the OWASP ASI Top 10 has no home for (false completion, output fabrication), to be realigned if OWASP ASI ratifies a matching category.
+- **Docs synced.** README ("At a glance", "How incidents are classified", and the tagline / conflict-of-interest / scope prose), CONTRIBUTING (the required fields), TAXONOMY (the version + the neutral axis), and RELATION-TO-STANDARDS (control domain named as the primary axis; its ASI-boundary section reframed as the narrower action-layer reachability view) all describe the control domain as the neutral classification.
+
 ## [1.4.0] - 2026-07-25
 
 ### Changed (tooling + schema): the vendor-claims column is genuinely multi-vendor
@@ -309,6 +321,7 @@ either backed by a repro you can run or honestly marked as not ours.
   `ARE Incident Database (AREDB), aredb.org`, with the `ARE-YYYY-NNN` identifiers
   kept intact.
 
+[1.5.0]: https://github.com/vdalal/ARE-Incident-Database/releases/tag/v1.5.0
 [1.4.0]: https://github.com/vdalal/ARE-Incident-Database/releases/tag/v1.4.0
 [1.3.0]: https://github.com/vdalal/ARE-Incident-Database/releases/tag/v1.3.0
 [1.2.1]: https://github.com/vdalal/ARE-Incident-Database/releases/tag/v1.2.1
