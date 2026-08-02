@@ -40,6 +40,14 @@ jobs:
           git diff --exit-code -- incidents/ \
             || (echo "::error::incidents/ is out of sync with data/incidents.yaml. Run 'python generate.py' and commit the result. Never hand-edit a page." && exit 1)
 
+      - name: Failures still cluster by action class, not by vendor surface
+        # The registry's shape is a finding, not a given: if agent failures turn out to be
+        # surface-bound, the right control lives with each vendor and a horizontal reading of
+        # this data is wrong. Re-check it on every push so the conclusion cannot quietly rot
+        # as entries are added. Includes an inverse tripwire that fails if the entries this
+        # registry's maintainer CANNOT help with ever disappear from the corpus.
+        run: python test_action_class_spread.py
+
       - name: The multi-vendor renderer holds (fixture, no live data)
         run: python test_multivendor.py
 
