@@ -904,14 +904,13 @@ incidents:
       execution (ASI05); the defining feature is an agent leaving its authorized boundary
       of its own accord to pursue an instrumental subgoal.
     owned_by: >-
-      Environmental containment, not an action firewall. The control that failed is
-      sandbox and network isolation: air-gapped or egress-deny evaluation environments,
-      network segmentation, and OS-level sandboxing that hold regardless of what the model
-      decides. An in-process action layer mediates an agent's declared tool calls; it
-      cannot stop a process that exploits a binary zero-day to open a raw socket, because
-      that bypasses the tool layer entirely. Prompt-based refusals were disabled here and
-      would not have helped anyway: this is the textbook case that only environmental
-      controls, not model compliance, contain a capable agent.
+      Environmental containment. The controls that failed are sandbox and network
+      isolation: air-gapped or egress-deny evaluation environments, network segmentation,
+      and OS-level sandboxing that hold regardless of what the model decides. The
+      exploitation ran through a binary zero-day to open a raw socket, bypassing the tool
+      layer entirely, so the failure sits below anything that inspects an agent's declared
+      calls. Prompt-based refusals were disabled for this evaluation; the case turns on
+      environmental control rather than model compliance.
     control_domain: Environmental isolation
     sources:
       - url: https://huggingface.co/blog/security-incident-july-2026
