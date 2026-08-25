@@ -389,9 +389,41 @@ def render_index(incidents):
            "discipline that owns the failure, where the action layer is one discipline among "
            "peers. Whether a specific product stops a given failure is a vendor claim, not a "
            "registry finding, and is recorded per entry on each page.",
-           "",
-           "| OWASP ASI | ID | Incident | Control domain |",
-           "|---|---|---|---|"]
+           ""]
+
+    # SELECTION DISCLOSURE -- generated from the entries, so it cannot drift from them.
+    #
+    # Field-level neutrality is not enough on its own. A registry can be neutral in every
+    # sentence and still lean through WHICH incidents it holds. This maintainer sells action
+    # mediation, so the corpus will tend to follow its vantage point whether or not the field
+    # does, and a reader cannot tell those two apart from the outside. Stating the shape --
+    # including the domains holding nothing -- makes it checkable rather than something taken
+    # on trust, and tells a contributor where an entry is worth most. A thin column is an
+    # invitation, not an embarrassment.
+    counts = {d: 0 for d in CONTROL_DOMAIN}
+    for i in incidents:
+        cd = i.get("control_domain")
+        if cd in counts:
+            counts[cd] += 1
+    total = len(incidents) or 1
+    lead, lead_n = max(counts.items(), key=lambda kv: kv[1])
+    thin = sorted(d for d, n in counts.items() if n <= 1 and d != lead)
+    thin_txt = ", ".join(f"{d} ({counts[d]})" for d in thin) or "none"
+    out += [
+        f"**Where this registry is thin.** {lead_n} of {total} entries sit under "
+        f"**{lead}**. Read that as a fact about who has filed so far, not about where agents "
+        "fail. The registry is young, its maintainer works in that discipline (disclosed in "
+        "full at the top of [`data/incidents.yaml`](../data/incidents.yaml)), and a young "
+        "registry looks like whoever started it. This paragraph is generated from the entries, "
+        "so the shape moves as others file.",
+        "",
+        f"Holding one entry or none: {thin_txt}. **An entry in those columns shifts this more "
+        "than another one in the crowded column.** Anyone may file -- see "
+        "[CONTRIBUTING.md](../CONTRIBUTING.md). The bar is a real incident with material "
+        "consequences and a checkable public source. It is not agreement with the maintainer.",
+        "",
+        "| OWASP ASI | ID | Incident | Control domain |",
+        "|---|---|---|---|"]
     for i in rows:
         # A disputed/withdrawn entry stays in the index (id never disappears) but is
         # marked so a reader is not misled by a normal-looking row.
