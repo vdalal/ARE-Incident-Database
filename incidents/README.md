@@ -22,6 +22,7 @@ Each incident is a registry fact: its OWASP ASI category (the shared industry ta
 | `ASI03` | [ARE-2026-004](ARE-2026-004.md) | Credential read-and-exfiltrate via hijacked agent (state-sponsored Claude Code hijack) | Action mediation |
 | `ASI03` | [ARE-2026-018](ARE-2026-018.md) | Privilege-escalating retries to bypass a denial (destructive retry escalation) | Action mediation |
 | `ASI04` | [ARE-2026-011](ARE-2026-011.md) | Installation of a hallucinated or look-alike dependency (react-codeshift slopsquat) | Action mediation |
+| `ASI04` | [ARE-2026-034](ARE-2026-034.md) | Credential-stealing worm persisted through the agent's own config file (PyPI lightning, Mini Shai-Hulud, ChainDrop) | Environmental isolation |
 | `ASI05` | [ARE-2026-007](ARE-2026-007.md) | Remote-code execution via download-piped-to-shell (Clinejection supply-chain attack) | Action mediation |
 | `ASI06` | [ARE-2026-030](ARE-2026-030.md) | Action on stale lineage data (stale lineage hallucination) | Data governance |
 | `ASI07` | [ARE-2026-031](ARE-2026-031.md) | Conflicting state between cooperating agents (A2A state conflicts) | Multi-agent coordination |
