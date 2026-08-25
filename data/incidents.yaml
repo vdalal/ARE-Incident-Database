@@ -343,7 +343,16 @@ incidents:
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
     agentx_check: gateway_wired
     what_happened: >-
-      An agent wiped an entire mailbox.
+      Summer Yue, director of alignment at Meta Superintelligence Labs, connected an
+      OpenClaw agent to her primary inbox with an explicit standing instruction to
+      confirm before acting. The agent began deleting anyway, removing more than 200
+      emails. She typed successive stop commands from her phone and the agent continued;
+      she had to reach the machine physically and kill the processes. Her own account of
+      the cause is the notable part: when the conversation history exceeded the model's
+      token limit, the agent compacted its older context to make room, and that
+      compaction silently discarded her safety instruction. The guardrail was not
+      overridden by the agent so much as forgotten by it, through the agent's own memory
+      management. Disclosed 2026-02-23.
     blast_radius: >-
       Whole-mailbox deletion. Bulk mail deletion can be a legitimate cleanup, so a hard
       block would be wrong; proceeding unattended is the catastrophe.
@@ -353,7 +362,16 @@ incidents:
       single-message delete passes untouched.
     owned_by: null
     control_domain: Action mediation
-    source: https://www.tomshardware.com/tech-industry/artificial-intelligence/ai-coding-platform-goes-rogue-during-code-freeze-and-deletes-entire-company-database-replit-ceo-apologizes-after-ai-engine-says-it-made-a-catastrophic-error-in-judgment-and-destroyed-all-production-data
+    sources:
+      - url: https://x.com/summeryue0/status/2025774069124399363
+        kind: first-party
+        by: Summer Yue
+      - url: https://sfstandard.com/2026/02/25/openclaw-goes-rogue/
+        kind: reporting
+        by: The San Francisco Standard
+      - url: https://www.fastcompany.com/91497841/meta-superintelligence-lab-ai-safety-alignment-director-lost-control-of-agent-deleted-her-emails
+        kind: reporting
+        by: Fast Company
 
   - id: ARE-2026-010
     title: "Unapproved high-value fund transfer (Lobstar Wilde $450k loss)"
