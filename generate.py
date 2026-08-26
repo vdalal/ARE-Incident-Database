@@ -90,9 +90,9 @@ COVERAGE_LABEL = {
 VENDOR_COVERAGE_VALUES = {"covered", "partial", "judge_or_org", "out_of_scope"}
 VENDOR_BLOCK_CLAIMS = {"covered", "partial"}
 # The TWO VERIFICATION LEVELS, open to every vendor on identical terms.
-#   ci_verified     -- ships a snippet this registry EXECUTES on every push. Counts toward coverage.
+#   ci_verified     -- ships a snippet this registry EXECUTES on every push. Proven here.
 #   vendor_attested -- the vendor verified it against its own component; the registry does NOT run
-#                      it. Rendered and labelled, but does NOT count toward coverage.
+#                      it. Rendered and labelled as such, and not proven here.
 # These replaced `keyless_pip` / `gateway_wired`, which named the MAINTAINER's mechanisms (pip, the
 # AgentX gateway) and so could not honestly be offered to anyone else. A level is a property of the
 # EVIDENCE, not of whose product produced it.
@@ -117,18 +117,21 @@ VENDOR_DISCLAIMER = (
 # Shown on an entry that NO vendor has claimed, so every page shows the column is open rather than
 # leaving boundary and judge pages silent. This is the registry's own open-participation line, not
 # a vendor claim, so it names no product.
-# SCOPED on purpose: "runs on every push" is true of INSTALL-ONLY checks, not of every claim. A
-# component-wired claim ships no snippet, so test_repros.py has nothing to execute and skips it.
-# Stating the CI rule unscoped, in the terms we offer a rival, advertises a bar the maintainer's own
-# rows do not all meet. Written imperatively (ship / say / withdraw) because this text is read by
-# someone deciding whether to file a claim, and a list of obligations is more useful to them than a
-# description of the policy.
+# SCOPED, and in the CURRENT vocabulary. TWO claims went stale in this one string in a single
+# session. First it stated the CI rule unscoped, when "runs on every push" is true of ci_verified
+# claims and not of all 25. Then the retraction of "counts toward the totals" landed in README,
+# TAXONOMY, CHANGELOG, incidents.yaml and BOTH renderer strings -- and not here. One claim, six
+# places, five fixed, and the one missed is the text rendered onto every unclaimed page and read by
+# a rival deciding whether to file. Grep the CLAIM, never the string you just edited.
+#
+# Written imperatively (ship / verify / withdraw) because the reader is deciding whether to file, and
+# a list of obligations serves them better than a description of policy.
 VENDOR_INVITATION = (
     "_No vendor has claimed to address this failure. Any vendor may add a claim under its own "
     "prefix, on the same terms as the maintainer ([CONTRIBUTING.md](../CONTRIBUTING.md)). Ship a "
-    "snippet this registry runs on every push and your claim counts toward coverage; verify it "
-    "yourself against your own component and it renders labelled as vendor-attested, outside the "
-    "totals. A claim whose check stops passing is withdrawn, not reworded._"
+    "snippet and this registry runs it on every push, so the claim is proven here; verify it "
+    "yourself against your own component instead and it renders labelled as vendor-attested, which "
+    "this registry does not execute. A claim whose check stops passing is withdrawn, not reworded._"
 )
 
 # Source provenance labels. A registry prefers a FIRST-PARTY disclosure (the involved org's own
@@ -450,6 +453,18 @@ def render(inc, vendors):
     lines.append("")
     lines.append(vs.strip())
     lines.append("")
+    # NON-AFFILIATION FOOTER. This page leads with `**OWASP ASI:** ASInn ...` in its ticket header,
+    # and it is the page a cited ARE-YYYY-NNN link resolves to. A reader arriving that way never
+    # sees the repo README, which is where the disclaimer used to live alone. The association
+    # travels with the page, so the disclaimer has to travel with it too.
+    lines.append("---")
+    lines.append("")
+    lines.append(
+        "_AREDB is not an OWASP project and is not affiliated with or endorsed by OWASP. It indexes "
+        "onto the ASI Top 10 because that is the vocabulary the field is standardizing on. "
+        "See [`RELATION-TO-STANDARDS.md`](../RELATION-TO-STANDARDS.md)._"
+    )
+    lines.append("")
     return "\n".join(lines)
 
 
@@ -465,6 +480,14 @@ def render_index(incidents):
            "discipline that owns the failure, where the action layer is one discipline among "
            "peers. Whether a specific product stops a given failure is a vendor claim, not a "
            "registry finding, and is recorded per entry on each page.",
+           "",
+           # NON-AFFILIATION BELONGS ON THE GENERATED SURFACES TOO. The disclaimer lives in the repo
+           # README, and a reader arriving from a cited ARE-YYYY-NNN link lands here or on an entry
+           # page and never sees it -- while every one of these rows leads with an OWASP ASI
+           # category. The disclaimer has to travel with the pages that carry the association.
+           "_AREDB is not an OWASP project and is not affiliated with or endorsed by OWASP. It "
+           "indexes onto the ASI Top 10 because that is the vocabulary the field is standardizing "
+           "on. See [`RELATION-TO-STANDARDS.md`](../RELATION-TO-STANDARDS.md)._",
            ""]
 
     # SELECTION DISCLOSURE -- generated from the entries, so it cannot drift from them.
@@ -538,9 +561,14 @@ def vendor_prefixes(inc):
 
 
 def repro_call_for(inc, prefix):
-    """The structured runnable repro for a vendor's CI-verified claim. The maintainer's (agentx)
-    repro is the historical un-namespaced `repro_call`; a future vendor would namespace it
-    `<prefix>_repro_call`."""
+    """The maintainer's structured repro: the historical un-namespaced `repro_call`.
+
+    ⚠️ THE NON-AGENTX BRANCH IS CURRENTLY DEAD, and the docstring used to invite a contributor into
+    it ("a future vendor would namespace it `<prefix>_repro_call`"). Nothing reads that field any
+    more: `has_ci_snippet` only consults this for `agentx`, and `generic_vendor_block` embeds
+    `<prefix>_repro` and nothing else. A third-party `acme_repro_call` is therefore REJECTED with
+    "ships no snippet". Kept as a stub rather than deleted so the prefix-shaped call sites read
+    uniformly; if a vendor ever needs a structured repro, the RENDERER is what has to change first."""
     if prefix == "agentx":
         return inc.get("repro_call")
     return inc.get(f"{prefix}_repro_call")
@@ -656,8 +684,8 @@ def validate(doc, check_readme=True):
             elif chk == CI_VERIFIED and not has_ci_snippet(inc, p):
                 errors.append(
                     f"{eid}: {p}_check=ci_verified but ships no snippet for the registry to "
-                    f"execute. Ship one, or declare vendor_attested and accept that the claim "
-                    f"does not count toward coverage; see CONTRIBUTING.md"
+                    f"execute. Ship one, or declare vendor_attested and accept that this registry "
+                    f"will not execute the claim; see CONTRIBUTING.md"
                 )
 
         if cc in ("needs_judge_or_org", "other_discipline") and not (inc.get("owned_by") or "").strip():
@@ -724,14 +752,28 @@ def validate(doc, check_readme=True):
     # was missing. Cheap here because both files live in this repo; the site's copy of these numbers
     # is a separate repo and needs its own cross-repo tripwire.
     readme = os.path.join(HERE, "README.md")
-    if check_readme and os.path.exists(readme):
+    if check_readme and not os.path.exists(readme):
+        # A guard whose missing input reads as a pass is not a guard. README.md is a required file
+        # in this repo, so its absence is a broken checkout or a rename, never a reason to skip.
+        errors.append("README.md is missing, so the At-a-glance reconciliation could not run")
+    elif check_readme:
         with open(readme, encoding="utf-8") as fh:
             rtext = fh.read()
 
         def readme_count(label_re):
-            """The bolded count in the README row whose label matches. None if there is no such row."""
-            m = re.search(r"^\|\s*%s[^|]*\|\s*\*\*(\d+)\*\*\s*\|" % label_re, rtext, re.M)
-            return int(m.group(1)) if m else None
+            """The bolded count in the README row whose label matches. None if there is no such row.
+
+            Asserts the match is UNIQUE. The search is not anchored to the At-a-glance section, so a
+            future row whose label merely starts with one of these patterns, appearing earlier in the
+            file, would silently become the value checked. Two matches means the guard can no longer
+            tell which row is authoritative, and that is a failure, not a coin flip."""
+            found = re.findall(r"^\|\s*%s[^|]*\|\s*\*\*(\d+)\*\*\s*\|" % label_re, rtext, re.M)
+            if len(found) > 1:
+                errors.append(
+                    f"README: {len(found)} rows match {label_re!r}; the guard cannot tell which is "
+                    "authoritative. Make the labels unique or anchor the search."
+                )
+            return int(found[0]) if found else None
 
         asi_mapped = sum(1 for i in incidents if str(i.get("owasp_asi") or "").startswith("ASI"))
         glance = {
@@ -763,6 +805,19 @@ def validate(doc, check_readme=True):
                 )
             elif got != want:
                 errors.append(f"README control-domain {dom!r} = {got} but the real count is {want}")
+
+        # AND THE OTHER DIRECTION: every ROW must be a real domain. Checking only "every domain has
+        # a row" caught the UNDER-count half of the bug and let the OVER-count half through: an
+        # invented row passed green, and the table could sum to more than Total incidents. The
+        # meta.control_domains check below has always been bidirectional; this one was not, and a
+        # guard written from a single remembered failure tends to cover only that failure's polarity.
+        for m in re.finditer(r"^\|\s*\*\*([^*|]+?)\*\*[^|]*\|\s*\*\*(\d+)\*\*\s*\|", rtext, re.M):
+            listed = m.group(1).strip()
+            if listed not in real_domains:
+                errors.append(
+                    f"README control-domain table lists {listed!r}, which no incident uses. "
+                    "The table would sum to more than the registry holds."
+                )
 
     # Neutral control-domain rollups (a nested map in meta): every listed domain's count must match
     # the real count, and every domain that occurs must be listed, so the "At a glance" table on the

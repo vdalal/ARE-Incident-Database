@@ -57,6 +57,7 @@ Every incident carries its **OWASP ASI category** (the shared industry taxonomy)
 - **Data governance**: freshness, lineage, and retrieval correctness.
 - **Multi-agent coordination**: state consistency between cooperating agents.
 - **Identity & access**: authorization, privilege, and blast-radius limits.
+- **Supply chain integrity**: what the agent installs or executes, and where it came from.
 
 Each entry also carries a finer, action-layer-specific field, `coverage_class` (`action_coverable` / `needs_judge_or_org` / `other_discipline`): the action firewall's own view of whether a deterministic rule reaches the failure. It gates a vendor's block claim and is not a neutral registry finding, so it does not lead the entry pages or the index.
 
@@ -77,7 +78,7 @@ Below the registry facts, an entry may carry a fenced **Vendor coverage claims**
 - The registry's facts (the incident, its OWASP ASI category, its control domain) are vendor-neutral. They do not name a product.
 - AgentX Core's coverage claims are namespaced (`agentx_coverage`, `agentx_check`, `agentx_response`) and rendered only in the fenced "Vendor coverage claims" section on each entry, never in the facts. Its full claim, including what it does not stop, lives on its own site at [agentx-core.com/aredb](https://agentx-core.com/aredb).
 - Every claim declares one of two verification levels, and both are open to every vendor. **CI-verified** claims ship a snippet this registry runs on every push, so only these are proven here. **Vendor-attested** claims are verified by the vendor against its own component and are labelled as such on the entry.
-- The maintainer gets no exemption. [`validate()`](generate.py) does not branch on who is claiming, and a claim that stops passing is **withdrawn, not reworded** ([`GOVERNANCE.md`](GOVERNANCE.md)).
+- The maintainer gets no exemption. The requirement is identical for every vendor, and only the field name the renderer reads differs; there is no level, and no path, available to the maintainer that is not available to you. A claim that stops passing is **withdrawn, not reworded** ([`GOVERNANCE.md`](GOVERNANCE.md)).
 
 **Any vendor may add a claim** under its own prefix (`<vendor>_coverage`, and so on), on exactly the same terms. The registry records what was claimed, by whom, and whether the check still passes. It does not rank vendors and it does not endorse them. See [`CONTRIBUTING.md`](CONTRIBUTING.md).
 

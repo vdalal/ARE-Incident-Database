@@ -2,6 +2,8 @@
 
 Short version: **OWASP ASI is the weakness taxonomy; AREDB is the incident registry underneath it.** AREDB indexes onto the established standards. It does not compete with them.
 
+> **AREDB is not an OWASP project, and is not affiliated with or endorsed by OWASP.** It indexes onto the ASI Top 10 the way any registry indexes onto a taxonomy someone else maintains. Nothing on this page implies a relationship beyond that. The same applies to CVE and CWE, referenced here and maintained by MITRE.
+
 ## OWASP ASI is the map. AREDB is the incidents plus the patch.
 
 The OWASP Agentic Security Initiative's **Top 10 for Agentic Applications (ASI01 through ASI10)** is the industry's peer-reviewed taxonomy of *what can go wrong* with an autonomous agent. It is the CWE / Top-10 layer for agents: the categories, the theory, the shared vocabulary.

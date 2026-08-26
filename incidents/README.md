@@ -2,6 +2,8 @@
 
 Each incident is a registry fact: its OWASP ASI category (the shared industry taxonomy), a permanent id, what happened, and the neutral control domain -- the discipline that owns the failure, where the action layer is one discipline among peers. Whether a specific product stops a given failure is a vendor claim, not a registry finding, and is recorded per entry on each page.
 
+_AREDB is not an OWASP project and is not affiliated with or endorsed by OWASP. It indexes onto the ASI Top 10 because that is the vocabulary the field is standardizing on. See [`RELATION-TO-STANDARDS.md`](../RELATION-TO-STANDARDS.md)._
+
 **Where this registry is thin.** 20 of 34 entries sit under **Action mediation**. Read that as a fact about who has filed so far, not about where agents fail. The registry is young, its maintainer works in that discipline (disclosed in full at the top of [`data/incidents.yaml`](../data/incidents.yaml)), and a young registry looks like whoever started it. This paragraph is generated from the entries, so the shape moves as others file.
 
 Holding one entry or none: Data governance (1), Environmental isolation (1), Model alignment & content safety (1), Multi-agent coordination (1). **An entry in those columns shifts this more than another one in the crowded column.** Anyone may file -- see [CONTRIBUTING.md](../CONTRIBUTING.md). The bar is a real incident with material consequences and a checkable public source. It is not agreement with the maintainer.

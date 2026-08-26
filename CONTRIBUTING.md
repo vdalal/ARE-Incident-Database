@@ -64,11 +64,11 @@ by the registry and are not yours to change:
 
 `acme_check` is the verification level, and it is the same choice the maintainer makes:
 
-- **`ci_verified`** ships `acme_repro`, this registry executes it on every push, and the claim counts
-  toward the coverage totals. Declaring this without a snippet is rejected.
+- **`ci_verified`** ships `acme_repro`, this registry executes it on every push, and the claim is
+  proven here. Declaring this without a snippet is rejected.
 - **`vendor_attested`** means you verify the claim against your own component. It renders labelled
-  as not executed here, and it does not count toward the totals. No snippet is published, because a
-  published snippet is a snippet CI runs.
+  as not executed by this registry. No snippet is published, because a published snippet is a
+  snippet CI runs.
 
 Your `acme_repro` is the runnable proof, embedded verbatim on the page and executed by CI. It
 installs your product, runs the incident's attack, and asserts the block fired and the tool body
@@ -92,9 +92,9 @@ keys the contract off the SDK the snippet imports.)
 **The terms, which are the same for everyone:**
 
 - **A block claim declares one of two verification levels, and both are open to you.**
-  `ci_verified` ships a self-verifying snippet this registry runs on every push and weekly, and it
-  counts toward the coverage totals. `vendor_attested` is verified by you against your own
-  component, renders labelled as such, and does not count toward the totals. Declaring
+  `ci_verified` ships a self-verifying snippet this registry runs on every push and weekly, so the
+  claim is proven here. `vendor_attested` is verified by you against your own component and renders
+  labelled as such, which this registry does not execute. Declaring
   `ci_verified` without a runnable snippet is rejected, for every vendor including the maintainer.
   A claim that only holds when someone remembers to run it is a hope, not a claim.
 - **A claim that stops holding is withdrawn, not reworded.** If the check goes red, the entry is

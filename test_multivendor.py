@@ -76,9 +76,12 @@ def main():
         problems = ""
     except SystemExit as e:
         problems = str(e)
+    # ONE substring, not two ANDed. The joined message carries several errors, so "acme" and
+    # "not declared in meta.vendors" could come from two DIFFERENT lines and still pass. Matching
+    # the whole phrase forces both halves to come from the same error.
     check(
         "undeclared vendor fails validation, and the error names it",
-        "acme" in problems and "not declared in meta.vendors" in problems,
+        "'acme' is not declared in meta.vendors" in problems,
     )
 
     # The other polarity: declaring the vendor clears THAT error specifically. Whatever else the

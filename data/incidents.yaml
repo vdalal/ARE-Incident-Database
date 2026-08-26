@@ -36,10 +36,9 @@
 #   Namespaced by vendor. AgentX Core's claim uses the `agentx_` prefix:
 #     agentx_coverage:  covered | partial | judge_or_org | out_of_scope
 #     agentx_check:     ci_verified     (ships a snippet THIS REGISTRY executes on every push;
-#                                        counts toward coverage)
+#                                        proven here)
 #                       vendor_attested (the vendor verified it against its own component; the
-#                                        registry does NOT execute it and it does NOT count
-#                                        toward coverage)
+#                                        registry does NOT execute it, so it is not proven here)
 #                       none            (not a coverable entry)
 #                     The two levels are VERIFICATION LEVELS, open to every vendor on identical
 #                     terms, and they replaced `keyless_pip` / `gateway_wired`, which named the

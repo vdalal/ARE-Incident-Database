@@ -2,9 +2,10 @@ cff-version: 1.2.0
 title: "Agent Reliability Engineering Database (AREDB)"
 abstract: >-
   A public registry of catastrophic autonomous-agent failures, indexed onto the
-  OWASP Agentic Security Initiative Top 10. Each incident carries a stable
-  ARE-YYYY-NNN identifier, a cited source, and a coverage class stating the control
-  architecture the failure requires. Vendor coverage claims, where present, are
+  OWASP Agentic Security Initiative Top 10. AREDB is independent and is not
+  affiliated with or endorsed by OWASP. Each incident carries a stable
+  ARE-YYYY-NNN identifier, a cited source, and a control domain naming the
+  discipline that owns the failure. Vendor coverage claims, where present, are
   recorded per entry and marked as claims, not registry findings.
   Cite the identifiers (e.g. ARE-2026-001) as the shared reference for the field.
 message: >-
