@@ -2,7 +2,7 @@
 
 [![repros](https://github.com/vdalal/ARE-Incident-Database/actions/workflows/repros.yml/badge.svg)](https://github.com/vdalal/ARE-Incident-Database/actions/workflows/repros.yml)
 
-**A public registry of real, cited agent failures. Each carries a stable `ARE-YYYY-NNN` identifier, is indexed onto its OWASP Agentic Security Initiative (ASI) Top 10 category, and is classified by the control domain that owns it.**
+**A public registry of real, cited agent failures. Each carries a stable `ARE-YYYY-NNN` identifier, an OWASP Agentic Security Initiative (ASI) Top 10 category where one fits, and the control domain that owns it.**
 
 > **AREDB is not an OWASP project.** It is independent, and it is not affiliated with or endorsed by OWASP. It indexes onto the [ASI Top 10](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/) because that is the vocabulary the field is standardizing on. See [`RELATION-TO-STANDARDS.md`](RELATION-TO-STANDARDS.md).
 
@@ -65,7 +65,7 @@ On top of the OWASP category, each entry also carries AREDB's finer two-axis cla
 
 ## How to read an entry
 
-Each incident lives at [`incidents/ARE-2026-NNN.md`](incidents/) and states, as registry facts: what happened, the blast radius, the severity, the OWASP ASI category, the control domain, and, where no deterministic rule applies, which discipline owns it. Machine-readable source of record: [`data/incidents.yaml`](data/incidents.yaml).
+Each incident lives at [`incidents/ARE-2026-NNN.md`](incidents/) and states, as registry facts: what happened, the blast radius, the severity, its OWASP ASI category (or the `AREDB-Reliability` bucket where the ASI Top 10 has no category for it), the control domain, and, where no deterministic rule applies, which discipline owns it. Machine-readable source of record: [`data/incidents.yaml`](data/incidents.yaml).
 
 Every entry also carries a **status**, `confirmed` by default. Per [`GOVERNANCE.md`](GOVERNANCE.md), a `disputed` or `withdrawn` entry keeps its `ARE-YYYY-NNN` id forever and is marked in place, never deleted, so any citation always resolves.
 
@@ -77,14 +77,14 @@ Below the registry facts, an entry may carry a fenced **Vendor coverage claims**
 
 - The registry's facts (the incident, its OWASP ASI category, its control domain) are vendor-neutral. They do not name a product.
 - AgentX Core's coverage claims are namespaced (`agentx_coverage`, `agentx_check`, `agentx_response`) and rendered only in the fenced "Vendor coverage claims" section on each entry, never in the facts. Its full claim, including what it does not stop, lives on its own site at [agentx-core.com/aredb](https://agentx-core.com/aredb).
-- Every claim declares one of two verification levels, and both are open to every vendor. **CI-verified** claims ship a snippet this registry runs on every push, so only these are proven here. **Vendor-attested** claims are verified by the vendor against its own component and are labelled as such on the entry.
+- Every block claim declares one of two verification levels, and both are open to every vendor. **CI-verified** claims ship a snippet this registry runs on every push, so only these are proven here. **Vendor-attested** claims are verified by the vendor against its own component and are labelled as such on the entry.
 - The maintainer gets no exemption. The requirement is identical for every vendor, and only the field name the renderer reads differs; there is no level, and no path, available to the maintainer that is not available to you. A claim that stops passing is **withdrawn, not reworded** ([`GOVERNANCE.md`](GOVERNANCE.md)).
 
 **Any vendor may add a claim** under its own prefix (`<vendor>_coverage`, and so on), on exactly the same terms. The registry records what was claimed, by whom, and whether the check still passes. It does not rank vendors and it does not endorse them. See [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## Scope and the living taxonomy
 
-Agent failure is an open, growing space, and its taxonomy is now the OWASP Agentic Security Initiative's (ASI01 through ASI10). AREDB does not compete with it. AREDB owns the **incident registry**: stable `ARE-YYYY-NNN` identifiers for real, cited events, each indexed onto its OWASP ASI category and classified by the control domain that owns it.
+Agent failure is an open, growing space, and its taxonomy is now the OWASP Agentic Security Initiative's (ASI01 through ASI10). AREDB does not compete with it. AREDB owns the **incident registry**: stable `ARE-YYYY-NNN` identifiers for real, cited events, each indexed onto its OWASP ASI category where one fits, and classified by the control domain that owns it.
 
 New incidents get an `ARE-YYYY-NNN` id and an OWASP ASI mapping as they surface, across every control domain, not only the ones a deterministic rule can reach. How the registry is governed as it grows (the ARE Numbering Authority, lane stewards, the honesty rule) is in [`GOVERNANCE.md`](GOVERNANCE.md).
 
