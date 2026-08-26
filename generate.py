@@ -448,6 +448,16 @@ def render_index(incidents):
         "[CONTRIBUTING.md](../CONTRIBUTING.md). The bar is a real incident with material "
         "consequences and a checkable public source. It is not agreement with the maintainer.",
         "",
+        # WHO FILED WHAT: git already knows, because entries arrive by pull request. Deliberately
+        # a link and not a `filed_by` field -- a second copy of something git owns is the drift
+        # this file has already been bitten by twice (the meta rollups, and the two taxonomies
+        # disagreeing). Point at the record; do not restate it.
+        "Entries arrive by pull request, so authorship is git's, not a field anyone can "
+        "self-declare: "
+        "[who has filed](https://github.com/vdalal/ARE-Incident-Database/graphs/contributors) "
+        "and [every change to an entry]"
+        "(https://github.com/vdalal/ARE-Incident-Database/commits/main/data/incidents.yaml).",
+        "",
         "| OWASP ASI | ID | Incident | Control domain |",
         "|---|---|---|---|"]
     for i in rows:

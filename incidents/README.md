@@ -6,6 +6,8 @@ Each incident is a registry fact: its OWASP ASI category (the shared industry ta
 
 Holding one entry or none: Data governance (1), Environmental isolation (1), Model alignment & content safety (1), Multi-agent coordination (1). **An entry in those columns shifts this more than another one in the crowded column.** Anyone may file -- see [CONTRIBUTING.md](../CONTRIBUTING.md). The bar is a real incident with material consequences and a checkable public source. It is not agreement with the maintainer.
 
+Entries arrive by pull request, so authorship is git's, not a field anyone can self-declare: [who has filed](https://github.com/vdalal/ARE-Incident-Database/graphs/contributors) and [every change to an entry](https://github.com/vdalal/ARE-Incident-Database/commits/main/data/incidents.yaml).
+
 | OWASP ASI | ID | Incident | Control domain |
 |---|---|---|---|
 | `ASI01` | [ARE-2026-005](ARE-2026-005.md) | Injection-driven sensitive-data exfiltration (EchoLeak, CVE-2025-32711) | Action mediation |
