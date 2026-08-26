@@ -99,9 +99,13 @@ meta:
   agentx_out_of_scope: 8
 
   # VERIFICATION LEVELS of the 25 claims above. Every vendor declares one of these two, on identical
-  # terms. ONLY `ci_verified` counts toward coverage on the neutral surfaces; `vendor_attested`
-  # claims render and are labelled, but are excluded from the coverage totals, because the registry
-  # does not execute them. validate() fails loud if either rollup drifts from the real counts.
+  # terms. Only `ci_verified` is PROVEN BY THIS REGISTRY; `vendor_attested` claims render, labelled,
+  # verified by the vendor against its own component. validate() fails loud if either rollup drifts.
+  #
+  # These are a SECOND AXIS, not a replacement for the claim counts above: `agentx_covered: 23` and
+  # `agentx_coverable: 25` still count all 25 claims, because what a vendor CLAIMS and how it is
+  # VERIFIED are different questions. Whether the published coverage totals should themselves narrow
+  # to the CI-verified 11 is open and not decided here. Do not "reconcile" these by editing one side.
   agentx_ci_verified: 11
   agentx_vendor_attested: 14
 

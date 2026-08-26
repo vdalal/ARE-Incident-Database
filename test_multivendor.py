@@ -21,10 +21,11 @@ TWO_VENDOR = {
     "coverage_class": "action_coverable",
     "control_domain": "Action mediation",
     "agentx_coverage": "covered",
-    "agentx_check": "keyless_pip",
+    "agentx_check": "ci_verified",
     "agentx_response": "AgentX denies the destructive call before it runs.",
     "repro_call": {"tool": "run_sql", "param": "query", "action": "db_write", "payload": '"DROP TABLE t;"'},
     "acme_coverage": "covered",
+    "acme_check": "ci_verified",
     "acme_response": "Acme Guard denies the destructive call before it runs.",
     "acme_repro": (
         "```bash\npip install acme-guard\n```\n\n"
@@ -60,13 +61,38 @@ def main():
     check("unclaimed entry names no product", "AgentX" not in inv and "Acme" not in inv)
 
     # An undeclared vendor must fail loud rather than render an anonymous claim.
+    #
+    # check_readme=False is LOAD-BEARING, not tidiness. validate() also reconciles the real README's
+    # "At a glance" tables against the incidents it is given, and this doc is a two-entry fixture, so
+    # with that block live EVERY README row mismatches and validate() raises SystemExit no matter
+    # what. The assertion below would then pass on README noise alone: deleting the undeclared-vendor
+    # rule entirely would not turn it red. A test that cannot fail is not a test.
+    # The assertion reads the MESSAGE, not merely that SystemExit was raised. This is a two-entry
+    # synthetic doc, so other rules fire on it too (it carries no sources, for one); "something
+    # raised" would stay green with the undeclared-vendor rule deleted outright.
     doc = {"meta": {"vendors": {"agentx": VENDORS["agentx"]}}, "incidents": [TWO_VENDOR]}
     try:
-        g.validate(doc)
-        raised = False
-    except SystemExit:
-        raised = True
-    check("undeclared vendor fails validation", raised)
+        g.validate(doc, check_readme=False)
+        problems = ""
+    except SystemExit as e:
+        problems = str(e)
+    check(
+        "undeclared vendor fails validation, and the error names it",
+        "acme" in problems and "not declared in meta.vendors" in problems,
+    )
+
+    # The other polarity: declaring the vendor clears THAT error specifically. Whatever else the
+    # fixture trips, this one rule must key off declaration and nothing incidental.
+    ok_doc = {"meta": {"vendors": VENDORS}, "incidents": [TWO_VENDOR]}
+    try:
+        g.validate(ok_doc, check_readme=False)
+        remaining = ""
+    except SystemExit as e:
+        remaining = str(e)
+    check(
+        "declaring the vendor clears that specific error",
+        "not declared in meta.vendors" not in remaining,
+    )
 
     print("multi-vendor fixture: all ok")
 

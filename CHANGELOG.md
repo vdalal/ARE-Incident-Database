@@ -38,8 +38,11 @@ no higher". A third party was in fact held higher.
   `ci_verified`, `gateway_wired` -> `vendor_attested`. The old names described the maintainer's own
   delivery (pip, the AgentX gateway) and so could not honestly be offered to a third party; a level
   describes the evidence, not whose product produced it. Both levels are open to every vendor.
-- **Only `ci_verified` counts toward coverage.** `vendor_attested` claims render, labelled on the
-  entry page as not executed here, and are excluded from the totals. The maintainer's split is
+- **Only `ci_verified` is proven by this registry.** `vendor_attested` claims render, labelled on
+  the entry page as not executed here. NOTE, and this is deliberately not overstated: the CLAIM
+  rollups (`agentx_covered: 23`, `agentx_coverable: 25`) still count all 25 claims, because a claim
+  and its verification level are two different axes. Whether the published coverage totals should
+  themselves narrow to the CI-verified 11 is a separate, open decision. The maintainer's split is
   **11 CI-verified and 14 vendor-attested**, and both are now meta rollups that `validate()` checks
   against the real counts.
 - Renderers label the two levels identically for the maintainer and for any other vendor, so a

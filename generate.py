@@ -259,8 +259,8 @@ def repro_block(inc):
         return (
             "**Check: vendor-attested.** This registry does NOT execute this one. The block runs "
             "in the AgentX gateway, so it does not fire from a bare `pip install`, and AgentX "
-            "verifies it against its own component. It does not count toward the CI-verified "
-            "coverage totals. The gateway is free and self-serve: pull it at "
+            "verifies it against its own component, so it is not included in the registry's "
+            "CI-verified count. The gateway is free and self-serve: pull it at "
             "[agentx-core.com/gateway](https://agentx-core.com/gateway) and run it locally to "
             "check this claim yourself.\n\n"
         )
@@ -349,8 +349,20 @@ def generic_vendor_block(inc, prefix, vendors):
     ]
     # Same two levels, same labels, same wording as the maintainer's block. A reader must be able to
     # tell CI-verified from vendor-attested without knowing or caring whose claim it is.
+    #
+    # KEYED OFF THE DECLARED LEVEL, NEVER OFF SNIPPET PRESENCE. Reading `if snippet:` here meant a
+    # vendor declaring `vendor_attested` who ALSO included an illustrative snippet got a page saying
+    # "This registry executes this snippet on every push", which is false. Worse, `test_repros.py`
+    # scrapes every python fence off every page regardless of level, so that snippet WAS executed and
+    # could redden the build under a label promising it never runs. The level is the claim; the
+    # snippet is evidence for one of the levels.
+    chk = inc.get(f"{prefix}_check")
     snippet = (inc.get(f"{prefix}_repro") or "").strip()
-    if snippet:
+    if chk == CI_VERIFIED:
+        if not snippet:
+            # validate() rejects this, so reaching it means validation was bypassed. Fail loud
+            # rather than render a verified badge over nothing (mirrors repro_block's posture).
+            raise KeyError(f"{inc['id']}: {prefix} is ci_verified but has no {prefix}_repro to render")
         out.append(
             f"**Check: CI-verified.** This registry executes this snippet on every push. It runs "
             f"against a real install and asserts the block fired and the tool body never executed, "
@@ -359,13 +371,15 @@ def generic_vendor_block(inc, prefix, vendors):
         out.append("")
         out.append(snippet)
         out.append("")
-    elif inc.get(f"{prefix}_check") == "vendor_attested":
+    elif chk == "vendor_attested":
         out.append(
             f"**Check: vendor-attested.** This registry does NOT execute this one. {v['name']} "
-            f"verifies it against its own component. It does not count toward the CI-verified "
-            f"coverage totals."
+            f"verifies it against its own component, so it is not included in the registry's "
+            f"CI-verified count."
         )
         out.append("")
+        # No snippet is embedded even when one exists: publishing it would put a python fence on the
+        # page, and test_repros.py runs every fence it finds.
     return "\n".join(out).rstrip()
 
 
@@ -533,21 +547,33 @@ def repro_call_for(inc, prefix):
 
 
 def has_ci_snippet(inc, prefix):
-    """Does this vendor ship something `test_repros.py` can actually execute?
+    """Will a snippet for this vendor actually be PUBLISHED and therefore EXECUTED?
 
-    Two shapes satisfy it, and they are equal under the rule: a STRUCTURED `repro_call` that the
-    renderer expands into a python fence (how the maintainer's founding entries are written), or a
-    verbatim self-verifying `<prefix>_repro` snippet (how any other vendor writes one). The
-    MECHANISM differs because the maintainer's pages predate multi-vendor support; the BAR does not.
-    Accepting only one shape would rebuild the maintainer-only exemption in a new place."""
-    if repro_call_for(inc, prefix):
-        return True
+    Deliberately asks what the RENDERER emits, not merely which field exists, because the two
+    renderers read different fields and accepting either for either prefix creates a hole:
+
+      * `agentx` -> `repro_block` renders `repro_call` and nothing else. Accepting a bare
+        `agentx_repro` here would pass validation and then make `repro_block` raise KeyError
+        mid-render, after pages have already been written.
+      * anyone else -> `generic_vendor_block` embeds `<prefix>_repro` and nothing else. Accepting a
+        structured `<prefix>_repro_call` here would pass validation and render a `ci_verified` claim
+        with NO snippet and NO check label at all -- an unverified claim wearing the verified badge,
+        which is the exemption this branch exists to delete, rebuilt one field over.
+
+    The BAR is identical for both. Only the field the renderer reads differs, and that is a fact
+    about the templates, not a concession to whoever is claiming."""
+    if prefix == "agentx":
+        return bool(repro_call_for(inc, prefix))
     return bool((inc.get(f"{prefix}_repro") or "").strip())
 
 
-def validate(doc):
+def validate(doc, check_readme=True):
     """Fail loud, and BEFORE any file is written, on anything that would render a wrong,
     contradictory, or partial page.
+
+    `check_readme=False` skips only the README reconciliation, for callers validating a SYNTHETIC or
+    PARTIAL doc (the multivendor fixture). Those docs legitimately hold two entries, so every README
+    row would mismatch and the raise would carry no information about the thing under test.
 
     The pre-1.3 single-field code got this for free: an unconditional `COVERAGE_LABEL[agentx_coverage]`
     subscript KeyError-ed on any bad value. Splitting the neutral `coverage_class` fact from the
@@ -698,7 +724,7 @@ def validate(doc):
     # was missing. Cheap here because both files live in this repo; the site's copy of these numbers
     # is a separate repo and needs its own cross-repo tripwire.
     readme = os.path.join(HERE, "README.md")
-    if os.path.exists(readme):
+    if check_readme and os.path.exists(readme):
         with open(readme, encoding="utf-8") as fh:
             rtext = fh.read()
 

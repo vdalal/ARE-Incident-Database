@@ -106,11 +106,11 @@ the vendor's namespace alongside it.
 
 - **ci_verified**: the claim ships a snippet **this registry executes** on every push. The entry
   page carries it and `test_repros.py` runs it, so the level is a tested assertion rather than an
-  editorial one. Only these count toward the coverage totals.
+  editorial one. Only these are proven by this registry.
 - **vendor_attested**: the vendor verified the claim against its own component, and this registry
   does **not** execute it. Stated explicitly so a claim never implies it reproduces standalone when
-  it does not, and excluded from the coverage totals for the same reason. This distinction is part
-  of the claim, not a footnote to it.
+  it does not, and not proven here for the same reason. This distinction is part of the claim, not
+  a footnote to it.
 - **none**: no verifiable check offered for this entry.
 
 Both levels are open to every vendor on identical terms. `validate()` applies the same rule to the
