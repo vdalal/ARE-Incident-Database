@@ -107,11 +107,18 @@ VENDOR_DISCLAIMER = (
 # Shown on an entry that NO vendor has claimed, so every page shows the column is open rather than
 # leaving boundary and judge pages silent. This is the registry's own open-participation line, not
 # a vendor claim, so it names no product.
+# SCOPED on purpose: "runs on every push" is true of INSTALL-ONLY checks, not of every claim. A
+# component-wired claim ships no snippet, so test_repros.py has nothing to execute and skips it.
+# Stating the CI rule unscoped, in the terms we offer a rival, advertises a bar the maintainer's own
+# rows do not all meet. Written imperatively (ship / say / withdraw) because this text is read by
+# someone deciding whether to file a claim, and a list of obligations is more useful to them than a
+# description of the policy.
 VENDOR_INVITATION = (
-    "_No vendor has claimed to address this failure. Any vendor that does may add a claim under "
-    "its own prefix, on the terms in [CONTRIBUTING.md](../CONTRIBUTING.md): a claim must ship a "
-    "check a stranger can run, that check runs on every push, and a claim that stops holding is "
-    "withdrawn, not reworded._"
+    "_No vendor has claimed to address this failure. Any vendor may add a claim under its own "
+    "prefix; the terms are in [CONTRIBUTING.md](../CONTRIBUTING.md). Ship a check anyone can run, "
+    "say whether it runs from a plain install or needs your own component running, and withdraw a "
+    "claim rather than reword it if the check stops passing. Install-only checks are executed on "
+    "every push._"
 )
 
 # Source provenance labels. A registry prefers a FIRST-PARTY disclosure (the involved org's own

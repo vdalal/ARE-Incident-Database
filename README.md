@@ -70,7 +70,7 @@ Below the registry facts, an entry may carry a fenced **Vendor coverage claims**
 
 - The registry's facts (the incident, its OWASP ASI category, its control domain) are vendor-neutral. They do not name a product.
 - AgentX Core's coverage claims are namespaced (`agentx_coverage`, `agentx_check`, `agentx_response`) and rendered only in the fenced "Vendor coverage claims" section on each entry, never in the facts. Its full claim, including what it does not stop, lives on its own site at [agentx-core.com/aredb](https://agentx-core.com/aredb).
-- The honesty rule is applied to the maintainer most strictly of all: no claim is listed unless it ships a check a stranger can run, the check runs on every push ([`test_repros.py`](test_repros.py) executes the exact snippet off each page and asserts the block fires *and* that the tool body never ran), and a claim that stops holding is **withdrawn, not reworded** ([`GOVERNANCE.md`](GOVERNANCE.md)).
+- Every claim ships a check you can run yourself. Some run from a plain package install; others need the vendor's own component running first, and each entry states which kind it is. The install-only checks are executed on every push by [`test_repros.py`](test_repros.py), which runs the exact snippet off each page and asserts the block fires *and* that the tool body never ran. A claim that stops passing is **withdrawn, not reworded** ([`GOVERNANCE.md`](GOVERNANCE.md)).
 
 **Any vendor may add a claim** under its own prefix (`<vendor>_coverage`, and so on), on exactly the same terms. The registry records what was claimed, by whom, and whether the check still passes. It does not rank vendors and it does not endorse them. See [`CONTRIBUTING.md`](CONTRIBUTING.md).
 

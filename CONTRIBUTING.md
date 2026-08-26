@@ -21,8 +21,10 @@ If your product owns one of the disciplines behind the incidents classified `nee
 ## 3. A coverage claim (any vendor, including a competitor)
 
 The coverage column is not reserved for the maintainer. If your product stops one of these
-failures, claim it. You will be held to exactly the bar AgentX Core is held to here, and no
-higher.
+failures, claim it. The terms below apply to every vendor, with one difference stated here rather
+than left to be discovered: a component-wired claim by the maintainer is verified against its own
+gateway instead of by a snippet in CI, while a third-party claim currently has to ship a
+self-verifying snippet.
 
 **A claim is listed only if it ships a check a stranger can run.** Two steps.
 
@@ -81,9 +83,10 @@ keys the contract off the SDK the snippet imports.)
 
 **The terms, which are the same for everyone:**
 
-- **A block claim ships a runnable, self-verifying repro.** A `covered` or `partial` claim with no
-  repro is rejected. The check runs on every push and weekly: a claim that only holds when someone
-  remembers to run it is a hope, not a claim.
+- **A block claim ships a check anyone can run.** A third-party `covered` or `partial` claim with
+  no self-verifying repro is rejected. Install-only checks run on every push and weekly, because a
+  claim that only holds when someone remembers to run it is a hope, not a claim. A component-wired
+  check is verified against the vendor's own component and is not re-run here.
 - **A claim that stops holding is withdrawn, not reworded.** If the check goes red, the entry is
   reclassified. Softening the page instead is the one thing this registry will not do, and that
   applies to the maintainer's own rows first. See `GOVERNANCE.md`.

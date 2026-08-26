@@ -88,8 +88,9 @@ not rank vendors and it does not endorse them. Claims are namespaced to the vend
 
 Applied to a claim, the tiers mean:
 
-- **covered**: the vendor claims a deterministic block today, backed by a check that passes on
-  every push.
+- **covered**: the vendor claims a deterministic block today, backed by a check the entry names.
+  An install-only check passes on every push; a component-wired check is verified against the
+  vendor's own component.
 - **partial**: a mechanism exists; the claim states its honest scope.
 - **judge_or_org**: needs an LLM judge or the org's ground truth; no deterministic block claimed.
 - **out_of_scope**: a different discipline's job entirely. The entry names whose, and `PARTNERS.md`
