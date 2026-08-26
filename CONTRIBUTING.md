@@ -21,10 +21,9 @@ If your product owns one of the disciplines behind the incidents classified `nee
 ## 3. A coverage claim (any vendor, including a competitor)
 
 The coverage column is not reserved for the maintainer. If your product stops one of these
-failures, claim it. The terms below apply to every vendor, with one difference stated here rather
-than left to be discovered: a component-wired claim by the maintainer is verified against its own
-gateway instead of by a snippet in CI, while a third-party claim currently has to ship a
-self-verifying snippet.
+failures, claim it. You will be held to exactly the bar AgentX Core is held to here, and no higher.
+That is not a promise in prose: `validate()` in `generate.py` applies one rule to every vendor, and
+the maintainer has no path a newcomer lacks.
 
 **A claim is listed only if it ships a check a stranger can run.** Two steps.
 
@@ -49,7 +48,7 @@ by the registry and are not yours to change:
   - id: ARE-2026-001
     # ... registry facts (not yours to change) ...
     agentx_coverage: covered              # the maintainer's claim, already here
-    agentx_check: keyless_pip
+    agentx_check: ci_verified
     agentx_response: |
       ...
 
@@ -83,10 +82,12 @@ keys the contract off the SDK the snippet imports.)
 
 **The terms, which are the same for everyone:**
 
-- **A block claim ships a check anyone can run.** A third-party `covered` or `partial` claim with
-  no self-verifying repro is rejected. Install-only checks run on every push and weekly, because a
-  claim that only holds when someone remembers to run it is a hope, not a claim. A component-wired
-  check is verified against the vendor's own component and is not re-run here.
+- **A block claim declares one of two verification levels, and both are open to you.**
+  `ci_verified` ships a self-verifying snippet this registry runs on every push and weekly, and it
+  counts toward the coverage totals. `vendor_attested` is verified by you against your own
+  component, renders labelled as such, and does not count toward the totals. Declaring
+  `ci_verified` without a runnable snippet is rejected, for every vendor including the maintainer.
+  A claim that only holds when someone remembers to run it is a hope, not a claim.
 - **A claim that stops holding is withdrawn, not reworded.** If the check goes red, the entry is
   reclassified. Softening the page instead is the one thing this registry will not do, and that
   applies to the maintainer's own rows first. See `GOVERNANCE.md`.

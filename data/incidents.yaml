@@ -35,9 +35,16 @@
 # VENDOR-CLAIM fields (one vendor's claim about its own product; NOT a registry finding).
 #   Namespaced by vendor. AgentX Core's claim uses the `agentx_` prefix:
 #     agentx_coverage:  covered | partial | judge_or_org | out_of_scope
-#     agentx_check:     keyless_pip   (blocks from a bare `pip install`; the keyless SDK shield)
-#                       gateway_wired (blocks only when wired to the AgentX gateway)
-#                       none          (not a coverable entry)
+#     agentx_check:     ci_verified     (ships a snippet THIS REGISTRY executes on every push;
+#                                        counts toward coverage)
+#                       vendor_attested (the vendor verified it against its own component; the
+#                                        registry does NOT execute it and it does NOT count
+#                                        toward coverage)
+#                       none            (not a coverable entry)
+#                     The two levels are VERIFICATION LEVELS, open to every vendor on identical
+#                     terms, and they replaced `keyless_pip` / `gateway_wired`, which named the
+#                     maintainer's own mechanisms and so could not honestly be offered to anyone
+#                     else. A level describes the EVIDENCE, never whose product produced it.
 #     agentx_response:  outcome-loud prose: what class of action is stopped and the safe path
 #                       offered. Never names an internal detector or a signature threshold.
 #
@@ -90,6 +97,14 @@ meta:
   agentx_partial: 2
   agentx_judge_or_org: 1
   agentx_out_of_scope: 8
+
+  # VERIFICATION LEVELS of the 25 claims above. Every vendor declares one of these two, on identical
+  # terms. ONLY `ci_verified` counts toward coverage on the neutral surfaces; `vendor_attested`
+  # claims render and are labelled, but are excluded from the coverage totals, because the registry
+  # does not execute them. validate() fails loud if either rollup drifts from the real counts.
+  agentx_ci_verified: 11
+  agentx_vendor_attested: 14
+
   agentx_sev1_coverable_closed: "15/15"
 
   # VENDOR REGISTRY: display identity for each vendor namespace used in the entries below. A claim
@@ -114,7 +129,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI02
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: keyless_pip
+    agentx_check: ci_verified
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
     repro_call:
@@ -146,7 +161,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI02
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: gateway_wired
+    agentx_check: vendor_attested
     what_happened: >-
       An AI agent with cloud credentials tore down a production environment in about nine
       seconds, deleting whole cloud resources.
@@ -171,7 +186,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI02
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: keyless_pip
+    agentx_check: ci_verified
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
     repro_call:
@@ -202,7 +217,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI03
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: keyless_pip
+    agentx_check: ci_verified
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
     repro_call:
@@ -233,7 +248,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI01
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: keyless_pip
+    agentx_check: ci_verified
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
     repro_call:
@@ -263,7 +278,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI02
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: keyless_pip
+    agentx_check: ci_verified
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
     repro_call:
@@ -294,7 +309,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI05
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: keyless_pip
+    agentx_check: ci_verified
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
     repro_call:
@@ -323,7 +338,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI02
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: gateway_wired
+    agentx_check: vendor_attested
     what_happened: >-
       An agent issued a cluster-wide delete against a search cluster over its REST API.
     blast_radius: >-
@@ -344,7 +359,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI02
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: gateway_wired
+    agentx_check: vendor_attested
     what_happened: >-
       Summer Yue, director of alignment at Meta Superintelligence Labs, connected an
       OpenClaw agent to her primary inbox with an explicit standing instruction to
@@ -385,7 +400,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI02
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: gateway_wired
+    agentx_check: vendor_attested
     what_happened: >-
       An agent moved roughly $450,000 in a value transfer that should have paused for a
       human.
@@ -409,7 +424,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI04
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: gateway_wired
+    agentx_check: vendor_attested
     what_happened: >-
       An agent installed a package that rode a famous name, a hallucinated or
       look-alike dependency rather than the real one.
@@ -435,7 +450,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI02
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: gateway_wired
+    agentx_check: vendor_attested
     what_happened: >-
       An agent autonomously published a public hit piece.
     blast_radius: >-
@@ -457,7 +472,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI02
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: keyless_pip
+    agentx_check: ci_verified
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
     repro_call:
@@ -486,7 +501,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI08
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: gateway_wired
+    agentx_check: vendor_attested
     what_happened: >-
       An agent repeated the same command in a loop, burning around 50,000 tokens.
     blast_radius: >-
@@ -508,7 +523,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI08
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: gateway_wired
+    agentx_check: vendor_attested
     what_happened: >-
       An agent ran up about $120 over eight hours with no single unsafe call.
     blast_radius: >-
@@ -530,7 +545,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI08
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: gateway_wired
+    agentx_check: vendor_attested
     what_happened: >-
       A 50-step runaway loop crossed the cost ceiling fast.
     blast_radius: >-
@@ -551,7 +566,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI08
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: gateway_wired
+    agentx_check: vendor_attested
     what_happened: >-
       A swarm of agents ran away on a shared budget, each staying under its own ceiling.
     blast_radius: >-
@@ -572,7 +587,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI03
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: gateway_wired
+    agentx_check: vendor_attested
     what_happened: >-
       Hitting a permission error, an agent escalated through sudo and scripting to
       bypass the block.
@@ -595,7 +610,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI01
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: keyless_pip
+    agentx_check: ci_verified
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
     repro_call:
@@ -625,7 +640,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI02
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: keyless_pip
+    agentx_check: ci_verified
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
     repro_call:
@@ -655,7 +670,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI08
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: gateway_wired
+    agentx_check: vendor_attested
     what_happened: >-
       A multi-agent conversation looped for eleven days and cost about $47,000.
     blast_radius: >-
@@ -677,7 +692,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI02
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: gateway_wired
+    agentx_check: vendor_attested
     what_happened: >-
       An agent pointed at a networking task ran wide port and host scans and spun up a
       large fleet of instances to do it; the bill is what stopped it.
@@ -701,7 +716,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI01
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: keyless_pip
+    agentx_check: ci_verified
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
     repro_call:
@@ -731,7 +746,7 @@ incidents:
     agentx_coverage: partial
     owasp_asi: ASI02
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: keyless_pip
+    agentx_check: ci_verified
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
     repro_call:
@@ -761,7 +776,7 @@ incidents:
     agentx_coverage: partial
     owasp_asi: ASI08
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: gateway_wired
+    agentx_check: vendor_attested
     what_happened: >-
       A conversational agent looped, re-emitting near-identical turns without progress.
     blast_radius: >-

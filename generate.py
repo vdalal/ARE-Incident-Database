@@ -87,7 +87,15 @@ COVERAGE_LABEL = {
 # only kind that renders a vendor section + repro; the other two are non-claims.
 VENDOR_COVERAGE_VALUES = {"covered", "partial", "judge_or_org", "out_of_scope"}
 VENDOR_BLOCK_CLAIMS = {"covered", "partial"}
-VENDOR_CHECK_VALUES = {"keyless_pip", "gateway_wired"}
+# The TWO VERIFICATION LEVELS, open to every vendor on identical terms.
+#   ci_verified     -- ships a snippet this registry EXECUTES on every push. Counts toward coverage.
+#   vendor_attested -- the vendor verified it against its own component; the registry does NOT run
+#                      it. Rendered and labelled, but does NOT count toward coverage.
+# These replaced `keyless_pip` / `gateway_wired`, which named the MAINTAINER's mechanisms (pip, the
+# AgentX gateway) and so could not honestly be offered to anyone else. A level is a property of the
+# EVIDENCE, not of whose product produced it.
+VENDOR_CHECK_VALUES = {"ci_verified", "vendor_attested"}
+CI_VERIFIED = "ci_verified"
 
 # Multi-vendor: the renderer draws EVERY vendor namespace found on an entry, attributed via the
 # meta.vendors registry. The maintainer's `agentx_` claim keeps its original templated rendering
@@ -115,10 +123,10 @@ VENDOR_DISCLAIMER = (
 # description of the policy.
 VENDOR_INVITATION = (
     "_No vendor has claimed to address this failure. Any vendor may add a claim under its own "
-    "prefix; the terms are in [CONTRIBUTING.md](../CONTRIBUTING.md). Ship a check anyone can run, "
-    "say whether it runs from a plain install or needs your own component running, and withdraw a "
-    "claim rather than reword it if the check stops passing. Install-only checks are executed on "
-    "every push._"
+    "prefix, on the same terms as the maintainer ([CONTRIBUTING.md](../CONTRIBUTING.md)). Ship a "
+    "snippet this registry runs on every push and your claim counts toward coverage; verify it "
+    "yourself against your own component and it renders labelled as vendor-attested, outside the "
+    "totals. A claim whose check stops passing is withdrawn, not reworded._"
 )
 
 # Source provenance labels. A registry prefers a FIRST-PARTY disclosure (the involved org's own
@@ -222,17 +230,18 @@ def ticket_header(inc):
 
 def repro_block(inc):
     r = inc.get("agentx_check")
-    if r == "keyless_pip":
+    if r == "ci_verified":
         call = inc.get("repro_call")
         if not call:
-            # A keyless entry with no runnable call is a claim with no proof. Fail loud
-            # rather than quietly emitting a prose-only "repro" (mirrors the KeyError posture).
-            raise KeyError(f"{inc['id']}: agentx_check is keyless_pip but no repro_call to render")
+            # A ci_verified entry with no runnable call is a claim with no proof. Fail loud
+            # rather than quietly emitting a prose-only "check" (mirrors the KeyError posture).
+            raise KeyError(f"{inc['id']}: agentx_check is ci_verified but no repro_call to render")
         tool, param, action = call["tool"], call["param"], call["action"]
         payload = call["payload"]
         return (
-            "**Repro.** This blocks from a bare `pip install`, with no key, no gateway, "
-            "and nothing leaving your machine. Copy it and run it.\n\n"
+            "**Check: CI-verified.** This registry executes this snippet on every push. It blocks "
+            "from a bare `pip install`, with no key, no gateway, and nothing leaving your machine. "
+            "Copy it and run it.\n\n"
             "```bash\npip install agentx-security-sdk\n```\n\n"
             "```python\n"
             "from agentx_sdk import agentx_protect, is_block\n\n"
@@ -244,12 +253,14 @@ def repro_block(inc):
             "print(result)                  # the block, and the safe path to take instead\n"
             "```\n\n"
         )
-    if r == "gateway_wired":
+    if r == "vendor_attested":
         return (
-            "**Repro (gateway).** This block runs in the AgentX gateway, so it does "
-            "not fire from a bare `pip install`. The gateway is free and self-serve: "
-            "pull it at [agentx-core.com/gateway](https://agentx-core.com/gateway) and "
-            "run it locally to reproduce this claim.\n\n"
+            "**Check: vendor-attested.** This registry does NOT execute this one. The block runs "
+            "in the AgentX gateway, so it does not fire from a bare `pip install`, and AgentX "
+            "verifies it against its own component. It does not count toward the CI-verified "
+            "coverage totals. The gateway is free and self-serve: pull it at "
+            "[agentx-core.com/gateway](https://agentx-core.com/gateway) and run it locally to "
+            "check this claim yourself.\n\n"
         )
     return ""
 
@@ -295,8 +306,14 @@ def agentx_claim_block(inc):
     (not routed through the generic renderer) so the founding pages stay byte-identical and their
     scraped repros keep passing untouched. Non-maintainer vendors go through generic_vendor_block."""
     cov = inc.get("agentx_coverage")
-    keyless = inc.get("agentx_check") == "keyless_pip"
-    delivery = ("from the keyless SDK (no key, no gateway)" if keyless
+    # Reads the CHECK LEVEL to describe DELIVERY. These are two different things that happen to
+    # correlate for this vendor today (the maintainer's CI-verified claims are exactly its keyless
+    # ones), and this line compared against the old `keyless_pip` literal. When the levels were
+    # renamed, the comparison silently went False for all 25 and every page would have said "wired
+    # to the AgentX gateway", including the 11 that block from a bare pip install. Nothing would
+    # have failed; 11 pages would just have carried a false delivery line.
+    ci_verified = inc.get("agentx_check") == CI_VERIFIED
+    delivery = ("from the keyless SDK (no key, no gateway)" if ci_verified
                 else "wired to the AgentX gateway")
     out = [
         f"**AgentX Core** (the registry maintainer) claims: **{COVERAGE_LABEL[cov]}**, "
@@ -328,14 +345,24 @@ def generic_vendor_block(inc, prefix, vendors):
         (inc.get(f"{prefix}_response") or "").strip(),
         "",
     ]
+    # Same two levels, same labels, same wording as the maintainer's block. A reader must be able to
+    # tell CI-verified from vendor-attested without knowing or caring whose claim it is.
     snippet = (inc.get(f"{prefix}_repro") or "").strip()
     if snippet:
         out.append(
-            f"**Repro ({v['name']}).** Runs against a real install and asserts the block fired and "
-            f"the tool body never executed, exiting non-zero if not. Copy it and run it."
+            f"**Check: CI-verified.** This registry executes this snippet on every push. It runs "
+            f"against a real install and asserts the block fired and the tool body never executed, "
+            f"exiting non-zero if not. Copy it and run it."
         )
         out.append("")
         out.append(snippet)
+        out.append("")
+    elif inc.get(f"{prefix}_check") == "vendor_attested":
+        out.append(
+            f"**Check: vendor-attested.** This registry does NOT execute this one. {v['name']} "
+            f"verifies it against its own component. It does not count toward the CI-verified "
+            f"coverage totals."
+        )
         out.append("")
     return "\n".join(out).rstrip()
 
@@ -495,11 +522,25 @@ def vendor_prefixes(inc):
 
 
 def repro_call_for(inc, prefix):
-    """The runnable repro for a vendor's keyless claim. The maintainer's (agentx) repro is the
-    historical un-namespaced `repro_call`; a future vendor would namespace it `<prefix>_repro_call`."""
+    """The structured runnable repro for a vendor's CI-verified claim. The maintainer's (agentx)
+    repro is the historical un-namespaced `repro_call`; a future vendor would namespace it
+    `<prefix>_repro_call`."""
     if prefix == "agentx":
         return inc.get("repro_call")
     return inc.get(f"{prefix}_repro_call")
+
+
+def has_ci_snippet(inc, prefix):
+    """Does this vendor ship something `test_repros.py` can actually execute?
+
+    Two shapes satisfy it, and they are equal under the rule: a STRUCTURED `repro_call` that the
+    renderer expands into a python fence (how the maintainer's founding entries are written), or a
+    verbatim self-verifying `<prefix>_repro` snippet (how any other vendor writes one). The
+    MECHANISM differs because the maintainer's pages predate multi-vendor support; the BAR does not.
+    Accepting only one shape would rebuild the maintainer-only exemption in a new place."""
+    if repro_call_for(inc, prefix):
+        return True
+    return bool((inc.get(f"{prefix}_repro") or "").strip())
 
 
 def validate(doc):
@@ -514,7 +555,8 @@ def validate(doc):
       * `coverage_class` present and valid.
       * each vendor claim present and valid; only supported vendor namespaces (renderer can't drop one).
       * a block claim (covered/partial) must be consistent with an action-coverable class, and must
-        ship a valid check + response (+ a repro for a keyless claim) -- no fabricated delivery line.
+        ship a valid check + response (+ an executable snippet for a ci_verified claim, for EVERY
+        vendor including the maintainer) -- no fabricated delivery line.
       * a non-coverable class must name an owner (the 'Who owns it' section cannot be blank).
       * the meta rollups must equal the real per-entry counts.
 
@@ -566,19 +608,29 @@ def validate(doc):
                 )
             if not (inc.get(f"{p}_response") or "").strip():
                 errors.append(f"{eid}: {p}_coverage={cov} but {p}_response is empty")
-            if p == "agentx":
-                chk = inc.get("agentx_check")
-                if chk not in VENDOR_CHECK_VALUES:
-                    errors.append(f"{eid}: agentx_coverage={cov} but agentx_check {chk!r} invalid (use {sorted(VENDOR_CHECK_VALUES)})")
-                if chk == "keyless_pip" and not repro_call_for(inc, "agentx"):
-                    errors.append(f"{eid}: agentx is keyless_pip but has no repro_call to render")
-            else:
-                # A generic vendor's runnable proof is a self-verifying `<prefix>_repro` snippet.
-                if not (inc.get(f"{p}_repro") or "").strip():
-                    errors.append(
-                        f"{eid}: {p}_coverage={cov} claims a block but ships no {p}_repro snippet "
-                        f"(a claim must ship a check a stranger can run; see CONTRIBUTING.md)"
-                    )
+            # ONE BAR, NO VENDOR BRANCH.
+            #
+            # This read `if p == "agentx": ... else: ...`, and the two sides were NOT the same rule.
+            # The maintainer could declare a component-wired claim and ship no snippet, and it was
+            # accepted; any other vendor shipping no snippet was rejected with "a claim must ship a
+            # check a stranger can run". 14 of the maintainer's 25 claims used that exemption, while
+            # CONTRIBUTING promised every vendor "exactly the bar AgentX Core is held to, and no
+            # higher". A rival was in fact held HIGHER, and the branch was the proof of it.
+            #
+            # Every vendor now declares one of the same two levels and is held to the same
+            # requirement for each. The maintainer has no path a newcomer lacks.
+            chk = inc.get(f"{p}_check")
+            if chk not in VENDOR_CHECK_VALUES:
+                errors.append(
+                    f"{eid}: {p}_coverage={cov} but {p}_check {chk!r} invalid "
+                    f"(use {sorted(VENDOR_CHECK_VALUES)}); see CONTRIBUTING.md"
+                )
+            elif chk == CI_VERIFIED and not has_ci_snippet(inc, p):
+                errors.append(
+                    f"{eid}: {p}_check=ci_verified but ships no snippet for the registry to "
+                    f"execute. Ship one, or declare vendor_attested and accept that the claim "
+                    f"does not count toward coverage; see CONTRIBUTING.md"
+                )
 
         if cc in ("needs_judge_or_org", "other_discipline") and not (inc.get("owned_by") or "").strip():
             errors.append(f"{eid}: coverage_class={cc} but owned_by is empty (the 'Who owns it' section would be blank)")
@@ -615,6 +667,16 @@ def validate(doc):
         "agentx_judge_or_org": ax.get("judge_or_org", 0),
         "agentx_out_of_scope": ax.get("out_of_scope", 0),
         "agentx_coverable": ax.get("covered", 0) + ax.get("partial", 0),
+        # Verification levels. Counted over CLAIMS only, so a non-claim carrying `none` can never
+        # inflate either number.
+        "agentx_ci_verified": sum(
+            1 for i in incidents
+            if i.get("agentx_coverage") in VENDOR_BLOCK_CLAIMS and i.get("agentx_check") == CI_VERIFIED
+        ),
+        "agentx_vendor_attested": sum(
+            1 for i in incidents
+            if i.get("agentx_coverage") in VENDOR_BLOCK_CLAIMS and i.get("agentx_check") == "vendor_attested"
+        ),
     }
     for key, want in expected.items():
         if key in meta and meta[key] != want:

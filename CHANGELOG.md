@@ -23,6 +23,28 @@ number is assigned when the tag is cut, not before.
   agent configuration and fire before any tool call, so an action-mediation layer never sees
   them. `agentx_check: none`, with `owned_by` naming the discipline that does own it.
 
+### Changed (governance + schema): one bar for every vendor, two verification levels
+
+The registry advertised a single bar to every vendor and did not apply it to itself. `validate()`
+branched on the vendor: the maintainer could declare a component-wired claim and ship no executable
+snippet and it was accepted, while any other vendor shipping no snippet was rejected with "a claim
+must ship a check a stranger can run". **14 of the maintainer's 25 claims used that exemption**,
+under a `CONTRIBUTING.md` line promising every vendor "exactly the bar AgentX Core is held to, and
+no higher". A third party was in fact held higher.
+
+- **The vendor branch is gone.** One rule, applied to the maintainer and to everyone else: a claim
+  declaring `ci_verified` must ship a snippet the registry can execute, whoever filed it.
+- **`agentx_check` values are now VERIFICATION LEVELS, not mechanisms.** `keyless_pip` ->
+  `ci_verified`, `gateway_wired` -> `vendor_attested`. The old names described the maintainer's own
+  delivery (pip, the AgentX gateway) and so could not honestly be offered to a third party; a level
+  describes the evidence, not whose product produced it. Both levels are open to every vendor.
+- **Only `ci_verified` counts toward coverage.** `vendor_attested` claims render, labelled on the
+  entry page as not executed here, and are excluded from the totals. The maintainer's split is
+  **11 CI-verified and 14 vendor-attested**, and both are now meta rollups that `validate()` checks
+  against the real counts.
+- Renderers label the two levels identically for the maintainer and for any other vendor, so a
+  reader can tell them apart without knowing whose claim it is.
+
 ### Changed (schema): taxonomy 1.4 -> 1.5
 
 - **New `control_domain` value `Supply chain integrity`.** This is an axis-member addition, so

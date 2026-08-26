@@ -88,9 +88,8 @@ not rank vendors and it does not endorse them. Claims are namespaced to the vend
 
 Applied to a claim, the tiers mean:
 
-- **covered**: the vendor claims a deterministic block today, backed by a check the entry names.
-  An install-only check passes on every push; a component-wired check is verified against the
-  vendor's own component.
+- **covered**: the vendor claims a deterministic block today, backed by a check the entry names at
+  one of the two verification levels below.
 - **partial**: a mechanism exists; the claim states its honest scope.
 - **judge_or_org**: needs an LLM judge or the org's ground truth; no deterministic block claimed.
 - **out_of_scope**: a different discipline's job entirely. The entry names whose, and `PARTNERS.md`
@@ -105,13 +104,20 @@ Severity is the **real-world blast radius of the incident** (Sev-1 = catastrophi
 How a vendor's claim can be verified. These describe the CLAIM, not the incident, so they live in
 the vendor's namespace alongside it.
 
-- **keyless_pip**: the claimed block runs in a free, keyless package and reproduces from a bare
-  install. The entry page carries the runnable snippet and `test_repros.py` executes it on every
-  push, so the flag is a tested assertion rather than an editorial one.
-- **gateway_wired**: the claimed block requires the vendor's server-side component and does **not**
-  fire from a bare install. Stated explicitly so that a claim never implies it reproduces standalone
-  when it does not. This distinction is part of the claim, not a footnote to it.
+- **ci_verified**: the claim ships a snippet **this registry executes** on every push. The entry
+  page carries it and `test_repros.py` runs it, so the level is a tested assertion rather than an
+  editorial one. Only these count toward the coverage totals.
+- **vendor_attested**: the vendor verified the claim against its own component, and this registry
+  does **not** execute it. Stated explicitly so a claim never implies it reproduces standalone when
+  it does not, and excluded from the coverage totals for the same reason. This distinction is part
+  of the claim, not a footnote to it.
 - **none**: no verifiable check offered for this entry.
+
+Both levels are open to every vendor on identical terms. `validate()` applies the same rule to the
+maintainer as to anyone else: a `ci_verified` claim shipping no executable snippet is rejected,
+whoever filed it. The levels describe the **evidence**, never whose product produced it, which is
+why they replaced `keyless_pip` / `gateway_wired` -- those named the maintainer's own mechanisms and
+so could not honestly be offered to a third party.
 
 A claim whose check stops passing is **withdrawn, not reworded** (`GOVERNANCE.md`). That rule
 applies to the maintainer's own rows first.
