@@ -20,17 +20,19 @@ Every count here is a registry fact about the incidents. It is not a claim that 
 
 | | Count |
 |---|---|
-| Total incidents | **33** |
-| Mapped to an OWASP ASI category (ASI01-10) | **30** |
+| Total incidents | **34** |
+| Mapped to an OWASP ASI category (ASI01-10) | **31** |
 | Non-ASI reliability failures (the AREDB-Reliability bucket) | **3** |
-| Severity-1 (highest real-world harm) | **16** |
+| Severity-1 (highest real-world harm) | **17** |
 
 Each incident is also classified by its **control domain**: the discipline that owns the failure. This is a neutral, structural property of the incident, not a claim that any product stops it. The disciplines are peers; the action layer is one of them, not the frame:
 
 | Control domain | Count |
 |---|---|
-| **Action mediation** (an agent's tool call, gated at the point it acts) | **25** |
+| **Action mediation** (an agent's tool call, gated at the point it acts) | **20** |
 | **Output grounding & verification** (the agent stated something false; it needed checking against ground truth) | **4** |
+| **Identity & access** (who the agent is authorized as, and how far that authority reaches) | **3** |
+| **Supply chain integrity** (what the agent installs or executes, and where it came from) | **3** |
 | **Model alignment & content safety** (the model's own behavior or outputs) | **1** |
 | **Environmental isolation** (sandbox, network segmentation, egress control) | **1** |
 | **Data governance** (freshness, lineage, retrieval correctness) | **1** |

@@ -15,6 +15,8 @@ failure is rendered in a separate, fenced "Vendor coverage claims" section, attr
 namespaced, and only where a claim actually exists. The registry does not endorse it.
 """
 import os
+import re
+
 import yaml
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -681,6 +683,60 @@ def validate(doc):
     for key, want in expected.items():
         if key in meta and meta[key] != want:
             errors.append(f"meta.{key} = {meta[key]!r} but the real count is {want}")
+
+    # THE README'S "At a glance" TABLES ARE HAND-WRITTEN FROM THIS DATA, AND NOTHING CHECKED THEM.
+    #
+    # They went stale the moment entry 34 landed and taxonomy 1.5 re-filed six entries: the front
+    # page of the registry claimed 33 incidents, 30 ASI-mapped, 16 severity-1 and `Action mediation`
+    # 25, while the data said 34 / 31 / 17 / 20 -- and the two domains the re-filing created,
+    # `Identity & access` and `Supply chain integrity`, had no row at all, so the table summed to 33
+    # for a registry holding 34. Four wrong numbers and two missing rows on the one page a rival
+    # reads first, and every existing guard was green: `meta.control_domains` was checked against the
+    # entries, and the README was checked against nothing.
+    #
+    # The rollups below guard meta-vs-entries. This guards README-vs-entries, which is the hop that
+    # was missing. Cheap here because both files live in this repo; the site's copy of these numbers
+    # is a separate repo and needs its own cross-repo tripwire.
+    readme = os.path.join(HERE, "README.md")
+    if os.path.exists(readme):
+        with open(readme, encoding="utf-8") as fh:
+            rtext = fh.read()
+
+        def readme_count(label_re):
+            """The bolded count in the README row whose label matches. None if there is no such row."""
+            m = re.search(r"^\|\s*%s[^|]*\|\s*\*\*(\d+)\*\*\s*\|" % label_re, rtext, re.M)
+            return int(m.group(1)) if m else None
+
+        asi_mapped = sum(1 for i in incidents if str(i.get("owasp_asi") or "").startswith("ASI"))
+        glance = {
+            r"Total incidents": len(incidents),
+            r"Mapped to an OWASP ASI": asi_mapped,
+            r"Non-ASI reliability": len(incidents) - asi_mapped,
+            r"Severity-1": sum(1 for i in incidents if i.get("severity") == 1),
+        }
+        for label_re, want in glance.items():
+            got = readme_count(label_re)
+            if got is None:
+                errors.append(f"README 'At a glance': no row matching {label_re!r} (renamed? removed?)")
+            elif got != want:
+                errors.append(f"README 'At a glance' {label_re!r} = {got} but the real count is {want}")
+
+        # Every control domain that OCCURS must have a row, with the right count. A domain the
+        # re-filing invents is otherwise silently absent, which is exactly what happened.
+        real_domains = {}
+        for i in incidents:
+            real_domains[i.get("control_domain")] = real_domains.get(i.get("control_domain"), 0) + 1
+        for dom, want in sorted(real_domains.items()):
+            if not dom:
+                continue
+            got = readme_count(r"\*\*%s\*\*" % re.escape(str(dom)))
+            if got is None:
+                errors.append(
+                    f"README control-domain table has NO ROW for {dom!r}, which {want} entries use. "
+                    "A new domain must appear here or the table silently under-counts the registry."
+                )
+            elif got != want:
+                errors.append(f"README control-domain {dom!r} = {got} but the real count is {want}")
 
     # Neutral control-domain rollups (a nested map in meta): every listed domain's count must match
     # the real count, and every domain that occurs must be listed, so the "At a glance" table on the
