@@ -2,9 +2,13 @@
 
 [![repros](https://github.com/vdalal/ARE-Incident-Database/actions/workflows/repros.yml/badge.svg)](https://github.com/vdalal/ARE-Incident-Database/actions/workflows/repros.yml)
 
-**The incident registry for the OWASP Agentic Security Initiative (ASI) Top 10. Real, cited agent failures, each with a stable `ARE-YYYY-NNN` identifier, mapped to its OWASP ASI category and classified by the control domain that owns it.**
+**A public registry of real, cited agent failures. Each carries a stable `ARE-YYYY-NNN` identifier, is indexed onto its OWASP Agentic Security Initiative (ASI) Top 10 category, and is classified by the control domain that owns it.**
 
-Agent Reliability Engineering (ARE) is the discipline of preventing them. [OWASP ASI](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/) is the map of what goes wrong with an agent; AREDB is the cited incidents under it. Each entry records what happened, its blast radius, and which kind of control the failure requires. Cite the `ARE-YYYY-NNN` identifiers as the shared reference for the field.
+> **AREDB is not an OWASP project.** It is independent, and it is not affiliated with or endorsed by OWASP. It indexes onto the [ASI Top 10](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/) because that is the vocabulary the field is standardizing on. See [`RELATION-TO-STANDARDS.md`](RELATION-TO-STANDARDS.md).
+
+OWASP ASI is the map of what goes wrong with an agent; AREDB is the cited incidents under it. Each entry records what happened, its blast radius, and which kind of control the failure requires. Cite the `ARE-YYYY-NNN` identifiers as the shared reference for the field.
+
+Agent Reliability Engineering (ARE) is the discipline of preventing these failures, and the name this registry is built around. It is a framing AREDB proposes, not an established industry term.
 
 > **Using AREDB in your product, model, or research? You're encouraged to.** To satisfy the CC-BY-4.0 license, paste this one line into your docs or footer, and keep the `ARE-YYYY-NNN` identifiers intact (they are the shared reference the whole field cites):
 >
@@ -72,7 +76,8 @@ Below the registry facts, an entry may carry a fenced **Vendor coverage claims**
 
 - The registry's facts (the incident, its OWASP ASI category, its control domain) are vendor-neutral. They do not name a product.
 - AgentX Core's coverage claims are namespaced (`agentx_coverage`, `agentx_check`, `agentx_response`) and rendered only in the fenced "Vendor coverage claims" section on each entry, never in the facts. Its full claim, including what it does not stop, lives on its own site at [agentx-core.com/aredb](https://agentx-core.com/aredb).
-- Every claim declares one of two verification levels, and the same two are open to every vendor. **CI-verified** claims ship a snippet this registry executes on every push ([`test_repros.py`](test_repros.py) runs the exact snippet off each page and asserts the block fires *and* that the tool body never ran); only these are proven by this registry. **Vendor-attested** claims are verified by the vendor against its own component and render labelled as such, so a reader can always tell which is which. `validate()` applies one rule to the maintainer and to everyone else. A claim that stops passing is **withdrawn, not reworded** ([`GOVERNANCE.md`](GOVERNANCE.md)).
+- Every claim declares one of two verification levels, and both are open to every vendor. **CI-verified** claims ship a snippet this registry runs on every push, so only these are proven here. **Vendor-attested** claims are verified by the vendor against its own component and are labelled as such on the entry.
+- The maintainer gets no exemption. [`validate()`](generate.py) does not branch on who is claiming, and a claim that stops passing is **withdrawn, not reworded** ([`GOVERNANCE.md`](GOVERNANCE.md)).
 
 **Any vendor may add a claim** under its own prefix (`<vendor>_coverage`, and so on), on exactly the same terms. The registry records what was claimed, by whom, and whether the check still passes. It does not rank vendors and it does not endorse them. See [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
