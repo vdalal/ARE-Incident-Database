@@ -10,6 +10,39 @@ an entry's content or its status (`confirmed` / `disputed` / `withdrawn`), never
 
 Dates are ISO-8601 (UTC). The format loosely follows Keep a Changelog.
 
+## [Unreleased]
+
+Deliberately undated and unnumbered: a dated heading here obligates the matching
+`CITATION.cff` version bump and git tag, and this work is not released yet. The release
+number is assigned when the tag is cut, not before.
+
+### Added
+
+- **`ARE-2026-034`**, the configuration-hook supply-chain family. Filed under the
+  `Supply chain integrity` control domain and `other_discipline`: the campaigns persist via
+  agent configuration and fire before any tool call, so an action-mediation layer never sees
+  them. `agentx_check: none`, with `owned_by` naming the discipline that does own it.
+
+### Changed (schema): taxonomy 1.4 -> 1.5
+
+- **New `control_domain` value `Supply chain integrity`.** This is an axis-member addition, so
+  `taxonomy_version` bumps to `1.5` per the governance rule that graduating an existing
+  `confusion_vector` does not bump but adding an axis member does.
+- **Six entries re-filed** across control domains to match the sharpened definitions, and the
+  two maps (per-entry `control_domain` values and the `meta.control_domains` rollup) are
+  asserted to agree. `validate()` fails loud if they ever do not.
+- Rollups move with the data: `total` and `sourced` 33 -> 34, `other_discipline` and
+  `agentx_out_of_scope` 7 -> 8. `action_coverable` (25), `needs_judge_or_org` (1) and the
+  `agentx_covered` / `agentx_partial` claims are unchanged.
+
+### Fixed
+
+- **`ARE-2026-009`** now cites the incident it actually describes.
+- **`ARE-2026-033`** states the neutral discipline rather than the maintainer's product
+  category, the recurring neutrality failure where a well-meant edit re-centres the sponsor.
+- The index points at git history for who filed what instead of restating it, and states the
+  registry's shape and that it moves as others file.
+
 ## [1.5.0] - 2026-07-27
 
 ### Changed (schema + tooling): a neutral, generic control-domain axis; the index leads with it
