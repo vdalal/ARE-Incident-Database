@@ -2,9 +2,9 @@
 
 Each incident is a registry fact: its OWASP ASI category (the shared industry taxonomy), a permanent id, what happened, and the neutral control domain -- the discipline that owns the failure, where the action layer is one discipline among peers. Whether a specific product stops a given failure is a vendor claim, not a registry finding, and is recorded per entry on each page.
 
-**Where this registry is thin.** 25 of 34 entries sit under **Action mediation**. Read that as a fact about who has filed so far, not about where agents fail. The registry is young, its maintainer works in that discipline (disclosed in full at the top of [`data/incidents.yaml`](../data/incidents.yaml)), and a young registry looks like whoever started it. This paragraph is generated from the entries, so the shape moves as others file.
+**Where this registry is thin.** 20 of 34 entries sit under **Action mediation**. Read that as a fact about who has filed so far, not about where agents fail. The registry is young, its maintainer works in that discipline (disclosed in full at the top of [`data/incidents.yaml`](../data/incidents.yaml)), and a young registry looks like whoever started it. This paragraph is generated from the entries, so the shape moves as others file.
 
-Holding one entry or none: Data governance (1), Identity & access (0), Model alignment & content safety (1), Multi-agent coordination (1). **An entry in those columns shifts this more than another one in the crowded column.** Anyone may file -- see [CONTRIBUTING.md](../CONTRIBUTING.md). The bar is a real incident with material consequences and a checkable public source. It is not agreement with the maintainer.
+Holding one entry or none: Data governance (1), Environmental isolation (1), Model alignment & content safety (1), Multi-agent coordination (1). **An entry in those columns shifts this more than another one in the crowded column.** Anyone may file -- see [CONTRIBUTING.md](../CONTRIBUTING.md). The bar is a real incident with material consequences and a checkable public source. It is not agreement with the maintainer.
 
 | OWASP ASI | ID | Incident | Control domain |
 |---|---|---|---|
@@ -12,7 +12,7 @@ Holding one entry or none: Data governance (1), Identity & access (0), Model ali
 | `ASI01` | [ARE-2026-019](ARE-2026-019.md) | Semantic-injection-driven exfiltration and remote execution (Semantic Compliance Hijacking) | Action mediation |
 | `ASI01` | [ARE-2026-023](ARE-2026-023.md) | Hidden-instruction smuggling via invisible-Unicode carriers (Operation Pale Fire) | Action mediation |
 | `ASI02` | [ARE-2026-001](ARE-2026-001.md) | Autonomous production-database destruction (Replit prod wipe) | Action mediation |
-| `ASI02` | [ARE-2026-002](ARE-2026-002.md) | Autonomous whole-resource cloud teardown via authorized IAM scope (Cursor/Railway 9-second wipe) | Action mediation |
+| `ASI02` | [ARE-2026-002](ARE-2026-002.md) | Autonomous whole-resource cloud teardown via authorized IAM scope (Cursor/Railway 9-second wipe) | Identity & access |
 | `ASI02` | [ARE-2026-003](ARE-2026-003.md) | Recursive whole-scope deletion in the wrong environment (25k-document wipe) | Action mediation |
 | `ASI02` | [ARE-2026-006](ARE-2026-006.md) | Directory-traversal read of secret and system files (MCP-git path injection, CVE-2025-68143) | Action mediation |
 | `ASI02` | [ARE-2026-008](ARE-2026-008.md) | Cluster-wide destructive REST delete (Elasticsearch takedown) | Action mediation |
@@ -23,11 +23,11 @@ Holding one entry or none: Data governance (1), Identity & access (0), Model ali
 | `ASI02` | [ARE-2026-020](ARE-2026-020.md) | Server-side request forgery to cloud-metadata credentials (Casco agent compromise) | Action mediation |
 | `ASI02` | [ARE-2026-022](ARE-2026-022.md) | Runaway autonomous provisioning and network scanning (DN42 port-scan bankruptcy) | Action mediation |
 | `ASI02` | [ARE-2026-024](ARE-2026-024.md) | Destructive operation against the wrong environment (ERP reflection brittleness) | Action mediation |
-| `ASI03` | [ARE-2026-004](ARE-2026-004.md) | Credential read-and-exfiltrate via hijacked agent (state-sponsored Claude Code hijack) | Action mediation |
-| `ASI03` | [ARE-2026-018](ARE-2026-018.md) | Privilege-escalating retries to bypass a denial (destructive retry escalation) | Action mediation |
-| `ASI04` | [ARE-2026-011](ARE-2026-011.md) | Installation of a hallucinated or look-alike dependency (react-codeshift slopsquat) | Action mediation |
-| `ASI04` | [ARE-2026-034](ARE-2026-034.md) | Credential-stealing worm persisted through the agent's own config file (PyPI lightning, Mini Shai-Hulud, ChainDrop) | Environmental isolation |
-| `ASI05` | [ARE-2026-007](ARE-2026-007.md) | Remote-code execution via download-piped-to-shell (Clinejection supply-chain attack) | Action mediation |
+| `ASI03` | [ARE-2026-004](ARE-2026-004.md) | Credential read-and-exfiltrate via hijacked agent (state-sponsored Claude Code hijack) | Identity & access |
+| `ASI03` | [ARE-2026-018](ARE-2026-018.md) | Privilege-escalating retries to bypass a denial (destructive retry escalation) | Identity & access |
+| `ASI04` | [ARE-2026-011](ARE-2026-011.md) | Installation of a hallucinated or look-alike dependency (react-codeshift slopsquat) | Supply chain integrity |
+| `ASI04` | [ARE-2026-034](ARE-2026-034.md) | Credential-stealing worm persisted through the agent's own config file (PyPI lightning, Mini Shai-Hulud, ChainDrop) | Supply chain integrity |
+| `ASI05` | [ARE-2026-007](ARE-2026-007.md) | Remote-code execution via download-piped-to-shell (Clinejection supply-chain attack) | Supply chain integrity |
 | `ASI06` | [ARE-2026-030](ARE-2026-030.md) | Action on stale lineage data (stale lineage hallucination) | Data governance |
 | `ASI07` | [ARE-2026-031](ARE-2026-031.md) | Conflicting state between cooperating agents (A2A state conflicts) | Multi-agent coordination |
 | `ASI08` | [ARE-2026-014](ARE-2026-014.md) | No-progress command loop burning tokens (Cursor 50k-token loop) | Action mediation |

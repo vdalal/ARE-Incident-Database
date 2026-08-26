@@ -17,7 +17,8 @@
 #   control_domain:  the PRIMARY neutral axis -- the generic, vendor-agnostic discipline that owns
 #            the failure, as the field already knows it: Action mediation | Output grounding &
 #            verification | Model alignment & content safety | Environmental isolation | Identity &
-#            access | Data governance | Multi-agent coordination. The action layer is ONE discipline
+#            access | Data governance | Multi-agent coordination | Supply chain integrity. The action layer
+#            is ONE discipline
 #            among peers, never the frame, and these names are NOT branded AREDB-anything. This is
 #            what the index and the entry pages lead with.
 #   coverage_class:  action_coverable | needs_judge_or_org | other_discipline
@@ -50,7 +51,7 @@
 meta:
   name: ARE Incident Database
   discipline: Agent Reliability Engineering (ARE)
-  taxonomy_version: "1.4"   # schema version; consumers pin against it. See CHANGELOG.md.
+  taxonomy_version: "1.5"   # schema version; consumers pin against it. See CHANGELOG.md.
   license: CC-BY-4.0
 
   # REGISTRY facts. True regardless of who is reading, and not a claim about any product.
@@ -63,12 +64,14 @@ meta:
   # failure. Vendor-agnostic; the action layer is one discipline among peers. Counts must equal the
   # per-entry `control_domain` values -- validate() fails loud on drift.
   control_domains:
-    Action mediation: 25
+    Action mediation: 20
     Output grounding & verification: 4
     Model alignment & content safety: 1
-    Environmental isolation: 2
+    Environmental isolation: 1
     Data governance: 1
     Multi-agent coordination: 1
+    Identity & access: 3
+    Supply chain integrity: 3
 
   # ACTION-LAYER REACHABILITY rollups (NOT a neutral headline): the action firewall's OWN view of
   # whether a deterministic rule reaches each failure. Kept for the schema and to gate a vendor's
@@ -156,7 +159,7 @@ incidents:
       delete to a human instead of forbidding it. A companion check flags the credential
       read that preceded it.
     owned_by: null
-    control_domain: Action mediation
+    control_domain: Identity & access
     source: https://www.reddit.com/r/ExperiencedFounders/comments/1sx8obj/an_ai_agent_just_destroyed_our_production_data_it/
 
   - id: ARE-2026-003
@@ -218,7 +221,7 @@ incidents:
       to an external paste or webhook sink. The safe path is to read only the non-secret
       fields you need and keep them inside the trusted system.
     owned_by: null
-    control_domain: Action mediation
+    control_domain: Identity & access
     source: https://medium.com/@instatunnel/ai-hallucination-squatting-the-new-agentic-attack-vector-6e1366d77038
 
   - id: ARE-2026-005
@@ -308,7 +311,7 @@ incidents:
       into a shell interpreter) before it runs. The safe path is to download the script
       to a file and review it before executing.
     owned_by: null
-    control_domain: Action mediation
+    control_domain: Supply chain integrity
     source: https://forgepointcap.com/perspectives/tips-37-when-ai-agents-become-insider-threats/
 
   - id: ARE-2026-008
@@ -420,7 +423,7 @@ incidents:
       rescues it. An escalation, not a hard block, since a not-found is often a legit
       private package.
     owned_by: null
-    control_domain: Action mediation
+    control_domain: Supply chain integrity
     source: https://medium.com/@instatunnel/ai-hallucination-squatting-the-new-agentic-attack-vector-6e1366d77038
 
   - id: ARE-2026-012
@@ -580,7 +583,7 @@ incidents:
       the escalation commands themselves trip the destructive and remote-execution
       shields.
     owned_by: null
-    control_domain: Action mediation
+    control_domain: Identity & access
     source: https://amplitude.com/blog
 
   - id: ARE-2026-019
@@ -965,7 +968,7 @@ incidents:
       own configuration the power to execute on open. The payload runs at session start,
       before the agent has issued any tool call, so the failure sits upstream of anything
       that inspects what an agent does.
-    control_domain: Environmental isolation
+    control_domain: Supply chain integrity
     sources:
       - url: https://semgrep.dev/blog/2026/malicious-dependency-in-pytorch-lightning-used-for-ai-training/
         kind: reporting

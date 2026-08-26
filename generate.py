@@ -34,7 +34,33 @@ CONTROL_DOMAIN = {
     "Identity & access",
     "Data governance",
     "Multi-agent coordination",
+    "Supply chain integrity",
 }
+
+# CROSS-TAXONOMY AGREEMENT. Every entry is filed twice: once under OWASP ASI (the external,
+# industry map) and once under control_domain (this registry's neutral discipline axis). Nothing
+# compared them, and they silently disagreed on three entries for months -- ASI03 "Identity &
+# Privilege Abuse" filed as "Action mediation", ASI04 "Supply Chain" likewise. Both labels sat in
+# the same file the whole time.
+#
+# The drift had a direction, which is why it matters here: disagreements resolved toward the
+# maintainer's own discipline, so the neutral axis quietly tracked what the maintainer's product
+# reaches. `coverage_class` already records reachability; the neutral column should not.
+#
+# Only the four near-1:1 categories are asserted. ASI01/02/05/08/09/10 genuinely span several
+# disciplines and forcing an expectation there would produce false alarms, which is how a check
+# gets switched off.
+ASI_EXPECTED_DOMAIN = {
+    "ASI03": "Identity & access",          # Identity & Privilege Abuse
+    "ASI04": "Supply chain integrity",     # Supply Chain
+    "ASI06": "Data governance",            # Memory & Context Poisoning
+    "ASI07": "Multi-agent coordination",   # Insecure Inter-Agent Comms
+}
+
+# Documented, deliberate departures from the mapping above. An id here must carry a reason a
+# reader can weigh -- an empty allowlist is the goal, and a growing one means the mapping is
+# wrong rather than the entries.
+ASI_DOMAIN_EXCEPTIONS = {}
 
 # ACTION-LAYER REACHABILITY (NOT a neutral headline): whether an action firewall reaches the
 # failure with a deterministic rule (action_coverable), needs an LLM judge or the org's ground
@@ -492,6 +518,16 @@ def validate(doc):
         cd = inc.get("control_domain")
         if cd not in CONTROL_DOMAIN:
             errors.append(f"{eid}: control_domain {cd!r} missing/invalid (use {sorted(CONTROL_DOMAIN)})")
+
+        # The two taxonomies must agree where they overlap. See ASI_EXPECTED_DOMAIN.
+        expected = ASI_EXPECTED_DOMAIN.get(inc.get("owasp_asi"))
+        if expected and cd != expected and eid not in ASI_DOMAIN_EXCEPTIONS:
+            errors.append(
+                f"{eid}: filed {inc.get('owasp_asi')} ({ASI_LABEL.get(inc.get('owasp_asi'), '?')}) "
+                f"but control_domain is {cd!r}, not {expected!r}. The external taxonomy and the "
+                f"neutral axis disagree about which discipline owns this. Re-file it, or add "
+                f"{eid!r} to ASI_DOMAIN_EXCEPTIONS with a reason."
+            )
 
         for p in vendor_prefixes(inc):
             if p not in vendors:
