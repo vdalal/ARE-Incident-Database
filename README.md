@@ -73,10 +73,10 @@ Below the registry facts, an entry may carry a fenced **Vendor coverage claims**
 
 ## Maintainer and conflict of interest
 
-**AgentX Core maintains this registry and also sells a product in this space.** That is a real conflict of interest, and hiding it would be the thing that discredits the registry, so it is disclosed here and contained structurally:
+**AgentX Core maintains this registry and sells a product in this space.** That is a conflict of interest. Here is how it is contained:
 
 - The registry's facts (the incident, its OWASP ASI category, its control domain) are vendor-neutral. They do not name a product.
-- AgentX Core's coverage claims are namespaced (`agentx_coverage`, `agentx_check`, `agentx_response`) and rendered only in the fenced "Vendor coverage claims" section on each entry, never in the facts. Its full claim, including what it does not stop, lives on its own site at [agentx-core.com/aredb](https://agentx-core.com/aredb).
+- Every vendor's coverage claims are namespaced (`agentx_coverage`, `acme_coverage`, and so on) and render only in the fenced "Vendor coverage claims" section on each entry. The maintainer's are no exception. AgentX Core's full claim, including what it does not stop, lives on its own site at [agentx-core.com/aredb](https://agentx-core.com/aredb).
 - Every block claim declares one of two verification levels, and both are open to every vendor. **CI-verified** claims ship a snippet this registry runs on every push, so only these are proven here. **Vendor-attested** claims are verified by the vendor against its own component and are labelled as such on the entry.
 - The maintainer gets no exemption. The requirement is identical for every vendor, and only the field name the renderer reads differs; there is no level, and no path, available to the maintainer that is not available to you. A claim that stops passing is **withdrawn, not reworded** ([`GOVERNANCE.md`](GOVERNANCE.md)).
 
