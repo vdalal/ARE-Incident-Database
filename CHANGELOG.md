@@ -10,11 +10,7 @@ an entry's content or its status (`confirmed` / `disputed` / `withdrawn`), never
 
 Dates are ISO-8601 (UTC). The format loosely follows Keep a Changelog.
 
-## [Unreleased]
-
-Deliberately undated and unnumbered: a dated heading here obligates the matching
-`CITATION.cff` version bump and git tag, and this work is not released yet. The release
-number is assigned when the tag is cut, not before.
+## [1.6.0] - 2026-08-27
 
 ### Added
 
@@ -379,6 +375,7 @@ either backed by a repro you can run or honestly marked as not ours.
   `ARE Incident Database (AREDB), aredb.org`, with the `ARE-YYYY-NNN` identifiers
   kept intact.
 
+[1.6.0]: https://github.com/vdalal/ARE-Incident-Database/releases/tag/v1.6.0
 [1.5.0]: https://github.com/vdalal/ARE-Incident-Database/releases/tag/v1.5.0
 [1.4.0]: https://github.com/vdalal/ARE-Incident-Database/releases/tag/v1.4.0
 [1.3.0]: https://github.com/vdalal/ARE-Incident-Database/releases/tag/v1.3.0
