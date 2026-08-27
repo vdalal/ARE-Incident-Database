@@ -15,6 +15,8 @@ failure is rendered in a separate, fenced "Vendor coverage claims" section, attr
 namespaced, and only where a claim actually exists. The registry does not endorse it.
 """
 import os
+import re
+
 import yaml
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -34,7 +36,33 @@ CONTROL_DOMAIN = {
     "Identity & access",
     "Data governance",
     "Multi-agent coordination",
+    "Supply chain integrity",
 }
+
+# CROSS-TAXONOMY AGREEMENT. Every entry is filed twice: once under OWASP ASI (the external,
+# industry map) and once under control_domain (this registry's neutral discipline axis). Nothing
+# compared them, and they silently disagreed on three entries for months -- ASI03 "Identity &
+# Privilege Abuse" filed as "Action mediation", ASI04 "Supply Chain" likewise. Both labels sat in
+# the same file the whole time.
+#
+# The drift had a direction, which is why it matters here: disagreements resolved toward the
+# maintainer's own discipline, so the neutral axis quietly tracked what the maintainer's product
+# reaches. `coverage_class` already records reachability; the neutral column should not.
+#
+# Only the four near-1:1 categories are asserted. ASI01/02/05/08/09/10 genuinely span several
+# disciplines and forcing an expectation there would produce false alarms, which is how a check
+# gets switched off.
+ASI_EXPECTED_DOMAIN = {
+    "ASI03": "Identity & access",          # Identity & Privilege Abuse
+    "ASI04": "Supply chain integrity",     # Supply Chain
+    "ASI06": "Data governance",            # Memory & Context Poisoning
+    "ASI07": "Multi-agent coordination",   # Insecure Inter-Agent Comms
+}
+
+# Documented, deliberate departures from the mapping above. An id here must carry a reason a
+# reader can weigh -- an empty allowlist is the goal, and a growing one means the mapping is
+# wrong rather than the entries.
+ASI_DOMAIN_EXCEPTIONS = {}
 
 # ACTION-LAYER REACHABILITY (NOT a neutral headline): whether an action firewall reaches the
 # failure with a deterministic rule (action_coverable), needs an LLM judge or the org's ground
@@ -61,7 +89,15 @@ COVERAGE_LABEL = {
 # only kind that renders a vendor section + repro; the other two are non-claims.
 VENDOR_COVERAGE_VALUES = {"covered", "partial", "judge_or_org", "out_of_scope"}
 VENDOR_BLOCK_CLAIMS = {"covered", "partial"}
-VENDOR_CHECK_VALUES = {"keyless_pip", "gateway_wired"}
+# The TWO VERIFICATION LEVELS, open to every vendor on identical terms.
+#   ci_verified     -- ships a snippet this registry EXECUTES on every push. Proven here.
+#   vendor_attested -- the vendor verified it against its own component; the registry does NOT run
+#                      it. Rendered and labelled as such, and not proven here.
+# These replaced `keyless_pip` / `gateway_wired`, which named the MAINTAINER's mechanisms (pip, the
+# AgentX gateway) and so could not honestly be offered to anyone else. A level is a property of the
+# EVIDENCE, not of whose product produced it.
+VENDOR_CHECK_VALUES = {"ci_verified", "vendor_attested"}
+CI_VERIFIED = "ci_verified"
 
 # Multi-vendor: the renderer draws EVERY vendor namespace found on an entry, attributed via the
 # meta.vendors registry. The maintainer's `agentx_` claim keeps its original templated rendering
@@ -81,11 +117,21 @@ VENDOR_DISCLAIMER = (
 # Shown on an entry that NO vendor has claimed, so every page shows the column is open rather than
 # leaving boundary and judge pages silent. This is the registry's own open-participation line, not
 # a vendor claim, so it names no product.
+# SCOPED, and in the CURRENT vocabulary. TWO claims went stale in this one string in a single
+# session. First it stated the CI rule unscoped, when "runs on every push" is true of ci_verified
+# claims and not of all 25. Then the retraction of "counts toward the totals" landed in README,
+# TAXONOMY, CHANGELOG, incidents.yaml and BOTH renderer strings -- and not here. One claim, six
+# places, five fixed, and the one missed is the text rendered onto every unclaimed page and read by
+# a rival deciding whether to file. Grep the CLAIM, never the string you just edited.
+#
+# Written imperatively (ship / verify / withdraw) because the reader is deciding whether to file, and
+# a list of obligations serves them better than a description of policy.
 VENDOR_INVITATION = (
-    "_No vendor has claimed to address this failure. Any vendor that does may add a claim under "
-    "its own prefix, on the terms in [CONTRIBUTING.md](../CONTRIBUTING.md): a claim must ship a "
-    "check a stranger can run, that check runs on every push, and a claim that stops holding is "
-    "withdrawn, not reworded._"
+    "_No vendor has claimed to address this failure. Any vendor may add a claim under its own "
+    "prefix, on the same terms as the maintainer ([CONTRIBUTING.md](../CONTRIBUTING.md)). Ship a "
+    "snippet and this registry runs it on every push, so the claim is proven here; verify it "
+    "yourself against your own component instead and it renders labelled as vendor-attested, which "
+    "this registry does not execute. A claim whose check stops passing is withdrawn, not reworded._"
 )
 
 # Source provenance labels. A registry prefers a FIRST-PARTY disclosure (the involved org's own
@@ -189,17 +235,18 @@ def ticket_header(inc):
 
 def repro_block(inc):
     r = inc.get("agentx_check")
-    if r == "keyless_pip":
+    if r == "ci_verified":
         call = inc.get("repro_call")
         if not call:
-            # A keyless entry with no runnable call is a claim with no proof. Fail loud
-            # rather than quietly emitting a prose-only "repro" (mirrors the KeyError posture).
-            raise KeyError(f"{inc['id']}: agentx_check is keyless_pip but no repro_call to render")
+            # A ci_verified entry with no runnable call is a claim with no proof. Fail loud
+            # rather than quietly emitting a prose-only "check" (mirrors the KeyError posture).
+            raise KeyError(f"{inc['id']}: agentx_check is ci_verified but no repro_call to render")
         tool, param, action = call["tool"], call["param"], call["action"]
         payload = call["payload"]
         return (
-            "**Repro.** This blocks from a bare `pip install`, with no key, no gateway, "
-            "and nothing leaving your machine. Copy it and run it.\n\n"
+            "**Check: CI-verified.** This registry executes this snippet on every push. It blocks "
+            "from a bare `pip install`, with no key, no gateway, and nothing leaving your machine. "
+            "Copy it and run it.\n\n"
             "```bash\npip install agentx-security-sdk\n```\n\n"
             "```python\n"
             "from agentx_sdk import agentx_protect, is_block\n\n"
@@ -211,12 +258,14 @@ def repro_block(inc):
             "print(result)                  # the block, and the safe path to take instead\n"
             "```\n\n"
         )
-    if r == "gateway_wired":
+    if r == "vendor_attested":
         return (
-            "**Repro (gateway).** This block runs in the AgentX gateway, so it does "
-            "not fire from a bare `pip install`. The gateway is free and self-serve: "
-            "pull it at [agentx-core.com/gateway](https://agentx-core.com/gateway) and "
-            "run it locally to reproduce this claim.\n\n"
+            "**Check: vendor-attested.** This registry does NOT execute this one. The block runs "
+            "in the AgentX gateway, so it does not fire from a bare `pip install`, and AgentX "
+            "verifies it against its own component, so it is not included in the registry's "
+            "CI-verified count. The gateway is free and self-serve: pull it at "
+            "[agentx-core.com/gateway](https://agentx-core.com/gateway) and run it locally to "
+            "check this claim yourself.\n\n"
         )
     return ""
 
@@ -262,8 +311,14 @@ def agentx_claim_block(inc):
     (not routed through the generic renderer) so the founding pages stay byte-identical and their
     scraped repros keep passing untouched. Non-maintainer vendors go through generic_vendor_block."""
     cov = inc.get("agentx_coverage")
-    keyless = inc.get("agentx_check") == "keyless_pip"
-    delivery = ("from the keyless SDK (no key, no gateway)" if keyless
+    # Reads the CHECK LEVEL to describe DELIVERY. These are two different things that happen to
+    # correlate for this vendor today (the maintainer's CI-verified claims are exactly its keyless
+    # ones), and this line compared against the old `keyless_pip` literal. When the levels were
+    # renamed, the comparison silently went False for all 25 and every page would have said "wired
+    # to the AgentX gateway", including the 11 that block from a bare pip install. Nothing would
+    # have failed; 11 pages would just have carried a false delivery line.
+    ci_verified = inc.get("agentx_check") == CI_VERIFIED
+    delivery = ("from the keyless SDK (no key, no gateway)" if ci_verified
                 else "wired to the AgentX gateway")
     out = [
         f"**AgentX Core** (the registry maintainer) claims: **{COVERAGE_LABEL[cov]}**, "
@@ -295,15 +350,39 @@ def generic_vendor_block(inc, prefix, vendors):
         (inc.get(f"{prefix}_response") or "").strip(),
         "",
     ]
+    # Same two levels, same labels, same wording as the maintainer's block. A reader must be able to
+    # tell CI-verified from vendor-attested without knowing or caring whose claim it is.
+    #
+    # KEYED OFF THE DECLARED LEVEL, NEVER OFF SNIPPET PRESENCE. Reading `if snippet:` here meant a
+    # vendor declaring `vendor_attested` who ALSO included an illustrative snippet got a page saying
+    # "This registry executes this snippet on every push", which is false. Worse, `test_repros.py`
+    # scrapes every python fence off every page regardless of level, so that snippet WAS executed and
+    # could redden the build under a label promising it never runs. The level is the claim; the
+    # snippet is evidence for one of the levels.
+    chk = inc.get(f"{prefix}_check")
     snippet = (inc.get(f"{prefix}_repro") or "").strip()
-    if snippet:
+    if chk == CI_VERIFIED:
+        if not snippet:
+            # validate() rejects this, so reaching it means validation was bypassed. Fail loud
+            # rather than render a verified badge over nothing (mirrors repro_block's posture).
+            raise KeyError(f"{inc['id']}: {prefix} is ci_verified but has no {prefix}_repro to render")
         out.append(
-            f"**Repro ({v['name']}).** Runs against a real install and asserts the block fired and "
-            f"the tool body never executed, exiting non-zero if not. Copy it and run it."
+            f"**Check: CI-verified.** This registry executes this snippet on every push. It runs "
+            f"against a real install and asserts the block fired and the tool body never executed, "
+            f"exiting non-zero if not. Copy it and run it."
         )
         out.append("")
         out.append(snippet)
         out.append("")
+    elif chk == "vendor_attested":
+        out.append(
+            f"**Check: vendor-attested.** This registry does NOT execute this one. {v['name']} "
+            f"verifies it against its own component, so it is not included in the registry's "
+            f"CI-verified count."
+        )
+        out.append("")
+        # No snippet is embedded even when one exists: publishing it would put a python fence on the
+        # page, and test_repros.py runs every fence it finds.
     return "\n".join(out).rstrip()
 
 
@@ -374,6 +453,18 @@ def render(inc, vendors):
     lines.append("")
     lines.append(vs.strip())
     lines.append("")
+    # NON-AFFILIATION FOOTER. This page leads with `**OWASP ASI:** ASInn ...` in its ticket header,
+    # and it is the page a cited ARE-YYYY-NNN link resolves to. A reader arriving that way never
+    # sees the repo README, which is where the disclaimer used to live alone. The association
+    # travels with the page, so the disclaimer has to travel with it too.
+    lines.append("---")
+    lines.append("")
+    lines.append(
+        "_AREDB is not an OWASP project and is not affiliated with or endorsed by OWASP. It indexes "
+        "onto the ASI Top 10 because that is the vocabulary the field is standardizing on. "
+        "See [`RELATION-TO-STANDARDS.md`](../RELATION-TO-STANDARDS.md)._"
+    )
+    lines.append("")
     return "\n".join(lines)
 
 
@@ -390,8 +481,58 @@ def render_index(incidents):
            "peers. Whether a specific product stops a given failure is a vendor claim, not a "
            "registry finding, and is recorded per entry on each page.",
            "",
-           "| OWASP ASI | ID | Incident | Control domain |",
-           "|---|---|---|---|"]
+           # NON-AFFILIATION BELONGS ON THE GENERATED SURFACES TOO. The disclaimer lives in the repo
+           # README, and a reader arriving from a cited ARE-YYYY-NNN link lands here or on an entry
+           # page and never sees it -- while every one of these rows leads with an OWASP ASI
+           # category. The disclaimer has to travel with the pages that carry the association.
+           "_AREDB is not an OWASP project and is not affiliated with or endorsed by OWASP. It "
+           "indexes onto the ASI Top 10 because that is the vocabulary the field is standardizing "
+           "on. See [`RELATION-TO-STANDARDS.md`](../RELATION-TO-STANDARDS.md)._",
+           ""]
+
+    # SELECTION DISCLOSURE -- generated from the entries, so it cannot drift from them.
+    #
+    # Field-level neutrality is not enough on its own. A registry can be neutral in every
+    # sentence and still lean through WHICH incidents it holds. This maintainer sells action
+    # mediation, so the corpus will tend to follow its vantage point whether or not the field
+    # does, and a reader cannot tell those two apart from the outside. Stating the shape --
+    # including the domains holding nothing -- makes it checkable rather than something taken
+    # on trust, and tells a contributor where an entry is worth most. A thin column is an
+    # invitation, not an embarrassment.
+    counts = {d: 0 for d in CONTROL_DOMAIN}
+    for i in incidents:
+        cd = i.get("control_domain")
+        if cd in counts:
+            counts[cd] += 1
+    total = len(incidents) or 1
+    lead, lead_n = max(counts.items(), key=lambda kv: kv[1])
+    thin = sorted(d for d, n in counts.items() if n <= 1 and d != lead)
+    thin_txt = ", ".join(f"{d} ({counts[d]})" for d in thin) or "none"
+    out += [
+        f"**Where this registry is thin.** {lead_n} of {total} entries sit under "
+        f"**{lead}**. Read that as a fact about who has filed so far, not about where agents "
+        "fail. The registry is young, its maintainer works in that discipline (disclosed in "
+        "full at the top of [`data/incidents.yaml`](../data/incidents.yaml)), and a young "
+        "registry looks like whoever started it. This paragraph is generated from the entries, "
+        "so the shape moves as others file.",
+        "",
+        f"Holding one entry or none: {thin_txt}. **An entry in those columns shifts this more "
+        "than another one in the crowded column.** Anyone may file -- see "
+        "[CONTRIBUTING.md](../CONTRIBUTING.md). The bar is a real incident with material "
+        "consequences and a checkable public source. It is not agreement with the maintainer.",
+        "",
+        # WHO FILED WHAT: git already knows, because entries arrive by pull request. Deliberately
+        # a link and not a `filed_by` field -- a second copy of something git owns is the drift
+        # this file has already been bitten by twice (the meta rollups, and the two taxonomies
+        # disagreeing). Point at the record; do not restate it.
+        "Entries arrive by pull request, so authorship is git's, not a field anyone can "
+        "self-declare: "
+        "[who has filed](https://github.com/vdalal/ARE-Incident-Database/graphs/contributors) "
+        "and [every change to an entry]"
+        "(https://github.com/vdalal/ARE-Incident-Database/commits/main/data/incidents.yaml).",
+        "",
+        "| OWASP ASI | ID | Incident | Control domain |",
+        "|---|---|---|---|"]
     for i in rows:
         # A disputed/withdrawn entry stays in the index (id never disappears) but is
         # marked so a reader is not misled by a normal-looking row.
@@ -420,16 +561,47 @@ def vendor_prefixes(inc):
 
 
 def repro_call_for(inc, prefix):
-    """The runnable repro for a vendor's keyless claim. The maintainer's (agentx) repro is the
-    historical un-namespaced `repro_call`; a future vendor would namespace it `<prefix>_repro_call`."""
+    """The maintainer's structured repro: the historical un-namespaced `repro_call`.
+
+    ⚠️ THE NON-AGENTX BRANCH IS CURRENTLY DEAD, and the docstring used to invite a contributor into
+    it ("a future vendor would namespace it `<prefix>_repro_call`"). Nothing reads that field any
+    more: `has_ci_snippet` only consults this for `agentx`, and `generic_vendor_block` embeds
+    `<prefix>_repro` and nothing else. A third-party `acme_repro_call` is therefore REJECTED with
+    "ships no snippet". Kept as a stub rather than deleted so the prefix-shaped call sites read
+    uniformly; if a vendor ever needs a structured repro, the RENDERER is what has to change first."""
     if prefix == "agentx":
         return inc.get("repro_call")
     return inc.get(f"{prefix}_repro_call")
 
 
-def validate(doc):
+def has_ci_snippet(inc, prefix):
+    """Will a snippet for this vendor actually be PUBLISHED and therefore EXECUTED?
+
+    Deliberately asks what the RENDERER emits, not merely which field exists, because the two
+    renderers read different fields and accepting either for either prefix creates a hole:
+
+      * `agentx` -> `repro_block` renders `repro_call` and nothing else. Accepting a bare
+        `agentx_repro` here would pass validation and then make `repro_block` raise KeyError
+        mid-render, after pages have already been written.
+      * anyone else -> `generic_vendor_block` embeds `<prefix>_repro` and nothing else. Accepting a
+        structured `<prefix>_repro_call` here would pass validation and render a `ci_verified` claim
+        with NO snippet and NO check label at all -- an unverified claim wearing the verified badge,
+        which is the exemption this branch exists to delete, rebuilt one field over.
+
+    The BAR is identical for both. Only the field the renderer reads differs, and that is a fact
+    about the templates, not a concession to whoever is claiming."""
+    if prefix == "agentx":
+        return bool(repro_call_for(inc, prefix))
+    return bool((inc.get(f"{prefix}_repro") or "").strip())
+
+
+def validate(doc, check_readme=True):
     """Fail loud, and BEFORE any file is written, on anything that would render a wrong,
     contradictory, or partial page.
+
+    `check_readme=False` skips only the README reconciliation, for callers validating a SYNTHETIC or
+    PARTIAL doc (the multivendor fixture). Those docs legitimately hold two entries, so every README
+    row would mismatch and the raise would carry no information about the thing under test.
 
     The pre-1.3 single-field code got this for free: an unconditional `COVERAGE_LABEL[agentx_coverage]`
     subscript KeyError-ed on any bad value. Splitting the neutral `coverage_class` fact from the
@@ -439,7 +611,8 @@ def validate(doc):
       * `coverage_class` present and valid.
       * each vendor claim present and valid; only supported vendor namespaces (renderer can't drop one).
       * a block claim (covered/partial) must be consistent with an action-coverable class, and must
-        ship a valid check + response (+ a repro for a keyless claim) -- no fabricated delivery line.
+        ship a valid check + response (+ an executable snippet for a ci_verified claim, for EVERY
+        vendor including the maintainer) -- no fabricated delivery line.
       * a non-coverable class must name an owner (the 'Who owns it' section cannot be blank).
       * the meta rollups must equal the real per-entry counts.
 
@@ -461,6 +634,16 @@ def validate(doc):
         if cd not in CONTROL_DOMAIN:
             errors.append(f"{eid}: control_domain {cd!r} missing/invalid (use {sorted(CONTROL_DOMAIN)})")
 
+        # The two taxonomies must agree where they overlap. See ASI_EXPECTED_DOMAIN.
+        expected = ASI_EXPECTED_DOMAIN.get(inc.get("owasp_asi"))
+        if expected and cd != expected and eid not in ASI_DOMAIN_EXCEPTIONS:
+            errors.append(
+                f"{eid}: filed {inc.get('owasp_asi')} ({ASI_LABEL.get(inc.get('owasp_asi'), '?')}) "
+                f"but control_domain is {cd!r}, not {expected!r}. The external taxonomy and the "
+                f"neutral axis disagree about which discipline owns this. Re-file it, or add "
+                f"{eid!r} to ASI_DOMAIN_EXCEPTIONS with a reason."
+            )
+
         for p in vendor_prefixes(inc):
             if p not in vendors:
                 errors.append(
@@ -481,19 +664,29 @@ def validate(doc):
                 )
             if not (inc.get(f"{p}_response") or "").strip():
                 errors.append(f"{eid}: {p}_coverage={cov} but {p}_response is empty")
-            if p == "agentx":
-                chk = inc.get("agentx_check")
-                if chk not in VENDOR_CHECK_VALUES:
-                    errors.append(f"{eid}: agentx_coverage={cov} but agentx_check {chk!r} invalid (use {sorted(VENDOR_CHECK_VALUES)})")
-                if chk == "keyless_pip" and not repro_call_for(inc, "agentx"):
-                    errors.append(f"{eid}: agentx is keyless_pip but has no repro_call to render")
-            else:
-                # A generic vendor's runnable proof is a self-verifying `<prefix>_repro` snippet.
-                if not (inc.get(f"{p}_repro") or "").strip():
-                    errors.append(
-                        f"{eid}: {p}_coverage={cov} claims a block but ships no {p}_repro snippet "
-                        f"(a claim must ship a check a stranger can run; see CONTRIBUTING.md)"
-                    )
+            # ONE BAR, NO VENDOR BRANCH.
+            #
+            # This read `if p == "agentx": ... else: ...`, and the two sides were NOT the same rule.
+            # The maintainer could declare a component-wired claim and ship no snippet, and it was
+            # accepted; any other vendor shipping no snippet was rejected with "a claim must ship a
+            # check a stranger can run". 14 of the maintainer's 25 claims used that exemption, while
+            # CONTRIBUTING promised every vendor "exactly the bar AgentX Core is held to, and no
+            # higher". A rival was in fact held HIGHER, and the branch was the proof of it.
+            #
+            # Every vendor now declares one of the same two levels and is held to the same
+            # requirement for each. The maintainer has no path a newcomer lacks.
+            chk = inc.get(f"{p}_check")
+            if chk not in VENDOR_CHECK_VALUES:
+                errors.append(
+                    f"{eid}: {p}_coverage={cov} but {p}_check {chk!r} invalid "
+                    f"(use {sorted(VENDOR_CHECK_VALUES)}); see CONTRIBUTING.md"
+                )
+            elif chk == CI_VERIFIED and not has_ci_snippet(inc, p):
+                errors.append(
+                    f"{eid}: {p}_check=ci_verified but ships no snippet for the registry to "
+                    f"execute. Ship one, or declare vendor_attested and accept that this registry "
+                    f"will not execute the claim; see CONTRIBUTING.md"
+                )
 
         if cc in ("needs_judge_or_org", "other_discipline") and not (inc.get("owned_by") or "").strip():
             errors.append(f"{eid}: coverage_class={cc} but owned_by is empty (the 'Who owns it' section would be blank)")
@@ -530,10 +723,101 @@ def validate(doc):
         "agentx_judge_or_org": ax.get("judge_or_org", 0),
         "agentx_out_of_scope": ax.get("out_of_scope", 0),
         "agentx_coverable": ax.get("covered", 0) + ax.get("partial", 0),
+        # Verification levels. Counted over CLAIMS only, so a non-claim carrying `none` can never
+        # inflate either number.
+        "agentx_ci_verified": sum(
+            1 for i in incidents
+            if i.get("agentx_coverage") in VENDOR_BLOCK_CLAIMS and i.get("agentx_check") == CI_VERIFIED
+        ),
+        "agentx_vendor_attested": sum(
+            1 for i in incidents
+            if i.get("agentx_coverage") in VENDOR_BLOCK_CLAIMS and i.get("agentx_check") == "vendor_attested"
+        ),
     }
     for key, want in expected.items():
         if key in meta and meta[key] != want:
             errors.append(f"meta.{key} = {meta[key]!r} but the real count is {want}")
+
+    # THE README'S "At a glance" TABLES ARE HAND-WRITTEN FROM THIS DATA, AND NOTHING CHECKED THEM.
+    #
+    # They went stale the moment entry 34 landed and taxonomy 1.5 re-filed six entries: the front
+    # page of the registry claimed 33 incidents, 30 ASI-mapped, 16 severity-1 and `Action mediation`
+    # 25, while the data said 34 / 31 / 17 / 20 -- and the two domains the re-filing created,
+    # `Identity & access` and `Supply chain integrity`, had no row at all, so the table summed to 33
+    # for a registry holding 34. Four wrong numbers and two missing rows on the one page a rival
+    # reads first, and every existing guard was green: `meta.control_domains` was checked against the
+    # entries, and the README was checked against nothing.
+    #
+    # The rollups below guard meta-vs-entries. This guards README-vs-entries, which is the hop that
+    # was missing. Cheap here because both files live in this repo; the site's copy of these numbers
+    # is a separate repo and needs its own cross-repo tripwire.
+    readme = os.path.join(HERE, "README.md")
+    if check_readme and not os.path.exists(readme):
+        # A guard whose missing input reads as a pass is not a guard. README.md is a required file
+        # in this repo, so its absence is a broken checkout or a rename, never a reason to skip.
+        errors.append("README.md is missing, so the At-a-glance reconciliation could not run")
+    elif check_readme:
+        with open(readme, encoding="utf-8") as fh:
+            rtext = fh.read()
+
+        def readme_count(label_re):
+            """The bolded count in the README row whose label matches. None if there is no such row.
+
+            Asserts the match is UNIQUE. The search is not anchored to the At-a-glance section, so a
+            future row whose label merely starts with one of these patterns, appearing earlier in the
+            file, would silently become the value checked. Two matches means the guard can no longer
+            tell which row is authoritative, and that is a failure, not a coin flip."""
+            found = re.findall(r"^\|\s*%s[^|]*\|\s*\*\*(\d+)\*\*\s*\|" % label_re, rtext, re.M)
+            if len(found) > 1:
+                errors.append(
+                    f"README: {len(found)} rows match {label_re!r}; the guard cannot tell which is "
+                    "authoritative. Make the labels unique or anchor the search."
+                )
+            return int(found[0]) if found else None
+
+        asi_mapped = sum(1 for i in incidents if str(i.get("owasp_asi") or "").startswith("ASI"))
+        glance = {
+            r"Total incidents": len(incidents),
+            r"Mapped to an OWASP ASI": asi_mapped,
+            r"Non-ASI reliability": len(incidents) - asi_mapped,
+            r"Severity-1": sum(1 for i in incidents if i.get("severity") == 1),
+        }
+        for label_re, want in glance.items():
+            got = readme_count(label_re)
+            if got is None:
+                errors.append(f"README 'At a glance': no row matching {label_re!r} (renamed? removed?)")
+            elif got != want:
+                errors.append(f"README 'At a glance' {label_re!r} = {got} but the real count is {want}")
+
+        # Every control domain that OCCURS must have a row, with the right count. A domain the
+        # re-filing invents is otherwise silently absent, which is exactly what happened.
+        real_domains = {}
+        for i in incidents:
+            real_domains[i.get("control_domain")] = real_domains.get(i.get("control_domain"), 0) + 1
+        for dom, want in sorted(real_domains.items()):
+            if not dom:
+                continue
+            got = readme_count(r"\*\*%s\*\*" % re.escape(str(dom)))
+            if got is None:
+                errors.append(
+                    f"README control-domain table has NO ROW for {dom!r}, which {want} entries use. "
+                    "A new domain must appear here or the table silently under-counts the registry."
+                )
+            elif got != want:
+                errors.append(f"README control-domain {dom!r} = {got} but the real count is {want}")
+
+        # AND THE OTHER DIRECTION: every ROW must be a real domain. Checking only "every domain has
+        # a row" caught the UNDER-count half of the bug and let the OVER-count half through: an
+        # invented row passed green, and the table could sum to more than Total incidents. The
+        # meta.control_domains check below has always been bidirectional; this one was not, and a
+        # guard written from a single remembered failure tends to cover only that failure's polarity.
+        for m in re.finditer(r"^\|\s*\*\*([^*|]+?)\*\*[^|]*\|\s*\*\*(\d+)\*\*\s*\|", rtext, re.M):
+            listed = m.group(1).strip()
+            if listed not in real_domains:
+                errors.append(
+                    f"README control-domain table lists {listed!r}, which no incident uses. "
+                    "The table would sum to more than the registry holds."
+                )
 
     # Neutral control-domain rollups (a nested map in meta): every listed domain's count must match
     # the real count, and every domain that occurs must be listed, so the "At a glance" table on the

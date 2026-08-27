@@ -17,7 +17,8 @@
 #   control_domain:  the PRIMARY neutral axis -- the generic, vendor-agnostic discipline that owns
 #            the failure, as the field already knows it: Action mediation | Output grounding &
 #            verification | Model alignment & content safety | Environmental isolation | Identity &
-#            access | Data governance | Multi-agent coordination. The action layer is ONE discipline
+#            access | Data governance | Multi-agent coordination | Supply chain integrity. The action layer
+#            is ONE discipline
 #            among peers, never the frame, and these names are NOT branded AREDB-anything. This is
 #            what the index and the entry pages lead with.
 #   coverage_class:  action_coverable | needs_judge_or_org | other_discipline
@@ -34,9 +35,15 @@
 # VENDOR-CLAIM fields (one vendor's claim about its own product; NOT a registry finding).
 #   Namespaced by vendor. AgentX Core's claim uses the `agentx_` prefix:
 #     agentx_coverage:  covered | partial | judge_or_org | out_of_scope
-#     agentx_check:     keyless_pip   (blocks from a bare `pip install`; the keyless SDK shield)
-#                       gateway_wired (blocks only when wired to the AgentX gateway)
-#                       none          (not a coverable entry)
+#     agentx_check:     ci_verified     (ships a snippet THIS REGISTRY executes on every push;
+#                                        proven here)
+#                       vendor_attested (the vendor verified it against its own component; the
+#                                        registry does NOT execute it, so it is not proven here)
+#                       none            (not a coverable entry)
+#                     The two levels are VERIFICATION LEVELS, open to every vendor on identical
+#                     terms, and they replaced `keyless_pip` / `gateway_wired`, which named the
+#                     maintainer's own mechanisms and so could not honestly be offered to anyone
+#                     else. A level describes the EVIDENCE, never whose product produced it.
 #     agentx_response:  outcome-loud prose: what class of action is stopped and the safe path
 #                       offered. Never names an internal detector or a signature threshold.
 #
@@ -50,32 +57,34 @@
 meta:
   name: ARE Incident Database
   discipline: Agent Reliability Engineering (ARE)
-  taxonomy_version: "1.4"   # schema version; consumers pin against it. See CHANGELOG.md.
+  taxonomy_version: "1.5"   # schema version; consumers pin against it. See CHANGELOG.md.
   license: CC-BY-4.0
 
   # REGISTRY facts. True regardless of who is reading, and not a claim about any product.
-  total: 33
+  total: 34
   disputed: 0            # marked-disputed entries (id retained); see GOVERNANCE.md
   withdrawn: 0           # marked-withdrawn entries (id retained)
-  sourced: 33            # entries carrying a public, checkable source. That is the entry bar.
+  sourced: 34            # entries carrying a public, checkable source. That is the entry bar.
 
   # NEUTRAL control-domain rollups (the PRIMARY neutral axis): which generic discipline owns each
   # failure. Vendor-agnostic; the action layer is one discipline among peers. Counts must equal the
   # per-entry `control_domain` values -- validate() fails loud on drift.
   control_domains:
-    Action mediation: 25
+    Action mediation: 20
     Output grounding & verification: 4
     Model alignment & content safety: 1
     Environmental isolation: 1
     Data governance: 1
     Multi-agent coordination: 1
+    Identity & access: 3
+    Supply chain integrity: 3
 
   # ACTION-LAYER REACHABILITY rollups (NOT a neutral headline): the action firewall's OWN view of
   # whether a deterministic rule reaches each failure. Kept for the schema and to gate a vendor's
   # block claim, not presented as a registry finding about every discipline.
   action_coverable: 25   # an inspectable action; addressable by deterministic action interception
   needs_judge_or_org: 1  # needs an LLM judge or the org's ground truth; no deterministic rule
-  other_discipline: 7    # owned by a different control domain (isolation, alignment, content safety, ...)
+  other_discipline: 8    # owned by a different control domain (isolation, alignment, content safety, ...)
 
   # VENDOR-CLAIM rollups: AgentX Core's coverage OF this registry. NOT registry findings.
   # Namespaced for the same reason the per-entry fields are (see the header): unqualified
@@ -86,7 +95,19 @@ meta:
   agentx_covered: 23
   agentx_partial: 2
   agentx_judge_or_org: 1
-  agentx_out_of_scope: 7
+  agentx_out_of_scope: 8
+
+  # VERIFICATION LEVELS of the 25 claims above. Every vendor declares one of these two, on identical
+  # terms. Only `ci_verified` is PROVEN BY THIS REGISTRY; `vendor_attested` claims render, labelled,
+  # verified by the vendor against its own component. validate() fails loud if either rollup drifts.
+  #
+  # These are a SECOND AXIS, not a replacement for the claim counts above: `agentx_covered: 23` and
+  # `agentx_coverable: 25` still count all 25 claims, because what a vendor CLAIMS and how it is
+  # VERIFIED are different questions. Whether the published coverage totals should themselves narrow
+  # to the CI-verified 11 is open and not decided here. Do not "reconcile" these by editing one side.
+  agentx_ci_verified: 11
+  agentx_vendor_attested: 14
+
   agentx_sev1_coverable_closed: "15/15"
 
   # VENDOR REGISTRY: display identity for each vendor namespace used in the entries below. A claim
@@ -111,7 +132,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI02
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: keyless_pip
+    agentx_check: ci_verified
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
     repro_call:
@@ -143,7 +164,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI02
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: gateway_wired
+    agentx_check: vendor_attested
     what_happened: >-
       An AI agent with cloud credentials tore down a production environment in about nine
       seconds, deleting whole cloud resources.
@@ -156,7 +177,7 @@ incidents:
       delete to a human instead of forbidding it. A companion check flags the credential
       read that preceded it.
     owned_by: null
-    control_domain: Action mediation
+    control_domain: Identity & access
     source: https://www.reddit.com/r/ExperiencedFounders/comments/1sx8obj/an_ai_agent_just_destroyed_our_production_data_it/
 
   - id: ARE-2026-003
@@ -168,7 +189,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI02
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: keyless_pip
+    agentx_check: ci_verified
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
     repro_call:
@@ -199,7 +220,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI03
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: keyless_pip
+    agentx_check: ci_verified
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
     repro_call:
@@ -218,7 +239,7 @@ incidents:
       to an external paste or webhook sink. The safe path is to read only the non-secret
       fields you need and keep them inside the trusted system.
     owned_by: null
-    control_domain: Action mediation
+    control_domain: Identity & access
     source: https://medium.com/@instatunnel/ai-hallucination-squatting-the-new-agentic-attack-vector-6e1366d77038
 
   - id: ARE-2026-005
@@ -230,7 +251,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI01
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: keyless_pip
+    agentx_check: ci_verified
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
     repro_call:
@@ -260,7 +281,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI02
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: keyless_pip
+    agentx_check: ci_verified
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
     repro_call:
@@ -291,7 +312,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI05
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: keyless_pip
+    agentx_check: ci_verified
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
     repro_call:
@@ -308,7 +329,7 @@ incidents:
       into a shell interpreter) before it runs. The safe path is to download the script
       to a file and review it before executing.
     owned_by: null
-    control_domain: Action mediation
+    control_domain: Supply chain integrity
     source: https://forgepointcap.com/perspectives/tips-37-when-ai-agents-become-insider-threats/
 
   - id: ARE-2026-008
@@ -320,7 +341,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI02
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: gateway_wired
+    agentx_check: vendor_attested
     what_happened: >-
       An agent issued a cluster-wide delete against a search cluster over its REST API.
     blast_radius: >-
@@ -341,9 +362,18 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI02
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: gateway_wired
+    agentx_check: vendor_attested
     what_happened: >-
-      An agent wiped an entire mailbox.
+      Summer Yue, director of alignment at Meta Superintelligence Labs, connected an
+      OpenClaw agent to her primary inbox with an explicit standing instruction to
+      confirm before acting. The agent began deleting anyway, removing more than 200
+      emails. She typed successive stop commands from her phone and the agent continued;
+      she had to reach the machine physically and kill the processes. Her own account of
+      the cause is the notable part: when the conversation history exceeded the model's
+      token limit, the agent compacted its older context to make room, and that
+      compaction silently discarded her safety instruction. The guardrail was not
+      overridden by the agent so much as forgotten by it, through the agent's own memory
+      management. Disclosed 2026-02-23.
     blast_radius: >-
       Whole-mailbox deletion. Bulk mail deletion can be a legitimate cleanup, so a hard
       block would be wrong; proceeding unattended is the catastrophe.
@@ -353,7 +383,16 @@ incidents:
       single-message delete passes untouched.
     owned_by: null
     control_domain: Action mediation
-    source: https://www.tomshardware.com/tech-industry/artificial-intelligence/ai-coding-platform-goes-rogue-during-code-freeze-and-deletes-entire-company-database-replit-ceo-apologizes-after-ai-engine-says-it-made-a-catastrophic-error-in-judgment-and-destroyed-all-production-data
+    sources:
+      - url: https://x.com/summeryue0/status/2025774069124399363
+        kind: first-party
+        by: Summer Yue
+      - url: https://sfstandard.com/2026/02/25/openclaw-goes-rogue/
+        kind: reporting
+        by: The San Francisco Standard
+      - url: https://www.fastcompany.com/91497841/meta-superintelligence-lab-ai-safety-alignment-director-lost-control-of-agent-deleted-her-emails
+        kind: reporting
+        by: Fast Company
 
   - id: ARE-2026-010
     title: "Unapproved high-value fund transfer (Lobstar Wilde $450k loss)"
@@ -364,7 +403,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI02
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: gateway_wired
+    agentx_check: vendor_attested
     what_happened: >-
       An agent moved roughly $450,000 in a value transfer that should have paused for a
       human.
@@ -388,7 +427,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI04
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: gateway_wired
+    agentx_check: vendor_attested
     what_happened: >-
       An agent installed a package that rode a famous name, a hallucinated or
       look-alike dependency rather than the real one.
@@ -402,7 +441,7 @@ incidents:
       rescues it. An escalation, not a hard block, since a not-found is often a legit
       private package.
     owned_by: null
-    control_domain: Action mediation
+    control_domain: Supply chain integrity
     source: https://medium.com/@instatunnel/ai-hallucination-squatting-the-new-agentic-attack-vector-6e1366d77038
 
   - id: ARE-2026-012
@@ -414,7 +453,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI02
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: gateway_wired
+    agentx_check: vendor_attested
     what_happened: >-
       An agent autonomously published a public hit piece.
     blast_radius: >-
@@ -436,7 +475,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI02
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: keyless_pip
+    agentx_check: ci_verified
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
     repro_call:
@@ -465,7 +504,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI08
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: gateway_wired
+    agentx_check: vendor_attested
     what_happened: >-
       An agent repeated the same command in a loop, burning around 50,000 tokens.
     blast_radius: >-
@@ -487,7 +526,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI08
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: gateway_wired
+    agentx_check: vendor_attested
     what_happened: >-
       An agent ran up about $120 over eight hours with no single unsafe call.
     blast_radius: >-
@@ -509,7 +548,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI08
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: gateway_wired
+    agentx_check: vendor_attested
     what_happened: >-
       A 50-step runaway loop crossed the cost ceiling fast.
     blast_radius: >-
@@ -530,7 +569,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI08
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: gateway_wired
+    agentx_check: vendor_attested
     what_happened: >-
       A swarm of agents ran away on a shared budget, each staying under its own ceiling.
     blast_radius: >-
@@ -551,7 +590,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI03
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: gateway_wired
+    agentx_check: vendor_attested
     what_happened: >-
       Hitting a permission error, an agent escalated through sudo and scripting to
       bypass the block.
@@ -562,7 +601,7 @@ incidents:
       the escalation commands themselves trip the destructive and remote-execution
       shields.
     owned_by: null
-    control_domain: Action mediation
+    control_domain: Identity & access
     source: https://amplitude.com/blog
 
   - id: ARE-2026-019
@@ -574,7 +613,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI01
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: keyless_pip
+    agentx_check: ci_verified
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
     repro_call:
@@ -604,7 +643,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI02
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: keyless_pip
+    agentx_check: ci_verified
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
     repro_call:
@@ -634,7 +673,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI08
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: gateway_wired
+    agentx_check: vendor_attested
     what_happened: >-
       A multi-agent conversation looped for eleven days and cost about $47,000.
     blast_radius: >-
@@ -656,7 +695,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI02
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: gateway_wired
+    agentx_check: vendor_attested
     what_happened: >-
       An agent pointed at a networking task ran wide port and host scans and spun up a
       large fleet of instances to do it; the bill is what stopped it.
@@ -680,7 +719,7 @@ incidents:
     agentx_coverage: covered
     owasp_asi: ASI01
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: keyless_pip
+    agentx_check: ci_verified
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
     repro_call:
@@ -710,7 +749,7 @@ incidents:
     agentx_coverage: partial
     owasp_asi: ASI02
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: keyless_pip
+    agentx_check: ci_verified
     # The runnable repro. Rendered verbatim into the entry page and executed by
     # the repro test, so the snippet a reader copies is the snippet we prove blocks.
     repro_call:
@@ -740,7 +779,7 @@ incidents:
     agentx_coverage: partial
     owasp_asi: ASI08
     coverage_class: action_coverable   # action-layer reachability (see control_domain for the neutral registry fact)
-    agentx_check: gateway_wired
+    agentx_check: vendor_attested
     what_happened: >-
       A conversational agent looped, re-emitting near-identical turns without progress.
     blast_radius: >-
@@ -886,14 +925,13 @@ incidents:
       execution (ASI05); the defining feature is an agent leaving its authorized boundary
       of its own accord to pursue an instrumental subgoal.
     owned_by: >-
-      Environmental containment, not an action firewall. The control that failed is
-      sandbox and network isolation: air-gapped or egress-deny evaluation environments,
-      network segmentation, and OS-level sandboxing that hold regardless of what the model
-      decides. An in-process action layer mediates an agent's declared tool calls; it
-      cannot stop a process that exploits a binary zero-day to open a raw socket, because
-      that bypasses the tool layer entirely. Prompt-based refusals were disabled here and
-      would not have helped anyway: this is the textbook case that only environmental
-      controls, not model compliance, contain a capable agent.
+      Environmental containment. The controls that failed are sandbox and network
+      isolation: air-gapped or egress-deny evaluation environments, network segmentation,
+      and OS-level sandboxing that hold regardless of what the model decides. The
+      exploitation ran through a binary zero-day to open a raw socket, bypassing the tool
+      layer entirely, so the failure sits below anything that inspects an agent's declared
+      calls. Prompt-based refusals were disabled for this evaluation; the case turns on
+      environmental control rather than model compliance.
     control_domain: Environmental isolation
     sources:
       - url: https://huggingface.co/blog/security-incident-july-2026
@@ -905,4 +943,58 @@ incidents:
       - url: https://simonwillison.net/2026/Jul/22/openai-cyberattack/
         kind: reporting
         by: Simon Willison
+
+  - id: ARE-2026-034
+    title: "Credential-stealing worm persisted through the agent's own config file (PyPI lightning, Mini Shai-Hulud, ChainDrop)"
+    severity: 1
+    failure_mode: SUPPLY_CHAIN
+    confusion_vector: UNAUTHORIZED_SCOPE_EXPANSION
+    surface: package
+    agentx_coverage: out_of_scope
+    owasp_asi: ASI04
+    coverage_class: other_discipline   # action-layer reachability (see control_domain for the neutral registry fact)
+    agentx_check: none
+    what_happened: >-
+      A family of at least four supply-chain campaigns between April and August 2026 used
+      the same persistence step: a poisoned package writes an auto-run hook into the AI
+      coding agent's own configuration, so the payload executes when a developer opens the
+      repository or starts an agent session rather than at install time. It began on
+      30 April 2026, when PyPI versions 2.6.2 and 2.6.3 of `lightning` (PyTorch Lightning)
+      shipped a hidden `_runtime` directory; Semgrep records that the malware "writes a
+      SessionStart hook with matcher `*` into the repository's Claude Code settings,
+      pointing to `node .vscode/setup.mjs`". It harvested GitHub and npm tokens, AWS
+      credentials from the environment, `~/.aws/credentials` and IMDSv2, Azure Key Vault
+      secrets, GCP Secret Manager values and GitHub Actions secrets. A cross-ecosystem worm
+      called Mini Shai-Hulud, attributed to a group calling itself TeamPCP, followed in May
+      across more than 170 npm and PyPI packages; a June variant named Miasma took down 73
+      Microsoft GitHub repositories; and on 4 August Microsoft published an analysis of
+      ChainDrop, a Mini Shai-Hulud variant affecting "more than 400 packages across
+      multiple unrelated publishers". Microsoft names the targeted paths directly, and
+      Semgrep independently names the same two Claude paths in the April compromise:
+      `.claude/settings.json`, `.claude/setup.mjs`, `.vscode/tasks.json`,
+      `.vscode/setup.mjs`. The agent is the delivery vehicle here, not the actor: it takes
+      no decision and issues no tool call.
+    blast_radius: >-
+      Credential theft across ecosystems and cloud providers, followed by self-propagation
+      using the stolen publishing tokens. Whole package namespaces were republished by the
+      attacker. Because the payload runs on repository open or session start, a developer
+      who never installs the package is still exposed by cloning it.
+    owned_by: >-
+      Supply-chain provenance and environment isolation. The controls that failed are
+      package provenance and integrity verification, treating an agent's configuration
+      files as reviewable code rather than inert settings, and not granting a repository's
+      own configuration the power to execute on open. The payload runs at session start,
+      before the agent has issued any tool call, so the failure sits upstream of anything
+      that inspects what an agent does.
+    control_domain: Supply chain integrity
+    sources:
+      - url: https://semgrep.dev/blog/2026/malicious-dependency-in-pytorch-lightning-used-for-ai-training/
+        kind: reporting
+        by: Semgrep
+      - url: https://www.microsoft.com/en-us/security/blog/2026/08/04/chaindrop-supply-chain-compromise-anatomy-self-propagating-worm/
+        kind: reporting
+        by: Microsoft Security
+      - url: https://lord.technology/2026/05/02/claude-codes-hook-system-just-got-weaponised.html
+        kind: reporting
+        by: Jamie Lord
 

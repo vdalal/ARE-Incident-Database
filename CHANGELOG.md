@@ -10,6 +10,64 @@ an entry's content or its status (`confirmed` / `disputed` / `withdrawn`), never
 
 Dates are ISO-8601 (UTC). The format loosely follows Keep a Changelog.
 
+## [Unreleased]
+
+Deliberately undated and unnumbered: a dated heading here obligates the matching
+`CITATION.cff` version bump and git tag, and this work is not released yet. The release
+number is assigned when the tag is cut, not before.
+
+### Added
+
+- **`ARE-2026-034`**, the configuration-hook supply-chain family. Filed under the
+  `Supply chain integrity` control domain and `other_discipline`: the campaigns persist via
+  agent configuration and fire before any tool call, so an action-mediation layer never sees
+  them. `agentx_check: none`, with `owned_by` naming the discipline that does own it.
+
+### Changed (governance + schema): one bar for every vendor, two verification levels
+
+The registry advertised a single bar to every vendor and did not apply it to itself. `validate()`
+branched on the vendor: the maintainer could declare a component-wired claim and ship no executable
+snippet and it was accepted, while any other vendor shipping no snippet was rejected with "a claim
+must ship a check a stranger can run". **14 of the maintainer's 25 claims used that exemption**,
+under a `CONTRIBUTING.md` line promising every vendor "exactly the bar AgentX Core is held to, and
+no higher". A third party was in fact held higher.
+
+- **The vendor branch is gone.** One rule, applied to the maintainer and to everyone else: a claim
+  declaring `ci_verified` must ship a snippet the registry can execute, whoever filed it.
+- **`agentx_check` values are now VERIFICATION LEVELS, not mechanisms.** `keyless_pip` ->
+  `ci_verified`, `gateway_wired` -> `vendor_attested`. The old names described the maintainer's own
+  delivery (pip, the AgentX gateway) and so could not honestly be offered to a third party; a level
+  describes the evidence, not whose product produced it. Both levels are open to every vendor.
+- **Only `ci_verified` is proven by this registry.** `vendor_attested` claims render, labelled on
+  the entry page as not executed here. NOTE, and this is deliberately not overstated: the CLAIM
+  rollups (`agentx_covered: 23`, `agentx_coverable: 25`) still count all 25 claims, because a claim
+  and its verification level are two different axes. Whether the published coverage totals should
+  themselves narrow to the CI-verified 11 is a separate, open decision. The maintainer's split is
+  **11 CI-verified and 14 vendor-attested**, and both are now meta rollups that `validate()` checks
+  against the real counts.
+- Renderers label the two levels identically for the maintainer and for any other vendor, so a
+  reader can tell them apart without knowing whose claim it is.
+
+### Changed (schema): taxonomy 1.4 -> 1.5
+
+- **New `control_domain` value `Supply chain integrity`.** This is an axis-member addition, so
+  `taxonomy_version` bumps to `1.5` per the governance rule that graduating an existing
+  `confusion_vector` does not bump but adding an axis member does.
+- **Six entries re-filed** across control domains to match the sharpened definitions, and the
+  two maps (per-entry `control_domain` values and the `meta.control_domains` rollup) are
+  asserted to agree. `validate()` fails loud if they ever do not.
+- Rollups move with the data: `total` and `sourced` 33 -> 34, `other_discipline` and
+  `agentx_out_of_scope` 7 -> 8. `action_coverable` (25), `needs_judge_or_org` (1) and the
+  `agentx_covered` / `agentx_partial` claims are unchanged.
+
+### Fixed
+
+- **`ARE-2026-009`** now cites the incident it actually describes.
+- **`ARE-2026-033`** states the neutral discipline rather than the maintainer's product
+  category, the recurring neutrality failure where a well-meant edit re-centres the sponsor.
+- The index points at git history for who filed what instead of restating it, and states the
+  registry's shape and that it moves as others file.
+
 ## [1.5.0] - 2026-07-27
 
 ### Changed (schema + tooling): a neutral, generic control-domain axis; the index leads with it

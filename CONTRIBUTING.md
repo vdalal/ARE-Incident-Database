@@ -8,7 +8,7 @@ Open a pull request adding an entry to [`data/incidents.yaml`](data/incidents.ya
 
 - A **real, cited incident** with a working source URL. Prefer a **first-party** source (the involved organization's own disclosure, or the primary record) over secondary reporting. When more than one authoritative account exists, use a `sources:` list instead of `source:`, labelling each `kind: first-party` or `kind: reporting` (see `ARE-2026-033`).
 - The **two-axis classification** (`failure_mode` x `confusion_vector`); see [`TAXONOMY.md`](TAXONOMY.md).
-- A neutral **control domain** (one of: `Action mediation`, `Output grounding & verification`, `Model alignment & content safety`, `Environmental isolation`, `Identity & access`, `Data governance`, `Multi-agent coordination`): the generic discipline that owns the failure, a registry fact, named as the field already knows it. The action layer is one discipline among peers.
+- A neutral **control domain** (one of: `Action mediation`, `Output grounding & verification`, `Model alignment & content safety`, `Environmental isolation`, `Identity & access`, `Data governance`, `Multi-agent coordination`, `Supply chain integrity`): the generic discipline that owns the failure, a registry fact, named as the field already knows it. The action layer is one discipline among peers.
 - An honest **coverage class** (`action_coverable`, `needs_judge_or_org`, or `other_discipline`): the action layer's own view of whether a deterministic rule reaches the failure. It gates a vendor block claim, so do not mark `action_coverable` unless a deterministic rule genuinely reaches it, and if you add a vendor coverage claim (below) do not claim a block that does not exist. The honesty is the point of this database.
 
 **What qualifies.** An ARE incident is a real, publicly reported failure with **material consequences**: data loss, a security breach, financial or resource harm, or a comparable catastrophic outcome. A routine model mistake with no real-world consequence (a weak answer, an ordinary hallucination, a style complaint) is below the threshold and is declined. The bar is consequence and citation, not novelty; a harmful, cited hallucination qualifies, an ordinary one does not.
@@ -21,8 +21,9 @@ If your product owns one of the disciplines behind the incidents classified `nee
 ## 3. A coverage claim (any vendor, including a competitor)
 
 The coverage column is not reserved for the maintainer. If your product stops one of these
-failures, claim it. You will be held to exactly the bar AgentX Core is held to here, and no
-higher.
+failures, claim it. You will be held to exactly the bar AgentX Core is held to here, and no higher.
+That is not a promise in prose: `validate()` in `generate.py` applies one rule to every vendor, and
+the maintainer has no path a newcomer lacks.
 
 **A claim is listed only if it ships a check a stranger can run.** Two steps.
 
@@ -47,18 +48,27 @@ by the registry and are not yours to change:
   - id: ARE-2026-001
     # ... registry facts (not yours to change) ...
     agentx_coverage: covered              # the maintainer's claim, already here
-    agentx_check: keyless_pip
+    agentx_check: ci_verified
     agentx_response: |
       ...
 
     # Yours
     acme_coverage: covered                # covered | partial (a block claim); judge_or_org | out_of_scope (a non-claim)
+    acme_check: ci_verified               # REQUIRED on a block claim. ci_verified | vendor_attested
     acme_response: |
       What class of action your product stops, and the safe path it offers instead.
       Outcome-loud. Do not name an internal detector or a signature threshold.
-    acme_repro: |                         # a self-verifying snippet, required for a block claim; see below
+    acme_repro: |                         # a self-verifying snippet, required for ci_verified; see below
       <a bash install block, then a python block that proves the block>
 ```
+
+`acme_check` is the verification level, and it is the same choice the maintainer makes:
+
+- **`ci_verified`** ships `acme_repro`, this registry executes it on every push, and the claim is
+  proven here. Declaring this without a snippet is rejected.
+- **`vendor_attested`** means you verify the claim against your own component. It renders labelled
+  as not executed by this registry. No snippet is published, because a published snippet is a
+  snippet CI runs.
 
 Your `acme_repro` is the runnable proof, embedded verbatim on the page and executed by CI. It
 installs your product, runs the incident's attack, and asserts the block fired and the tool body
@@ -81,9 +91,12 @@ keys the contract off the SDK the snippet imports.)
 
 **The terms, which are the same for everyone:**
 
-- **A block claim ships a runnable, self-verifying repro.** A `covered` or `partial` claim with no
-  repro is rejected. The check runs on every push and weekly: a claim that only holds when someone
-  remembers to run it is a hope, not a claim.
+- **A block claim declares one of two verification levels, and both are open to you.**
+  `ci_verified` ships a self-verifying snippet this registry runs on every push and weekly, so the
+  claim is proven here. `vendor_attested` is verified by you against your own component and renders
+  labelled as such, which this registry does not execute. Declaring
+  `ci_verified` without a runnable snippet is rejected, for every vendor including the maintainer.
+  A claim that only holds when someone remembers to run it is a hope, not a claim.
 - **A claim that stops holding is withdrawn, not reworded.** If the check goes red, the entry is
   reclassified. Softening the page instead is the one thing this registry will not do, and that
   applies to the maintainer's own rows first. See `GOVERNANCE.md`.
