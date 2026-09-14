@@ -25,8 +25,8 @@ executed. The coverage was intact; the published snippet had stopped meaning "bl
   so what a reader copies from the page is what CI runs, with no environment variable set
   outside the page. The check sentence on those pages says that the SDK watches by default and
   the snippet is what turns the block on.
-- Re-proved locally against real installs of 0.5.0 (the version the red run pulled) and 0.5.1
-  (current): 0 of 11 with the old snippets, 11 of 11 with the new, on both.
+- Re-proved locally against a real install of 0.5.0 (the version the red run pulled, and PyPI's
+  latest on 2026-09-14): 0 of 11 with the old snippets, 11 of 11 with the new.
 - No `agentx_check` level changed, no entry was reclassified, no id moved. This is the case
   `repros.yml`'s own comment names: "a new SDK release could change the behaviour out from
   under a published claim." The gate found it before a reader did, which is its job.
