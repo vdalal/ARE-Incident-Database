@@ -27,6 +27,11 @@ executed. The coverage was intact; the published snippet had stopped meaning "bl
   the snippet is what turns the block on.
 - Re-proved locally against a real install of 0.5.0 (the version the red run pulled, and PyPI's
   latest on 2026-09-14): 0 of 11 with the old snippets, 11 of 11 with the new.
+- The same check sentence used to say "nothing leaving your machine". That held for the CI run
+  only because the runner sets `AGENTX_TELEMETRY=off`; the SDK's usage telemetry is on by
+  default and posts at exit, so it did not hold for a reader. The sentence now says so and names
+  the variable. Found on the review of this change; a claim on this registry describes the
+  vendor's component as it is.
 - No `agentx_check` level changed, no entry was reclassified, no id moved. This is the case
   `repros.yml`'s own comment names: "a new SDK release could change the behaviour out from
   under a published claim." The gate found it before a reader did, which is its job.

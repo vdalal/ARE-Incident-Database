@@ -250,11 +250,17 @@ def repro_block(inc):
         # detectors were intact; the published snippet had silently stopped meaning "blocks".
         # A repro that only blocks because of an env var set outside the page would be a
         # claim a reader cannot reproduce from the page, so the posture lives in the code.
+        # The check sentence used to say "nothing leaving your machine". That was true of the
+        # CI run only because test_repros.py sets AGENTX_TELEMETRY=off; the SDK's usage pulse is
+        # on by default and posts at exit, so it was false for a reader. The sentence now says
+        # what the SDK does; it does not configure the SDK into a shape the sentence would like.
         return (
             "**Check: CI-verified.** This registry executes this snippet on every push. It blocks "
-            "from a bare `pip install`, with no key, no gateway, and nothing leaving your machine. "
-            "The SDK watches without blocking by default; `posture=\"enforce\"` on the tool is what "
-            "turns the block on, and the snippet says so. Copy it and run it.\n\n"
+            "from a bare `pip install`: the decision is made on your machine, with no key and no "
+            "gateway. Two things to know before you run it: the SDK watches without blocking by "
+            "default, so `posture=\"enforce\"` on the tool is what turns the block on; and the SDK "
+            "sends its usage telemetry at exit unless `AGENTX_TELEMETRY=off` is set. Copy it and "
+            "run it.\n\n"
             "```bash\npip install agentx-security-sdk\n```\n\n"
             "```python\n"
             "from agentx_sdk import agentx_protect, is_block\n\n"
