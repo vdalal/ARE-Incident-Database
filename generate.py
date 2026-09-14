@@ -243,14 +243,22 @@ def repro_block(inc):
             raise KeyError(f"{inc['id']}: agentx_check is ci_verified but no repro_call to render")
         tool, param, action = call["tool"], call["param"], call["action"]
         payload = call["payload"]
+        # `posture="enforce"` is stated in the snippet, not assumed. From SDK 0.5.0 the keyless
+        # default is audit: the same detection runs, the would-be block is recorded, and the
+        # call proceeds. The weekly re-proof caught that on 2026-09-14 (0 of 11 blocked against
+        # a bare install of 0.5.0; all 11 had blocked against 0.4.31 the week before). The
+        # detectors were intact; the published snippet had silently stopped meaning "blocks".
+        # A repro that only blocks because of an env var set outside the page would be a
+        # claim a reader cannot reproduce from the page, so the posture lives in the code.
         return (
             "**Check: CI-verified.** This registry executes this snippet on every push. It blocks "
             "from a bare `pip install`, with no key, no gateway, and nothing leaving your machine. "
-            "Copy it and run it.\n\n"
+            "The SDK watches without blocking by default; `posture=\"enforce\"` on the tool is what "
+            "turns the block on, and the snippet says so. Copy it and run it.\n\n"
             "```bash\npip install agentx-security-sdk\n```\n\n"
             "```python\n"
             "from agentx_sdk import agentx_protect, is_block\n\n"
-            f'@agentx_protect(agent_id="aredb-repro", action="{action}")\n'
+            f'@agentx_protect(agent_id="aredb-repro", action="{action}", posture="enforce")\n'
             f"def {tool}({param}: str):\n"
             f'    return "EXECUTED"          # the agent never gets here\n\n'
             f"result = {tool}({payload})\n"

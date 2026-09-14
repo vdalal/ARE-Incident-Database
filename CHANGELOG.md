@@ -10,6 +10,27 @@ an entry's content or its status (`confirmed` / `disputed` / `withdrawn`), never
 
 Dates are ISO-8601 (UTC). The format loosely follows Keep a Changelog.
 
+## [1.6.1] - 2026-09-14
+
+### Changed (a vendor claim's check, no entry content, no ids)
+
+The weekly re-proof (`repros.yml`, `schedule`) went red on 2026-09-14: **0 of 11** of the
+maintainer's CI-verified snippets blocked against a bare `pip install` of `agentx-security-sdk`,
+where all 11 had blocked the week before. The cause was the vendor's SDK, not the entries: from
+0.5.0 its keyless default posture is *audit* (the same detection runs, the would-be block is
+recorded, the call proceeds). Every one of the 11 logged the correct policy name and then
+executed. The coverage was intact; the published snippet had stopped meaning "blocks".
+
+- The maintainer's 11 CI-verified snippets now state `posture="enforce"` on the decorated tool,
+  so what a reader copies from the page is what CI runs, with no environment variable set
+  outside the page. The check sentence on those pages says that the SDK watches by default and
+  the snippet is what turns the block on.
+- Re-proved locally against real installs of 0.5.0 (the version the red run pulled) and 0.5.1
+  (current): 0 of 11 with the old snippets, 11 of 11 with the new, on both.
+- No `agentx_check` level changed, no entry was reclassified, no id moved. This is the case
+  `repros.yml`'s own comment names: "a new SDK release could change the behaviour out from
+  under a published claim." The gate found it before a reader did, which is its job.
+
 ## [1.6.0] - 2026-08-27
 
 ### Added
