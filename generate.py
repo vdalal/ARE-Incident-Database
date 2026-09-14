@@ -255,12 +255,11 @@ def repro_block(inc):
         # on by default and posts at exit, so it was false for a reader. The sentence now says
         # what the SDK does; it does not configure the SDK into a shape the sentence would like.
         return (
-            "**Check: CI-verified.** This registry executes this snippet on every push. It blocks "
-            "from a bare `pip install`: the decision is made on your machine, with no key and no "
-            "gateway. Two things to know before you run it: the SDK watches without blocking by "
-            "default, so `posture=\"enforce\"` on the tool is what turns the block on; and the SDK "
-            "sends its usage telemetry at exit unless `AGENTX_TELEMETRY=off` is set. Copy it and "
-            "run it.\n\n"
+            "**Check: CI-verified.** This registry runs this snippet on every push. It blocks from "
+            "a bare `pip install`, no key, no gateway; the decision is made on your machine. Two "
+            "notes: the SDK only watches by default, so `posture=\"enforce\"` is what makes it "
+            "block; and it sends usage telemetry at exit unless you set `AGENTX_TELEMETRY=off`. "
+            "Copy it and run it.\n\n"
             "```bash\npip install agentx-security-sdk\n```\n\n"
             "```python\n"
             "from agentx_sdk import agentx_protect, is_block\n\n"
