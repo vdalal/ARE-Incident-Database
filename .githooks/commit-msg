@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# commit-msg: this repository does not accept AI attribution trailers in commit messages
+# ("Co-Authored-By: <assistant> ..." or "<Assistant>-Session: <url>"). Some coding tools append
+# them by default; this hook refuses the commit and names the lines, so the author can drop them
+# and commit again. Nothing is rewritten.
+#
+# Activate once per clone:  git config core.hooksPath .githooks
+msg_file="$1"
+
+if grep -inE '^(co-authored-by:.*(claude|copilot|chatgpt|gpt|gemini|cursor|codex)|[a-z]+-session:)' "$msg_file" >/dev/null; then
+  echo "commit refused: the message carries an AI attribution trailer, which this repository does not accept." >&2
+  echo "Remove these line(s) and commit again:" >&2
+  grep -inE '^(co-authored-by:.*(claude|copilot|chatgpt|gpt|gemini|cursor|codex)|[a-z]+-session:)' "$msg_file" | sed 's/^/  /' >&2
+  exit 1
+fi
+exit 0

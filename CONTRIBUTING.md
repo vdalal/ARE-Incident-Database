@@ -116,6 +116,16 @@ pip install pyyaml
 python generate.py
 ```
 
+## Commit messages
+
+This repository does not accept AI attribution trailers in commit messages (`Co-Authored-By: <assistant> …`, `<Assistant>-Session: <url>`). Some coding tools add them by default. A versioned hook refuses such a commit and names the lines; activate it once per clone:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+A human `Co-authored-by:` line is fine.
+
 ## License
 
 Contributions are accepted under CC BY 4.0 (data and prose) and MIT (tooling).
